@@ -1,0 +1,12 @@
+.libs/
+.rbx/
+.rbc
+.lo
+.la
+.lai
+.dylib.dSYM
+.dylib
+.o
+tmp/
+.bundle
+.gem
