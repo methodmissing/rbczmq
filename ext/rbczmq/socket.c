@@ -403,12 +403,9 @@ static VALUE rb_czmq_socket_opt_hwm(VALUE obj)
     return INT2FIX(zsockopt_hwm(sock->socket));
 }
 
-static VALUE rb_czmq_socket_set_opt_hwm(VALUE obj, VALUE hwm)
+static VALUE rb_czmq_socket_set_opt_hwm(VALUE obj, VALUE value)
 {
-    GetZmqSocket(obj);
-    Check_Type(hwm, T_FIXNUM);
-    zsockopt_set_hwm(sock->socket, FIX2INT(hwm));
-    return Qnil;
+    ZmqSetSockOpt(obj, zsockopt_set_hwm, "HWM", value);
 }
 
 static VALUE rb_czmq_socket_opt_swap(VALUE obj)
@@ -417,12 +414,9 @@ static VALUE rb_czmq_socket_opt_swap(VALUE obj)
     return INT2FIX(zsockopt_swap(sock->socket));
 }
 
-static VALUE rb_czmq_socket_set_opt_swap(VALUE obj, VALUE swap)
+static VALUE rb_czmq_socket_set_opt_swap(VALUE obj, VALUE value)
 {
-    GetZmqSocket(obj);
-    Check_Type(swap, T_FIXNUM);
-    zsockopt_set_swap(sock->socket, FIX2INT(swap));
-    return Qnil;
+    ZmqSetSockOpt(obj, zsockopt_set_swap, "SWAP", value);
 }
 
 static VALUE rb_czmq_socket_opt_affinity(VALUE obj)
@@ -431,12 +425,9 @@ static VALUE rb_czmq_socket_opt_affinity(VALUE obj)
     return INT2FIX(zsockopt_affinity(sock->socket));
 }
 
-static VALUE rb_czmq_socket_set_opt_affinity(VALUE obj, VALUE affinity)
+static VALUE rb_czmq_socket_set_opt_affinity(VALUE obj, VALUE value)
 {
-    GetZmqSocket(obj);
-    Check_Type(affinity, T_FIXNUM);
-    zsockopt_set_affinity(sock->socket, FIX2INT(affinity));
-    return Qnil;
+    ZmqSetSockOpt(obj, zsockopt_set_affinity, "AFFINITY", value);
 }
 
 static VALUE rb_czmq_socket_opt_rate(VALUE obj)
@@ -445,12 +436,9 @@ static VALUE rb_czmq_socket_opt_rate(VALUE obj)
     return INT2FIX(zsockopt_rate(sock->socket));
 }
 
-static VALUE rb_czmq_socket_set_opt_rate(VALUE obj, VALUE rate)
+static VALUE rb_czmq_socket_set_opt_rate(VALUE obj, VALUE value)
 {
-    GetZmqSocket(obj);
-    Check_Type(rate, T_FIXNUM);
-    zsockopt_set_rate(sock->socket, FIX2INT(rate));
-    return Qnil;
+    ZmqSetSockOpt(obj, zsockopt_set_rate, "RATE", value);
 }
 
 static VALUE rb_czmq_socket_opt_recovery_ivl(VALUE obj)
@@ -459,12 +447,9 @@ static VALUE rb_czmq_socket_opt_recovery_ivl(VALUE obj)
     return INT2FIX(zsockopt_recovery_ivl(sock->socket));
 }
 
-static VALUE rb_czmq_socket_set_opt_recovery_ivl(VALUE obj, VALUE recovery_ivl)
+static VALUE rb_czmq_socket_set_opt_recovery_ivl(VALUE obj, VALUE value)
 {
-    GetZmqSocket(obj);
-    Check_Type(recovery_ivl, T_FIXNUM);
-    zsockopt_set_recovery_ivl(sock->socket, FIX2INT(recovery_ivl));
-    return Qnil;
+    ZmqSetSockOpt(obj, zsockopt_set_recovery_ivl, "RECOVERY_IVL", value);
 }
 
 static VALUE rb_czmq_socket_opt_recovery_ivl_msec(VALUE obj)
@@ -473,12 +458,9 @@ static VALUE rb_czmq_socket_opt_recovery_ivl_msec(VALUE obj)
     return INT2FIX(zsockopt_recovery_ivl_msec(sock->socket));
 }
 
-static VALUE rb_czmq_socket_set_opt_recovery_ivl_msec(VALUE obj, VALUE recovery_ivl_msec)
+static VALUE rb_czmq_socket_set_opt_recovery_ivl_msec(VALUE obj, VALUE value)
 {
-    GetZmqSocket(obj);
-    Check_Type(recovery_ivl_msec, T_FIXNUM);
-    zsockopt_set_recovery_ivl_msec(sock->socket, FIX2INT(recovery_ivl_msec));
-    return Qnil;
+    ZmqSetSockOpt(obj, zsockopt_set_recovery_ivl_msec, "RECOVERY_IVL_MSEC", value);
 }
 
 static VALUE rb_czmq_socket_opt_mcast_loop(VALUE obj)
@@ -487,14 +469,9 @@ static VALUE rb_czmq_socket_opt_mcast_loop(VALUE obj)
     return (zsockopt_mcast_loop(sock->socket) == 1) ? Qtrue : Qfalse;
 }
 
-static VALUE rb_czmq_socket_set_opt_mcast_loop(VALUE obj, VALUE mcast_loop)
+static VALUE rb_czmq_socket_set_opt_mcast_loop(VALUE obj, VALUE value)
 {
-    int opt;
-    GetZmqSocket(obj);
-    CheckBoolean(mcast_loop);
-    opt = (mcast_loop == Qtrue) ? 1 : 0;
-    zsockopt_set_mcast_loop(sock->socket, opt);
-    return Qnil;
+    ZmqSetBooleanSockOpt(obj, zsockopt_set_mcast_loop, "MCAST_LOOP", value);
 }
 
 static VALUE rb_czmq_socket_opt_sndbuf(VALUE obj)
@@ -503,12 +480,9 @@ static VALUE rb_czmq_socket_opt_sndbuf(VALUE obj)
     return INT2FIX(zsockopt_sndbuf(sock->socket));
 }
 
-static VALUE rb_czmq_socket_set_opt_sndbuf(VALUE obj, VALUE sndbuf)
+static VALUE rb_czmq_socket_set_opt_sndbuf(VALUE obj, VALUE value)
 {
-    GetZmqSocket(obj);
-    Check_Type(sndbuf, T_FIXNUM);
-    zsockopt_set_sndbuf(sock->socket, FIX2INT(sndbuf));
-    return Qnil;
+    ZmqSetSockOpt(obj, zsockopt_set_sndbuf, "SNDBUF", value);
 }
 
 static VALUE rb_czmq_socket_opt_rcvbuf(VALUE obj)
@@ -517,12 +491,9 @@ static VALUE rb_czmq_socket_opt_rcvbuf(VALUE obj)
     return INT2FIX(zsockopt_rcvbuf(sock->socket));
 }
 
-static VALUE rb_czmq_socket_set_opt_rcvbuf(VALUE obj, VALUE rcvbuf)
+static VALUE rb_czmq_socket_set_opt_rcvbuf(VALUE obj, VALUE value)
 {
-    GetZmqSocket(obj);
-    Check_Type(rcvbuf, T_FIXNUM);
-    zsockopt_set_rcvbuf(sock->socket, FIX2INT(rcvbuf));
-    return Qnil;
+    ZmqSetSockOpt(obj, zsockopt_set_rcvbuf, "RCVBUF", value);
 }
 
 static VALUE rb_czmq_socket_opt_linger(VALUE obj)
@@ -531,12 +502,9 @@ static VALUE rb_czmq_socket_opt_linger(VALUE obj)
     return INT2FIX(zsockopt_linger(sock->socket));
 }
 
-static VALUE rb_czmq_socket_set_opt_linger(VALUE obj, VALUE linger)
+static VALUE rb_czmq_socket_set_opt_linger(VALUE obj, VALUE value)
 {
-    GetZmqSocket(obj);
-    Check_Type(linger, T_FIXNUM);
-    zsockopt_set_linger(sock->socket, FIX2INT(linger));
-    return Qnil;
+    ZmqSetSockOpt(obj, zsockopt_set_linger, "LINGER", value);
 }
 
 static VALUE rb_czmq_socket_opt_backlog(VALUE obj)
@@ -545,12 +513,9 @@ static VALUE rb_czmq_socket_opt_backlog(VALUE obj)
     return INT2FIX(zsockopt_backlog(sock->socket));
 }
 
-static VALUE rb_czmq_socket_set_opt_backlog(VALUE obj, VALUE backlog)
+static VALUE rb_czmq_socket_set_opt_backlog(VALUE obj, VALUE value)
 {
-    GetZmqSocket(obj);
-    Check_Type(backlog, T_FIXNUM);
-    zsockopt_set_backlog(sock->socket, FIX2INT(backlog));
-    return Qnil;
+    ZmqSetSockOpt(obj, zsockopt_set_backlog, "BACKLOG", value);
 }
 
 static VALUE rb_czmq_socket_opt_reconnect_ivl(VALUE obj)
@@ -559,12 +524,9 @@ static VALUE rb_czmq_socket_opt_reconnect_ivl(VALUE obj)
     return INT2FIX(zsockopt_reconnect_ivl(sock->socket));
 }
 
-static VALUE rb_czmq_socket_set_opt_reconnect_ivl(VALUE obj, VALUE reconnect_ivl)
+static VALUE rb_czmq_socket_set_opt_reconnect_ivl(VALUE obj, VALUE value)
 {
-    GetZmqSocket(obj);
-    Check_Type(reconnect_ivl, T_FIXNUM);
-    zsockopt_set_reconnect_ivl(sock->socket, FIX2INT(reconnect_ivl));
-    return Qnil;
+    ZmqSetSockOpt(obj, zsockopt_set_reconnect_ivl, "RECONNECT_IVL", value);
 }
 
 static VALUE rb_czmq_socket_opt_reconnect_ivl_max(VALUE obj)
@@ -573,38 +535,28 @@ static VALUE rb_czmq_socket_opt_reconnect_ivl_max(VALUE obj)
     return INT2FIX(zsockopt_reconnect_ivl_max(sock->socket));
 }
 
-static VALUE rb_czmq_socket_set_opt_reconnect_ivl_max(VALUE obj, VALUE reconnect_ivl_max)
+static VALUE rb_czmq_socket_set_opt_reconnect_ivl_max(VALUE obj, VALUE value)
 {
-    GetZmqSocket(obj);
-    Check_Type(reconnect_ivl_max, T_FIXNUM);
-    zsockopt_set_reconnect_ivl_max(sock->socket, FIX2INT(reconnect_ivl_max));
-    return Qnil;
+    ZmqSetSockOpt(obj, zsockopt_set_reconnect_ivl_max, "RECONNECT_IVL_MAX", value);
 }
 
-static VALUE rb_czmq_socket_set_opt_identity(VALUE obj, VALUE identity)
+static VALUE rb_czmq_socket_set_opt_identity(VALUE obj, VALUE value)
 {
-    GetZmqSocket(obj);
-    Check_Type(identity, T_STRING);
-    zsockopt_set_identity(sock->socket, StringValueCStr(identity));
-    return Qnil;
+    ZmqSetStringSockOpt(obj, zsockopt_set_identity, "IDENTITY", value, "");
 }
 
-static VALUE rb_czmq_socket_set_opt_subscribe(VALUE obj, VALUE pattern)
+static VALUE rb_czmq_socket_set_opt_subscribe(VALUE obj, VALUE value)
 {
-    GetZmqSocket(obj);
-    Check_Type(pattern, T_STRING);
-    AssertSockOptFor(ZMQ_SUB);
-    zsockopt_set_subscribe(sock->socket, StringValueCStr(pattern));
-    return Qnil;
+    ZmqSetStringSockOpt(obj, zsockopt_set_subscribe, "SUBSCRIBE", value, {
+       ZmqAssertSockOptFor(ZMQ_SUB)
+    });
 }
 
-static VALUE rb_czmq_socket_set_opt_unsubscribe(VALUE obj, VALUE pattern)
+static VALUE rb_czmq_socket_set_opt_unsubscribe(VALUE obj, VALUE value)
 {
-    GetZmqSocket(obj);
-    Check_Type(pattern, T_STRING);
-    AssertSockOptFor(ZMQ_SUB);
-    zsockopt_set_unsubscribe(sock->socket, StringValueCStr(pattern));
-    return Qnil;
+    ZmqSetStringSockOpt(obj, zsockopt_set_unsubscribe, "UNSUBSCRIBE", value, {
+       ZmqAssertSockOptFor(ZMQ_SUB)
+    });
 }
 
 static VALUE rb_czmq_socket_opt_rcvmore(VALUE obj)

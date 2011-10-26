@@ -250,6 +250,7 @@ class TestZmqSocket < Test::Unit::TestCase
   def test_sock_options
     ctx = ZMQ::Context.new
     sock = ctx.socket(:PAIR)
+    sock.verbose = true
     assert_equal 0, sock.hwm
     sock.hwm = 1000
     assert_equal 1000, sock.hwm
@@ -305,7 +306,7 @@ class TestZmqSocket < Test::Unit::TestCase
     assert_equal 0, sock.events
 
     sub_sock = ctx.socket(:SUB)
-
+    sub_sock.verbose = true
     sub_sock.subscribe("ruby")
     sub_sock.unsubscribe("ruby")
   ensure

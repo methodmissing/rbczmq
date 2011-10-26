@@ -2,7 +2,6 @@
 
 * String encoding ?? (1.9 && Rubinius)
 * Verify GC on all implementations / platforms
-* Verbose logging of setting sock options
 * !!! Documentation !!!
 * !!! Examples !!!
 * GC for ZMQ::Frame - malloc errors

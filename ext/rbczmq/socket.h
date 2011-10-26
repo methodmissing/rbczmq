@@ -35,13 +35,44 @@ typedef struct {
       zmsg_dump((message)); \
   } while(0)
 
-#define AssertSockOptFor(sock_type) \
+#define ZmqAssertSockOptFor(sock_type) \
     if (zsockopt_type(sock->socket) != sock_type) \
         rb_raise(rb_eZmqError, "Socket option not supported on a %s socket!", zsocket_type_str(sock->socket));
 
 #define CheckBoolean(arg) \
-   if (TYPE((arg)) != T_TRUE && TYPE((arg)) != T_FALSE) \
-       rb_raise(rb_eTypeError, "wrong argument %s (expected true or false)", RSTRING_PTR(rb_obj_as_string((arg))));
+    if (TYPE((arg)) != T_TRUE && TYPE((arg)) != T_FALSE) \
+        rb_raise(rb_eTypeError, "wrong argument %s (expected true or false)", RSTRING_PTR(rb_obj_as_string((arg))));
+
+#define ZmqSetSockOpt(obj, opt, desc, value) \
+    int val; \
+    GetZmqSocket(obj); \
+    Check_Type(value, T_FIXNUM); \
+    val = FIX2INT(value); \
+    (opt)(sock->socket, val); \
+    if (sock->verbose) \
+        zclock_log ("I: %s socket %p: set option \"%s\" %d", zsocket_type_str(sock->socket), obj, (desc),  val); \
+    return Qnil;
+
+#define ZmqSetStringSockOpt(obj, opt, desc, value, assertion) \
+    char *val; \
+    GetZmqSocket(obj); \
+    Check_Type(value, T_STRING); \
+    (assertion); \
+    val = StringValueCStr(value); \
+    (opt)(sock->socket, val); \
+    if (sock->verbose) \
+        zclock_log ("I: %s socket %p: set option \"%s\" \"%s\"", zsocket_type_str(sock->socket), obj, (desc),  val); \
+    return Qnil;
+
+#define ZmqSetBooleanSockOpt(obj, opt, desc, value) \
+    int val; \
+    GetZmqSocket(obj); \
+    CheckBoolean(value); \
+    val = (value == Qtrue) ? 1 : 0; \
+    (opt)(sock->socket, val); \
+    if (sock->verbose) \
+        zclock_log ("I: %s socket %p: set option \"%s\" %d", zsocket_type_str(sock->socket), obj, (desc),  val); \
+    return Qnil;
 
 int rb_czmq_get_sock_fd(void *sock);
 void rb_czmq_free_sock(zmq_sock_wrapper *sock);
