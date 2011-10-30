@@ -1,51 +1,59 @@
 # encoding: utf-8
 
 require "set"
+require "forwardable"
 
 class ZMQ::Loop
   READABLES = Set[ZMQ::SUB, ZMQ::PULL, ZMQ::ROUTER, ZMQ::DEALER, ZMQ::REP, ZMQ::REQ, ZMQ::PAIR]
   WRITABLES = Set[ZMQ::PUB, ZMQ::PUSH, ZMQ::ROUTER, ZMQ::DEALER, ZMQ::REP, ZMQ::REQ, ZMQ::PAIR]
 
-  def self.run(ctx, proc = nil, &blk)
-    lp = new(ctx)
-    (proc || blk).call(lp)
-    lp.start()
+  class << self
+    extend Forwardable
+    def_delegators :instance, :stop, :running?, :verbose=, :register_timer, :cancel_timer, :register_socket, :remove_socket
+    private
+    attr_accessor :instance
   end
 
-  def bind(socket, address, handler = ZMQ::DefaultHandler)
+  def self.run(ctx, proc = nil, &blk)
+    self.instance = ZMQ::Loop.new(ctx)
+    (proc || blk).call
+    instance.start
+  end
+
+  def self.bind(socket, address, handler = ZMQ::DefaultHandler)
     attach(socket, :bind, address, handler)
   end
 
-  def connect(socket, address, handler = ZMQ::DefaultHandler)
+  def self.connect(socket, address, handler = ZMQ::DefaultHandler)
     attach(socket, :connect, address, handler)
   end
 
-  def register_readable(socket, handler = nil)
+  def self.register_readable(socket, handler = nil)
     assert_handler_for_event(socket, :on_readable)
-    register_socket(socket, ZMQ::POLLIN)
+    instance.register_socket(socket, ZMQ::POLLIN)
   end
 
-  def register_writable(socket, handler = nil)
+  def self.register_writable(socket, handler = nil)
     assert_handler_for_event(socket, :on_writable)
-    register_socket(socket, ZMQ::POLLOUT)
+    instance.register_socket(socket, ZMQ::POLLOUT)
   end
 
-  def add_timer(delay, times, p = nil, &blk)
+  def self.add_timer(delay, times, p = nil, &blk)
     timer = ZMQ::Timer.new(delay, times, p, &blk)
-    register_timer(timer)
+    instance.register_timer(timer)
     timer
   end
 
-  def add_oneshot_timer(delay, p = nil, &blk)
+  def self.add_oneshot_timer(delay, p = nil, &blk)
     add_timer(delay, 1, p, &blk)
   end
 
-  def add_periodic_timer(delay, p = nil, &blk)
+  def self.add_periodic_timer(delay, p = nil, &blk)
     add_timer(delay, 0, p, &blk)
   end
 
   private
-  def attach(socket, action, address, handler)
+  def self.attach(socket, action, address, handler)
     socket.handler = handler.new(socket) if handler
     ret = socket.__send__(action, address)
     register_readable(socket) if READABLES.include?(socket.type)
@@ -53,7 +61,7 @@ class ZMQ::Loop
     ret
   end
 
-  def assert_handler_for_event(socket, cb)
+  def self.assert_handler_for_event(socket, cb)
     unless socket.handler.respond_to?(cb)
       raise ZMQ::Error, "Socket #{socket.type_str}'s handler #{socket.handler.class} expected to implement an #{cb} callback!"
     end

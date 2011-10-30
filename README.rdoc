@@ -7,6 +7,5 @@
 * GC for ZMQ::Frame - malloc errors
 * GC for ZMQ::Message - malloc errors
 * Ensure test cases for all ruby code in /lib as well (Loop, Handler, )
-* ZMQ::Loop API changes (instance_eval ??)
 * Cross compile for Windows
 * Assert gem builds and installs as expected against all implementations with the vendor'ed dependences in /ext
