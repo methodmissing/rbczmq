@@ -35,16 +35,26 @@ class TestZmqContext < Test::Unit::TestCase
     ctx.destroy
   end
 
+  def test_bind_connect
+    ctx = ZMQ::Context.new
+    rep = ctx.bind(:REP, "inproc://test.bind_connect")
+    req = ctx.connect(:REQ, "inproc://test.bind_connect")
+    req.send('success')
+    assert_equal 'success', rep.recv
+  ensure
+    ctx.destroy
+  end
+
   def test_socket
     ctx = ZMQ::Context.new
     assert_raises TypeError do
       ctx.socket("invalid")
     end
     socket = ctx.socket(ZMQ::REP)
-    assert_equal ZMQ::REP, socket.type
+    assert_instance_of ZMQ::Socket::Rep, socket
     assert_nil socket.close
     socket = ctx.socket(:REP)
-    assert_equal ZMQ::REP, socket.type
+    assert_instance_of ZMQ::Socket::Rep, socket
     assert_nil socket.close
   ensure
     ctx.destroy

@@ -49,6 +49,11 @@ ZMQ_NOINLINE static int rb_czmq_loop_timer_callback(zloop_t *loop, ZMQ_UNUSED zm
 {
     int rc;
     VALUE args[3];
+    ZmqGetTimer((VALUE)cb);
+    if (timer->cancelled == TRUE) {
+       zloop_timer_end(loop, (void *)cb);
+       return 0;
+    }
     args[0] = (VALUE)cb;
     args[1] = intern_call;
     args[2] = Qnil;
@@ -85,38 +90,59 @@ ZMQ_NOINLINE static int rb_czmq_loop_socket_callback(zloop_t *loop, zmq_pollitem
 static void rb_czmq_loop_stop0(zmq_loop_wrapper *loop);
 static void rb_czmq_free_loop(zmq_loop_wrapper *loop)
 {
-    if (loop->ctx) {
-        rb_czmq_loop_stop0(loop);
-        zloop_destroy(&loop->loop);
-        loop->loop = NULL;
-    }
+    rb_czmq_loop_stop0(loop);
+    zloop_destroy(&(loop->loop));
+    loop->loop = NULL;
 }
 
 static void rb_czmq_free_loop_gc(void *ptr)
 {
     zmq_loop_wrapper *loop = ptr;
     if (loop) {
-        ZmqDebugf("rb_czmq_free_loop_gc %p, %p", loop, loop->loop);
         rb_czmq_free_loop(loop);
         xfree(loop);
     }
 }
 
-static VALUE rb_czmq_loop_s_new(VALUE loop, VALUE context)
+/*
+ *  call-seq:
+ *     ZMQ::Loop.new    =>  ZMQ::Loop
+ *
+ *  Creates a new reactor instance.
+ *
+ * === Examples
+ *     ZMQ::Loop.new    =>   ZMQ::Loop
+ *
+*/
+
+static VALUE rb_czmq_loop_new(VALUE loop)
 {
     zmq_loop_wrapper *lp = NULL;
-    ZmqGetContext(context);
     loop = Data_Make_Struct(rb_cZmqLoop, zmq_loop_wrapper, 0, rb_czmq_free_loop_gc, lp);
     lp->loop = zloop_new();
-    if (lp->loop == NULL) {
-        xfree(lp);
-        ZmqRaiseError;
-    }
+    ZmqAssertObjOnAlloc(lp->loop, lp);
     lp->running = FALSE;
-    lp->ctx = ctx->ctx;
     rb_obj_call_init(loop, 0, NULL);
     return loop;
 }
+
+static VALUE rb_czmq_nogvl_zloop_start(void *ptr)
+{
+    zloop_t *loop = ptr;
+    return (VALUE)zloop_start(loop);
+}
+
+/*
+ *  call-seq:
+ *     loop.start    =>  Fixnum
+ *
+ *  Creates a new reactor instance.
+ *
+ * === Examples
+ *     loop = ZMQ::Loop.new    =>   ZMQ::Loop
+ *     loop.start    =>   Fixnum
+ *
+*/
 
 static VALUE rb_czmq_loop_start(VALUE obj)
 {
@@ -124,11 +150,23 @@ static VALUE rb_czmq_loop_start(VALUE obj)
     ZmqGetLoop(obj);
     THREAD_PASS;
     zloop_timer(loop->loop, 1, 1, rb_czmq_loop_started_callback, loop);
-    TRAP_BEG;
+    /*rc = (int)rb_thread_blocking_region(rb_czmq_nogvl_zloop_start, loop->loop, RUBY_UBF_IO, 0);*/
     rc = zloop_start(loop->loop);
-    TRAP_END;
+    if (rc > 0) rb_raise(rb_eZmqError, "internal event loop error!");
     return INT2NUM(rc);
 }
+
+/*
+ *  call-seq:
+ *     loop.running?    =>  boolean
+ *
+ *  Predicate that returns true if the reactor is currently running..
+ *
+ * === Examples
+ *     loop = ZMQ::Loop.new    =>   ZMQ::Loop
+ *     loop.running?    =>   false
+ *
+*/
 
 static VALUE rb_czmq_loop_running_p(VALUE obj)
 {
@@ -141,6 +179,19 @@ static void rb_czmq_loop_stop0(zmq_loop_wrapper *loop)
     zloop_timer(loop->loop, 1, 1, rb_czmq_loop_breaker_callback, loop);
 }
 
+/*
+ *  call-seq:
+ *     loop.stop    =>  nil
+ *
+ *  Stops the reactor loop.
+ *
+ * === Examples
+ *     loop = ZMQ::Loop.new    =>   ZMQ::Loop
+ *     loop.add_timer(1){ loop.stop }
+ *     loop.start    =>   -1
+ *
+*/
+
 static VALUE rb_czmq_loop_stop(VALUE obj)
 {
     ZmqGetLoop(obj);
@@ -149,12 +200,36 @@ static VALUE rb_czmq_loop_stop(VALUE obj)
     return Qnil;
 }
 
+/*
+ *  call-seq:
+ *     loop.destroy    =>  nil
+ *
+ *  Destroy a reactor instance
+ *
+ * === Examples
+ *     loop = ZMQ::Loop.new    =>   ZMQ::Loop
+ *     loop.destroy   =>    nil
+ *
+*/
+
 static VALUE rb_czmq_loop_destroy(VALUE obj)
 {
     ZmqGetLoop(obj);
     rb_czmq_free_loop(loop);
     return Qnil;
 }
+
+/*
+ *  call-seq:
+ *     loop.verbose = true    =>  nil
+ *
+ *  Logs reactor activity to stdout.
+ *
+ * === Examples
+ *     loop = ZMQ::Loop.new    =>   ZMQ::Loop
+ *     loop.verbose = true   =>    nil
+ *
+*/
 
 static VALUE rb_czmq_loop_set_verbose(VALUE obj, VALUE level)
 {
@@ -165,14 +240,26 @@ static VALUE rb_czmq_loop_set_verbose(VALUE obj, VALUE level)
     return Qnil;
 }
 
+/*
+ *  call-seq:
+ *     loop.register_socket(sock, ZMQ::POLLIN)    =>  true
+ *
+ *  Registers a socket for read or write events.
+ *
+ * === Examples
+ *     loop = ZMQ::Loop.new    =>   ZMQ::Loop
+ *     loop.register_socket(sock, ZMQ::POLLIN)   =>   true
+ *
+*/
+
 static VALUE rb_czmq_loop_register_socket(VALUE obj, VALUE socket, VALUE event)
 {
     int rc;
     zmq_pollitem_t *pollitem = NULL;
     ZmqGetLoop(obj);
     GetZmqSocket(socket);
-    if (sock->state == ZMQ_SOCKET_PENDING)
-        rb_raise(rb_eZmqError, "socket in a pending state (not bound or connected) cannot be registered with the event loop!");
+    if (!(sock->state & (ZMQ_SOCKET_BOUND | ZMQ_SOCKET_CONNECTED)))
+        rb_raise(rb_eZmqError, "socket in a pending state (not bound or connected) and cannot be registered with the event loop!");
     Check_Type(event, T_FIXNUM);
     pollitem = ruby_xmalloc(sizeof(zmq_pollitem_t));
     pollitem->socket = sock->socket;
@@ -183,6 +270,18 @@ static VALUE rb_czmq_loop_register_socket(VALUE obj, VALUE socket, VALUE event)
     zsockopt_set_linger(sock->socket, 1);
     return Qtrue;
 }
+
+/*
+ *  call-seq:
+ *     loop.remove_socket(sock)    =>  nil
+ *
+ *  Removes a previously registered socket from the loop.
+ *
+ * === Examples
+ *     loop = ZMQ::Loop.new    =>   ZMQ::Loop
+ *     loop.verbose = true   =>    nil
+ *
+*/
 
 static VALUE rb_czmq_loop_remove_socket(VALUE obj, VALUE socket)
 {
@@ -196,6 +295,19 @@ static VALUE rb_czmq_loop_remove_socket(VALUE obj, VALUE socket)
     return Qnil;
 }
 
+/*
+ *  call-seq:
+ *     loop.register_timer(timer)    =>  true
+ *
+ *  Registers a ZMQ::Timer instance with the reactor.
+ *
+ * === Examples
+ *     loop = ZMQ::Loop.new    =>   ZMQ::Loop
+ *     timer = ZMQ::Timer.new(1, 2){ :fired }
+ *     loop.register_timer(timer)   =>   true
+ *
+*/
+
 static VALUE rb_czmq_loop_register_timer(VALUE obj, VALUE tm)
 {
     int rc;
@@ -206,11 +318,27 @@ static VALUE rb_czmq_loop_register_timer(VALUE obj, VALUE tm)
     return Qtrue;
 }
 
+/*
+ *  call-seq:
+ *     loop.cancel_timer(timer)    =>  nil
+ *
+ *  Cancels a ZMQ::Timer instance previously registered with the reactor.
+ *
+ * === Examples
+ *     loop = ZMQ::Loop.new    =>   ZMQ::Loop
+ *     timer = ZMQ::Timer.new(1, 2){ :fired }
+ *     loop.register_timer(timer)   =>   true
+ *     loop.cancel_timer(timer)   =>   nil
+ *
+*/
+
 static VALUE rb_czmq_loop_cancel_timer(VALUE obj, VALUE timer)
 {
+    int rc;
     ZmqGetLoop(obj);
-    zloop_timer_end(loop->loop, (void *)timer);
-    return Qnil;
+    rc = zloop_timer_end(loop->loop, (void *)timer);
+    ZmqAssert(rc);
+    return Qtrue;
 }
 
 void _init_rb_czmq_loop() {
@@ -221,7 +349,7 @@ void _init_rb_czmq_loop() {
 
     rb_cZmqLoop = rb_define_class_under(rb_mZmq, "Loop", rb_cObject);
 
-    rb_define_singleton_method(rb_cZmqLoop, "new", rb_czmq_loop_s_new, 1);
+    rb_define_alloc_func(rb_cZmqLoop, rb_czmq_loop_new);
     rb_define_method(rb_cZmqLoop, "start", rb_czmq_loop_start, 0);
     rb_define_method(rb_cZmqLoop, "stop", rb_czmq_loop_stop, 0);
     rb_define_method(rb_cZmqLoop, "running?", rb_czmq_loop_running_p, 0);

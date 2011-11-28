@@ -4,6 +4,7 @@
 typedef struct {
     size_t delay;
     size_t times;
+    Bool cancelled;
     VALUE callback;
 } zmq_timer_wrapper;
 

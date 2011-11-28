@@ -2,7 +2,7 @@
 
 class ZMQ::Handler
   attr_reader :socket
-  def initialize(socket)
+  def initialize(socket, *args)
     @socket = socket
   end
 

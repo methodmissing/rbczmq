@@ -50,8 +50,9 @@ void *
 zsocket_new (zctx_t *ctx, int type)
 {
     void *socket = zctx__socket_new (ctx, type);
-    if (type == ZMQ_SUB)
-        zsockopt_set_subscribe (socket, "");
+    if (socket)
+        if (type == ZMQ_SUB)
+            zsockopt_set_subscribe (socket, "");
     return socket;
 }
 
@@ -100,6 +101,9 @@ zsocket_bind (void *socket, const char *format, ...)
     }
     else {
         rc = zmq_bind (socket, endpoint);
+        if (rc)
+            fprintf (stderr, "E: zsocket_bind to %s failed\n", endpoint);
+
         assert (rc == 0);
         //  Return actual port used for binding
         rc = atoi (strrchr (endpoint, ':') + 1);
@@ -110,9 +114,9 @@ zsocket_bind (void *socket, const char *format, ...)
 
 //  --------------------------------------------------------------------------
 //  Connect a socket to a formatted endpoint
-//  Checks with assertion that the connect was valid
+//  Returns 0 if the endpoint is valid, -1 if the connect failed.
 
-void
+int
 zsocket_connect (void *socket, const char *format, ...)
 {
     char endpoint [256];
@@ -120,8 +124,7 @@ zsocket_connect (void *socket, const char *format, ...)
     va_start (argptr, format);
     vsnprintf (endpoint, 256, format, argptr);
     va_end (argptr);
-    int rc = zmq_connect (socket, endpoint);
-    assert (rc == 0);
+    return zmq_connect (socket, endpoint);
 }
 
 
@@ -154,6 +157,7 @@ zsocket_test (Bool verbose)
 
     //  @selftest
     zctx_t *ctx = zctx_new ();
+    assert (ctx);
 
     //  Create a detached thread, let it run
     char *interf = "*";
@@ -161,7 +165,9 @@ zsocket_test (Bool verbose)
     int service = 5560;
 
     void *writer = zsocket_new (ctx, ZMQ_PUSH);
+    assert (writer);
     void *reader = zsocket_new (ctx, ZMQ_PULL);
+    assert (reader);
     assert (streq (zsocket_type_str (writer), "PUSH"));
     assert (streq (zsocket_type_str (reader), "PULL"));
     int rc = zsocket_bind (writer, "tcp://%s:%d", interf, service);

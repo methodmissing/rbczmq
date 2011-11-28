@@ -6,16 +6,14 @@ require 'zmq'
 class TestZmqLoop < Test::Unit::TestCase
   def test_alloc
     ctx = ZMQ::Context.new
-    assert_raises TypeError do
-      ZMQ::Loop.new(nil)
-    end
+    assert_instance_of ZMQ::Context, ctx
   ensure
     ctx.destroy
   end
 
   def test_run_and_stop
     ctx = ZMQ::Context.new
-    ZMQ::Loop.run(ctx) do
+    ZMQ::Loop.run do
       assert !ZL.running?
       ZL.add_oneshot_timer(0.2) do
         ZL.stop
@@ -30,7 +28,7 @@ class TestZmqLoop < Test::Unit::TestCase
 
   def test_callback_stops_event_loop
     ctx = ZMQ::Context.new
-    ret = ZMQ::Loop.run(ctx) do
+    ret = ZMQ::Loop.run do
       ZL.add_oneshot_timer(0.2){ false }
     end
     assert_equal(-1, ret)
@@ -38,23 +36,22 @@ class TestZmqLoop < Test::Unit::TestCase
     ctx.destroy
   end
 
-=begin
   def test_callback_error_stops_event_loop
     ctx = ZMQ::Context.new
     assert_raises RuntimeError do
-      ret = ZMQ::Loop.run(ctx) do |lp|
-        lp.add_oneshot_timer(0.2){ raise("stop!") }
+      ret = ZMQ::Loop.run do
+        ZL.add_oneshot_timer(0.2){ raise("stop!") }
       end
       assert_equal(-1, ret)
     end
   ensure
     ctx.destroy
   end
-=end
+
   def test_add_periodic_timer
     ctx = ZMQ::Context.new
     fired = 0
-    ZMQ::Loop.run(ctx) do
+    ZMQ::Loop.run do
       ZL.add_periodic_timer(0.1) do 
         fired += 1
         fired < 3
@@ -68,7 +65,7 @@ class TestZmqLoop < Test::Unit::TestCase
   def test_add_timer
     ctx = ZMQ::Context.new
     fired, timer = 0, nil
-    ZMQ::Loop.run(ctx) do
+    ZMQ::Loop.run do
       timer = ZL.add_timer(0.1, 5) do
         fired += 1
         fired < 5
@@ -83,13 +80,27 @@ class TestZmqLoop < Test::Unit::TestCase
   def test_cancel_timer
     ctx = ZMQ::Context.new
     fired = 0
-    ZMQ::Loop.run(ctx) do
+    ZMQ::Loop.run do
       timer = ZL.add_timer(0.1, 5) do
         fired += 1
         fired < 5
       end
-      ZL.cancel_timer(timer)
+      assert ZL.cancel_timer(timer)
       ZL.add_oneshot_timer(0.1){ false }
+    end
+    assert_equal 0, fired
+  ensure
+    ctx.destroy
+  end
+
+  def test_cancel_timer_instance
+    ctx = ZMQ::Context.new
+    fired = 0
+    timer = ZMQ::Timer.new(0.1, 2){ fired += 1 }
+    ZMQ::Loop.run do
+      ZL.register_timer(timer)
+      ZL.add_oneshot_timer(0.3){ false }
+      timer.cancel
     end
     assert_equal 0, fired
   ensure
@@ -98,7 +109,7 @@ class TestZmqLoop < Test::Unit::TestCase
 
   def test_add_oneshot_timer
     ctx = ZMQ::Context.new
-    ret = ZMQ::Loop.run(ctx) do
+    ret = ZMQ::Loop.run do
       ZL.add_oneshot_timer(0.2){ false }
     end
     assert_equal(-1, ret)
@@ -109,7 +120,7 @@ class TestZmqLoop < Test::Unit::TestCase
   def test_run_in_thread
     ctx = ZMQ::Context.new
     t = Thread.new do
-      ZMQ::Loop.run(ctx) do
+      ZMQ::Loop.run do
         ZL.add_oneshot_timer(0.2){ false }
       end
       :done
@@ -131,7 +142,7 @@ class TestZmqLoop < Test::Unit::TestCase
 
   def test_register_socket
     ctx = ZMQ::Context.new
-    ret = ZMQ::Loop.run(ctx) do
+    ret = ZMQ::Loop.run do
       s1 = ctx.socket(:PAIR)
       s2 = ctx.socket(:PAIR)
       s3 = ctx.socket(:PAIR)
@@ -160,7 +171,7 @@ class TestZmqLoop < Test::Unit::TestCase
   def test_raise_from_socket_callback
     ctx = ZMQ::Context.new
     assert_raises RuntimeError do
-      ret = ZMQ::Loop.run(ctx) do
+      ret = ZMQ::Loop.run do
         s1 = ctx.socket(:PAIR)
         s2 = ctx.socket(:PAIR)
         ZL.bind(s1, "inproc://test_raise_from_socket_callback", FailHandler)
@@ -176,7 +187,7 @@ class TestZmqLoop < Test::Unit::TestCase
   def test_raise_on_invalid_handler
     ctx = ZMQ::Context.new
     assert_raises RuntimeError do
-      ret = ZMQ::Loop.run(ctx) do
+      ret = ZMQ::Loop.run do
         s1 = ctx.socket(:PAIR)
         s2 = ctx.socket(:PAIR)
         ZL.bind(s1, "inproc://test_raise_on_invalid_handler", FailHandler)
@@ -192,7 +203,7 @@ class TestZmqLoop < Test::Unit::TestCase
   def test_double_stop
     ctx = ZMQ::Context.new
     assert_raises ZMQ::Error do
-      lp = ZMQ::Loop.new(ctx)
+      lp = ZMQ::Loop.new
       lp.stop
     end
   ensure

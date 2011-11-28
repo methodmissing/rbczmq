@@ -9,7 +9,7 @@ class TestZmqSocket < Test::Unit::TestCase
     ctx = ZMQ::Context.new
     sock = ctx.socket(:REP)
     assert Fixnum === sock.fd
-    assert sock.fd > 2
+    assert_equal(-1, sock.fd)
     assert_equal sock.fd, sock.to_i
   ensure
     ctx.destroy
@@ -23,20 +23,78 @@ class TestZmqSocket < Test::Unit::TestCase
     ctx.destroy
   end
 
+  def test_readable_p
+    ctx = ZMQ::Context.new
+    rep = ctx.socket(:REP)
+    assert rep.readable?
+    assert rep.writable?
+    rep.bind("tcp://127.0.0.1:*")
+    assert rep.readable?
+    assert rep.writable?
+  ensure
+    ctx.destroy
+  end
+
+  def test_send_socket
+    ctx = ZMQ::Context.new
+    push = ctx.socket(:PUSH)
+    assert_raises ZMQ::Error do
+      push.recv
+    end
+  ensure
+    ctx.destroy
+  end
+
+  def test_receive_socket
+    ctx = ZMQ::Context.new
+    pull = ctx.socket(:PULL)
+    assert_raises ZMQ::Error do
+      pull.send("message")
+    end
+  ensure
+    ctx.destroy
+  end
+
+  def test_recv_timeout
+    ctx = ZMQ::Context.new
+    sock = ctx.socket(:REP)
+    assert_nil sock.recv_timeout
+    sock.recv_timeout = 10
+    assert_equal 10, sock.recv_timeout
+    assert_raises TypeError do
+      sock.recv_timeout = :x
+    end
+  ensure
+    ctx.destroy
+  end
+
+  def test_send_timeout
+    ctx = ZMQ::Context.new
+    sock = ctx.socket(:REP)
+    assert_nil sock.send_timeout
+    sock.send_timeout = 10
+    assert_equal 10, sock.send_timeout
+    assert_raises TypeError do
+      sock.send_timeout = :x
+    end
+  ensure
+    ctx.destroy
+  end
+
   def test_bind
     ctx = ZMQ::Context.new
     sock = ctx.socket(:PAIR)
-    assert_equal ZMQ::Socket::PENDING, sock.state
+    assert(sock.state & ZMQ::Socket::PENDING)
     port = sock.bind("tcp://127.0.0.1:*")
     assert sock.fd != -1
-    assert_equal ZMQ::Socket::BOUND, sock.state
+    assert(sock.state & ZMQ::Socket::BOUND)
     tcp_sock = nil
     assert_nothing_raised do
       tcp_sock = TCPSocket.new("127.0.0.1", port)
     end
   ensure
     ctx.destroy
-    tcp_sock.close
+    tcp_sock.close if tcp_sock
   end
 
   def test_connect
@@ -44,10 +102,10 @@ class TestZmqSocket < Test::Unit::TestCase
     rep = ctx.socket(:PAIR)
     port = rep.bind("tcp://127.0.0.1:*")
     req = ctx.socket(:PAIR)
-    assert_equal ZMQ::Socket::PENDING, req.state
+    assert(req.state & ZMQ::Socket::PENDING)
     req.connect("tcp://127.0.0.1:#{port}")
     assert req.fd != -1
-    assert_equal ZMQ::Socket::CONNECTED, req.state
+    assert(req.state & ZMQ::Socket::CONNECTED)
   ensure
     ctx.destroy
   end
@@ -57,7 +115,7 @@ class TestZmqSocket < Test::Unit::TestCase
     rep = ctx.socket(:PAIR)
     port = rep.bind("tcp://127.0.0.1:*")
     req = ctx.socket(:PAIR)
-    assert_equal ZMQ::Socket::PENDING, req.state
+    assert(req.state & ZMQ::Socket::PENDING)
     req.connect("tcp://127.0.0.1:#{port}")
     assert_equal "PAIR socket bound to tcp://127.0.0.1:*", rep.to_s
     assert_equal "PAIR socket connected to tcp://127.0.0.1:49152", req.to_s
@@ -156,13 +214,13 @@ class TestZmqSocket < Test::Unit::TestCase
     req = ctx.socket(:PAIR)
     req.connect("tcp://127.0.0.1:#{port}")
     ping = ZMQ::Frame("ping")
-    assert_nil req.send_frame(ping)
+    assert req.send_frame(ping)
     assert_equal ZMQ::Frame("ping"), rep.recv_frame
-    assert_nil rep.send_frame(ZMQ::Frame("pong"))
+    assert rep.send_frame(ZMQ::Frame("pong"))
     assert_equal ZMQ::Frame("pong"), req.recv_frame
-    assert_nil rep.send_frame(ZMQ::Frame("pong"))
+    assert rep.send_frame(ZMQ::Frame("pong"))
     assert_nil req.recv_frame_nonblock
-    sleep 0.2
+    sleep 0.3
     assert_equal ZMQ::Frame("pong"), req.recv_frame_nonblock
   ensure
     ctx.destroy
@@ -282,6 +340,10 @@ class TestZmqSocket < Test::Unit::TestCase
     assert_equal 0, sock.sndbuf
     sock.sndbuf = 1000
     assert_equal 1000, sock.sndbuf
+
+    assert_equal 0, sock.rcvbuf
+    sock.rcvbuf = 1000
+    assert_equal 1000, sock.rcvbuf
 
     assert_equal(-1, sock.linger)
     sock.linger = 10

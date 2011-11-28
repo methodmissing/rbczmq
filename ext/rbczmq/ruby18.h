@@ -31,30 +31,39 @@ rb_thread_blocking_region(
   TRAP_BEG;
   rv = func(data1);
   TRAP_END;
-
   return rv;
 }
 
+struct timeval rb_time_interval _((VALUE));
+
+extern VALUE rb_eZmqError;
+
 #ifdef ZMQ_FD
-#define ZmqBlockingRead(fcall, fd) \
+#define ZmqBlockingRead(fcall, sock) \
     retry_read: \
-      rb_thread_wait_fd((fd)); \
-      fcall; \
-      if (rc == -1) { \
-        if (rb_io_wait_readable((fd)) == Qtrue) goto retry_read; \
-        ZmqRaiseError; \
-    }
-#define ZmqBlockingWrite(fcall, fd) \
+      if (!rb_thread_alone() && !(zsockopt_events((sock)->socket) & ZMQ_POLLIN)) \
+          rb_thread_wait_fd(zsockopt_fd((sock)->socket)); \
+      if ((fcall)) { \
+          if (rb_io_wait_readable(zsockopt_fd((sock)->socket)) == Qtrue) { \
+              goto retry_read; \
+          } else { \
+              ZmqRaiseError; \
+          } \
+      }
+#define ZmqBlockingWrite(fcall, sock) \
     retry_write: \
-      rb_thread_fd_writable((fd)); \
-      fcall; \
-      if (rc == -1) { \
-        if (rb_io_wait_writable((fd)) == Qtrue) goto retry_write; \
-        ZmqRaiseError; \
-    }
+      if (!rb_thread_alone() && !(zsockopt_events((sock)->socket) & ZMQ_POLLOUT)) \
+          rb_thread_fd_writable(zsockopt_fd((sock)->socket)); \
+      if ((fcall)) { \
+          if (rb_io_wait_writable(zsockopt_fd((sock)->socket)) == Qtrue) { \
+              goto retry_write; \
+          } else { \
+              ZmqRaiseError; \
+          } \
+      }
 #else
-#define ZmqBlockingRead(fcall) fcall;
-#define ZmqBlockingWrite(fcall) fcall;
+#define ZmqBlockingRead(fcall, socket) fcall
+#define ZmqBlockingWrite(fcall, socket) fcall
 #endif
 
 #define rb_errinfo() ruby_errinfo

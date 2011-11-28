@@ -5,7 +5,6 @@ require 'zmq'
 require 'stringio'
 
 class TestZmqFrame < Test::Unit::TestCase
-
   def test_alloc
     frame = ZMQ::Frame("message")
     assert_instance_of ZMQ::Frame, frame

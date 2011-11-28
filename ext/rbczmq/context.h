@@ -12,6 +12,11 @@ typedef struct {
     Data_Get_Struct(obj, zmq_ctx_wrapper, ctx); \
     if (!ctx) rb_raise(rb_eTypeError, "uninitialized ZMQ context!");
 
+struct nogvl_socket_args {
+    zctx_t *ctx;
+    int type;
+};
+
 void _init_rb_czmq_context();
 
 #endif

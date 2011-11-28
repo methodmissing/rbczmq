@@ -2,16 +2,16 @@
 
 void rb_czmq_free_message(zmq_message_wrapper *message)
 {
-    zmsg_destroy(&message->message);
+    zmsg_destroy(&(message->message));
+    message->flags |= ZMQ_FRAME_RECYCLED;
     message->message = NULL;
 }
 
 static void rb_czmq_free_message_gc(void *ptr)
 {
     zmq_message_wrapper *msg = ptr;
-    ZmqDebug("rb_czmq_free_message_gc");
     if (msg) {
-        /*rb_czmq_free_message(msg);*/
+        if (msg->message != NULL && !(msg->flags & ZMQ_MESSAGE_RECYCLED)) rb_czmq_free_message(msg);
         xfree(msg);
     }
 }
@@ -22,6 +22,8 @@ VALUE rb_czmq_alloc_message(zmsg_t *message)
     zmq_message_wrapper *m = NULL;
     message_obj = Data_Make_Struct(rb_cZmqMessage, zmq_message_wrapper, 0, rb_czmq_free_message_gc, m);
     m->message = message;
+    ZmqAssertObjOnAlloc(m->message, m);
+    m->flags = 0;
     rb_obj_call_init(message_obj, 0, NULL);
     return message_obj;
 }
@@ -32,6 +34,7 @@ static VALUE rb_czmq_message_new(VALUE message)
     message = Data_Make_Struct(rb_cZmqMessage, zmq_message_wrapper, 0, rb_czmq_free_message_gc, msg);
     msg->message = zmsg_new();
     ZmqAssertObjOnAlloc(msg->message, msg);
+    msg->flags = 0;
     rb_obj_call_init(message, 0, NULL);
     return message;
 }
@@ -50,18 +53,24 @@ static VALUE rb_czmq_message_content_size(VALUE obj)
 
 static VALUE rb_czmq_message_push(VALUE obj, VALUE frame_obj)
 {
+    int rc = 0;
     ZmqGetMessage(obj);
     ZmqGetFrame(frame_obj);
-    zmsg_push(message->message, frame->frame);
-    return Qnil;
+    rc = zmsg_push(message->message, frame->frame);
+    frame->flags |= ZMQ_FRAME_MESSAGE;
+    ZmqAssert(rc);
+    return Qtrue;
 }
 
 static VALUE rb_czmq_message_add(VALUE obj, VALUE frame_obj)
 {
+    int rc = 0;
     ZmqGetMessage(obj);
     ZmqGetFrame(frame_obj);
-    zmsg_add(message->message, frame->frame);
-    return Qnil;
+    rc = zmsg_add(message->message, frame->frame);
+    frame->flags |= ZMQ_FRAME_MESSAGE;
+    ZmqAssert(rc);
+    return Qtrue;
 }
 
 static VALUE rb_czmq_message_pop(VALUE obj)
@@ -69,7 +78,8 @@ static VALUE rb_czmq_message_pop(VALUE obj)
     zframe_t *frame = NULL;
     ZmqGetMessage(obj);
     frame = zmsg_pop(message->message);
-    return rb_czmq_alloc_frame(frame);
+    if (frame == NULL) return Qnil;
+    return rb_czmq_alloc_frame(&frame, ZMQ_FRAME_ALLOC | ZMQ_FRAME_MESSAGE);
 }
 
 static VALUE rb_czmq_message_print(VALUE obj)
@@ -84,7 +94,8 @@ static VALUE rb_czmq_message_first(VALUE obj)
     zframe_t *frame = NULL;
     ZmqGetMessage(obj);
     frame = zmsg_first(message->message);
-    return (frame) ? rb_czmq_alloc_frame(frame) : Qnil;
+    if (frame == NULL) return Qnil;
+    return rb_czmq_alloc_frame(&frame, ZMQ_FRAME_ALLOC | ZMQ_FRAME_MESSAGE);
 }
 
 static VALUE rb_czmq_message_next(VALUE obj)
@@ -92,7 +103,8 @@ static VALUE rb_czmq_message_next(VALUE obj)
     zframe_t *frame = NULL;
     ZmqGetMessage(obj);
     frame = zmsg_next(message->message);
-    return (frame) ? rb_czmq_alloc_frame(frame) : Qnil;
+    if (frame == NULL) return Qnil;
+    return rb_czmq_alloc_frame(&frame, ZMQ_FRAME_ALLOC | ZMQ_FRAME_MESSAGE);
 }
 
 static VALUE rb_czmq_message_last(VALUE obj)
@@ -100,7 +112,8 @@ static VALUE rb_czmq_message_last(VALUE obj)
     zframe_t *frame = NULL;
     ZmqGetMessage(obj);
     frame = zmsg_last(message->message);
-    return (frame) ? rb_czmq_alloc_frame(frame) : Qnil;
+    if (frame == NULL) return Qnil;
+    return rb_czmq_alloc_frame(&frame, ZMQ_FRAME_ALLOC | ZMQ_FRAME_MESSAGE);
 }
 
 static VALUE rb_czmq_message_remove(VALUE obj, VALUE frame_obj)
@@ -113,18 +126,22 @@ static VALUE rb_czmq_message_remove(VALUE obj, VALUE frame_obj)
 
 static VALUE rb_czmq_message_pushstr(VALUE obj, VALUE str)
 {
+    int rc = 0;
     ZmqGetMessage(obj);
     Check_Type(str, T_STRING);
-    zmsg_pushstr(message->message, StringValueCStr(str));
-    return Qnil;
+    rc = zmsg_pushstr(message->message, StringValueCStr(str));
+    ZmqAssert(rc);
+    return Qtrue;
 }
 
 static VALUE rb_czmq_message_addstr(VALUE obj, VALUE str)
 {
+    int rc = 0;
     ZmqGetMessage(obj);
     Check_Type(str, T_STRING);
-    zmsg_addstr(message->message, StringValueCStr(str));
-    return Qnil;
+    rc = zmsg_addstr(message->message, StringValueCStr(str));
+    ZmqAssert(rc);
+    return Qtrue;
 }
 
 static VALUE rb_czmq_message_popstr(VALUE obj)
@@ -132,15 +149,19 @@ static VALUE rb_czmq_message_popstr(VALUE obj)
     char *str = NULL;
     ZmqGetMessage(obj);
     str = zmsg_popstr(message->message);
-    return (str) ? rb_str_new2(str) : Qnil;
+    if (str == NULL) return Qnil;
+    return rb_str_new2(str);
 }
 
 static VALUE rb_czmq_message_wrap(VALUE obj, VALUE frame_obj)
 {
+    int rc = 0;
     ZmqGetMessage(obj);
     ZmqGetFrame(frame_obj);
-    zmsg_wrap(message->message, frame->frame);
-    return Qnil;
+    rc = zmsg_wrap(message->message, frame->frame);
+    frame->flags |= ZMQ_FRAME_MESSAGE;
+    ZmqAssert(rc);
+    return Qtrue;
 }
 
 static VALUE rb_czmq_message_unwrap(VALUE obj)
@@ -148,7 +169,8 @@ static VALUE rb_czmq_message_unwrap(VALUE obj)
     zframe_t *frame = NULL;
     ZmqGetMessage(obj);
     frame = zmsg_unwrap(message->message);
-    return rb_czmq_alloc_frame(frame);
+    if (frame == NULL) return Qnil;
+    return rb_czmq_alloc_frame(&frame, ZMQ_FRAME_ALLOC);
 }
 
 static VALUE rb_czmq_message_dup(VALUE obj)
@@ -159,6 +181,7 @@ static VALUE rb_czmq_message_dup(VALUE obj)
     dup = Data_Make_Struct(rb_cZmqMessage, zmq_message_wrapper, 0, rb_czmq_free_message_gc, dup_msg);
     dup_msg->message = zmsg_dup(message->message);
     ZmqAssertObjOnAlloc(dup_msg->message, dup_msg);
+    dup_msg->flags = message->flags;
     rb_obj_call_init(dup, 0, NULL);
     return dup;
 }
@@ -183,16 +206,16 @@ static VALUE rb_czmq_message_s_decode(ZMQ_UNUSED VALUE obj, VALUE buffer)
 {
     zmsg_t * m = NULL;
     m = zmsg_decode((byte *)StringValueCStr(buffer), RSTRING_LEN(buffer));
-    if (!m) return Qnil;
+    if (m == NULL) return Qnil;
     return rb_czmq_alloc_message(m);
 }
 
 static VALUE rb_czmq_message_eql_p(VALUE obj, VALUE other_message)
 {
     zmq_message_wrapper *other = NULL;
-    byte *buff;
+    byte *buff = NULL;
     size_t buff_size;
-    byte *other_buff;
+    byte *other_buff = NULL;
     size_t other_buff_size;
     ZmqGetMessage(obj);
     ZmqAssertMessage(other_message);
@@ -204,7 +227,8 @@ static VALUE rb_czmq_message_eql_p(VALUE obj, VALUE other_message)
 
     buff_size = zmsg_encode(message->message, &buff);
     other_buff_size = zmsg_encode(other->message, &other_buff);
-    if (strcmp((const char*)buff, (const char*)other_buff) != 0) return Qfalse;
+    if (buff_size != other_buff_size) return Qfalse;
+    if (strncmp((const char*)buff, (const char*)other_buff, buff_size) != 0) return Qfalse;
     return Qtrue;
 }
 
@@ -238,6 +262,6 @@ void _init_rb_czmq_message() {
     rb_define_method(rb_cZmqMessage, "dup", rb_czmq_message_dup, 0);
     rb_define_method(rb_cZmqMessage, "destroy", rb_czmq_message_destroy, 0);
     rb_define_method(rb_cZmqMessage, "encode", rb_czmq_message_encode, 0);
-    rb_define_method(rb_cZmqMessage, "eql?", rb_czmq_message_eql_p, 1);
+    rb_define_method(rb_cZmqMessage, "eql?", rb_czmq_message_equals, 1);
     rb_define_method(rb_cZmqMessage, "==", rb_czmq_message_equals, 1);
 }

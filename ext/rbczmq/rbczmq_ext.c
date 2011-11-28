@@ -3,7 +3,18 @@
 VALUE rb_mZmq;
 VALUE rb_eZmqError;
 VALUE rb_cZmqContext;
+
 VALUE rb_cZmqSocket;
+VALUE rb_cZmqPubSocket;
+VALUE rb_cZmqSubSocket;
+VALUE rb_cZmqPushSocket;
+VALUE rb_cZmqPullSocket;
+VALUE rb_cZmqRouterSocket;
+VALUE rb_cZmqDealerSocket;
+VALUE rb_cZmqRepSocket;
+VALUE rb_cZmqReqSocket;
+VALUE rb_cZmqPairSocket;
+
 VALUE rb_cZmqFrame;
 VALUE rb_cZmqMessage;
 VALUE rb_cZmqLoop;

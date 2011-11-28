@@ -16,32 +16,38 @@
 
 #include <rbczmq_prelude.h>
 
-/* Debug */
-
-#ifdef DEBUG
-#define ZmqDebug(msg) printf(msg); printf("\n");
-#define ZmqDebugf(msg, ...) printf(msg, __VA_ARGS__); printf("\n");
-#else
-#define ZmqDebug(msg)
-#define ZmqDebugf(msg, ...)
-#endif
-
 #define ZmqRaiseError rb_sys_fail(zmq_strerror(zmq_errno()))
-#define ZmqAssert(rc) if (rc == -1) ZmqRaiseError;
-#define ZmqAssertObj(obj) if (obj == NULL) ZmqRaiseError;
+/* What about EINVAL ? */
+#define ZmqAssert(rc) \
+    if (rc != 0) { \
+        if (errno != 0) ZmqRaiseError; \
+        if (rc == ENOMEM) rb_memerror(); \
+        return Qfalse; \
+    }
 #define ZmqAssertObjOnAlloc(obj, wrapper) \
     if (obj == NULL) { \
         xfree(wrapper); \
-        ZmqRaiseError; \
+        rb_memerror(); \
     }
 #define ZmqAssertType(obj, type, desc) \
-    if (!rb_obj_is_instance_of(obj,type)) \
+    if (!rb_obj_is_kind_of(obj,type)) \
         rb_raise(rb_eTypeError, "wrong argument type %s (expected %s)", rb_obj_classname(obj), desc);
 
 extern VALUE rb_mZmq;
 extern VALUE rb_eZmqError;
 extern VALUE rb_cZmqContext;
+
 extern VALUE rb_cZmqSocket;
+extern VALUE rb_cZmqPubSocket;
+extern VALUE rb_cZmqSubSocket;
+extern VALUE rb_cZmqPushSocket;
+extern VALUE rb_cZmqPullSocket;
+extern VALUE rb_cZmqRouterSocket;
+extern VALUE rb_cZmqDealerSocket;
+extern VALUE rb_cZmqRepSocket;
+extern VALUE rb_cZmqReqSocket;
+extern VALUE rb_cZmqPairSocket;
+
 extern VALUE rb_cZmqFrame;
 extern VALUE rb_cZmqMessage;
 extern VALUE rb_cZmqLoop;
@@ -53,6 +59,13 @@ extern VALUE rb_cZmqTimer;
 #include <message.h>
 #include <loop.h>
 #include <timer.h>
+
+static VALUE
+get_pid()
+{
+    rb_secure(2);
+    return INT2FIX(getpid());
+}
 
 static inline char *rb_czmq_formatted_current_time()
 {

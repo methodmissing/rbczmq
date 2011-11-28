@@ -9,7 +9,7 @@ class TestZmq < Test::Unit::TestCase
   end
 
   def test_version
-    assert_equal [2,1,9], ZMQ.version
+    assert_equal [2,1,11], ZMQ.version
   end
 
   def test_now

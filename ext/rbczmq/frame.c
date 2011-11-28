@@ -2,28 +2,29 @@
 
 static VALUE intern_data;
 
-VALUE rb_czmq_alloc_frame(zframe_t *frame)
+VALUE rb_czmq_alloc_frame(zframe_t **frame, int flags)
 {
     VALUE frame_obj;
     zmq_frame_wrapper *fr = NULL;
     frame_obj = Data_Make_Struct(rb_cZmqFrame, zmq_frame_wrapper, 0, rb_czmq_free_frame_gc, fr);
-    fr->frame = frame;
+    fr->frame = *frame;
+    fr->flags = flags;
     rb_obj_call_init(frame_obj, 0, NULL);
     return frame_obj;
 }
 
 void rb_czmq_free_frame(zmq_frame_wrapper *frame)
 {
-    zframe_destroy(&frame->frame);
+    zframe_destroy(&(frame->frame));
     frame->frame = NULL;
+    frame->flags |= ZMQ_FRAME_RECYCLED;
 }
 
 void rb_czmq_free_frame_gc(void *ptr)
 {
     zmq_frame_wrapper *frame = ptr;
     if (frame) {
-        ZmqDebugf("rb_czmq_free_frame_gc %p, %p", frame, frame->frame);
-        /*rb_czmq_free_frame(frame);*/
+        if (frame->frame != NULL && !(frame->flags & (ZMQ_FRAME_RECYCLED | ZMQ_FRAME_MESSAGE))) rb_czmq_free_frame(frame);
         xfree(frame);
     }
 }
@@ -40,6 +41,7 @@ static VALUE rb_czmq_frame_s_new(int argc, VALUE *argv, VALUE frame)
         Check_Type(data, T_STRING);
         fr->frame = zframe_new(RSTRING_PTR(data), (size_t)RSTRING_LEN(data));
     }
+    fr->flags = ZMQ_FRAME_NEW;
     ZmqAssertObjOnAlloc(fr->frame, fr);
     rb_obj_call_init(frame, 0, NULL);
     return frame;
@@ -86,6 +88,7 @@ static VALUE rb_czmq_frame_dup(VALUE obj)
     ZmqGetFrame(obj);
     dup = Data_Make_Struct(rb_cZmqFrame, zmq_frame_wrapper, 0, rb_czmq_free_frame_gc, dup_fr);
     dup_fr->frame = zframe_dup(frame->frame);
+    dup_fr->flags = ZMQ_FRAME_DUP;
     ZmqAssertObjOnAlloc(dup_fr->frame, dup_fr);
     rb_obj_call_init(dup, 0, NULL);
     return dup;
@@ -138,7 +141,7 @@ static VALUE rb_czmq_frame_cmp(VALUE obj, VALUE other_frame)
 static VALUE rb_czmq_frame_print(int argc, VALUE *argv, VALUE obj)
 {
     VALUE prefix;
-    char *print_prefix;
+    char *print_prefix = NULL;
     ZmqGetFrame(obj);
     rb_scan_args(argc, argv, "01", &prefix);
     print_prefix = NIL_P(prefix) ? "" : RSTRING_PTR(prefix);

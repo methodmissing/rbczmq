@@ -12,7 +12,4 @@ extern rb_encoding *binary_encoding;
 #define TRAP_BEG
 #define TRAP_END
 
-#define ZmqBlockingRead(fcall, fd) fcall;
-#define ZmqBlockingWrite(fcall, fd) fcall;
-
 #endif

@@ -64,8 +64,9 @@ zstr_recv (void *socket)
 
 //  --------------------------------------------------------------------------
 //  Receive C string from socket, if socket had input ready. Caller must
-//  free returned string. Returns NULL if the context is being terminated
-//  or the process was interrupted.
+//  free returned string. Returns NULL if there was no input waiting, or if
+//  the context was terminated. Use zctx_interrupted to exit any loop that
+//  relies on this method.
 
 char *
 zstr_recv_nowait (void *socket)
@@ -159,10 +160,13 @@ zstr_test (Bool verbose)
 
     //  @selftest
     zctx_t *ctx = zctx_new ();
+    assert (ctx);
 
     void *output = zsocket_new (ctx, ZMQ_PAIR);
+    assert (output);
     zsocket_bind (output, "inproc://zstr.test");
     void *input = zsocket_new (ctx, ZMQ_PAIR);
+    assert (input);
     zsocket_connect (input, "inproc://zstr.test");
 
     //  Send ten strings and then END

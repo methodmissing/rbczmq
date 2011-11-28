@@ -304,7 +304,7 @@
 #   include <sys/file.h>
 #   include <sys/wait.h>
 #   include <netinet/in.h>              //  Must come before arpa/inet.h
-#   if (!defined (__UTYPE_ANDROID))
+#   if (!defined (__UTYPE_ANDROID)) && (!defined (__UTYPE_IBMAIX)) && (!defined (__UTYPE_HPUX)) && (!defined (__UTYPE_SUNOS))
 #       include <ifaddrs.h>
 #   endif
 #   if (!defined (__UTYPE_BEOS))
@@ -402,7 +402,7 @@ typedef unsigned int    qbyte;          //  Quad byte = 32 bits
 #define tblsize(x)      (sizeof (x) / sizeof ((x) [0]))
 #define tbllast(x)      (x [tblsize (x) - 1])
 //  Provide random number from 0..(num-1)
-#if (defined (__WINDOWS__))
+#if (defined (__WINDOWS__)) || (defined (__UTYPE_IBMAIX)) || (defined (__UTYPE_HPUX)) || (defined (__UTYPE_SUNOS))
 #   define randof(num)  (int) ((float) (num) * rand () / (RAND_MAX + 1.0))
 #else
 #   define randof(num)  (int) ((float) (num) * random () / (RAND_MAX + 1.0))
@@ -468,8 +468,9 @@ static inline void *
 //  Define _ZMALLOC_DEBUG if you need to trace memory leaks using e.g. mtrace,
 //  otherwise all allocations will claim to come from zfl_prelude.h.  For best
 //  results, compile all classes so you see dangling object allocations.
-//
-#ifdef _ZMALLOC_DEBUG
+//  _ZMALLOC_PEDANTIC does the same thing, but its intention is to propagate
+//  out of memory condition back up the call stack.
+#if defined _ZMALLOC_DEBUG || _ZMALLOC_PEDANTIC
 #   define zmalloc(size) calloc(1,(size))
 #else
 #   define zmalloc(size) safe_malloc((size), __FILE__, __LINE__, CZMQ_ASSERT_SANE_FUNCTION)

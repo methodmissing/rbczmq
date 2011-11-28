@@ -2,7 +2,6 @@
 #define RBCZMQ_LOOP_H
 
 typedef struct {
-    zctx_t *ctx;
     zloop_t  *loop;
     Bool running;
 } zmq_loop_wrapper;

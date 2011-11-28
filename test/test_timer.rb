@@ -27,4 +27,12 @@ class TestZmqTimer < Test::Unit::TestCase
       timer.on_error(err)
     end
   end
+
+  def test_cancel
+    timer = ZMQ::Timer.new(1, 2){ :fired }
+    timer.cancel
+    assert_raises ZMQ::Error do
+      timer.call
+    end
+  end
 end

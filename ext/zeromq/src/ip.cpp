@@ -102,7 +102,7 @@ static int resolve_nic_name (in_addr* addr_, char const *interface_)
     return 0;
 }
 
-#elif defined ZMQ_HAVE_AIX || ZMQ_HAVE_HPUX || ZMQ_HAVE_ANDROID
+#elif defined ZMQ_HAVE_AIX || defined ZMQ_HAVE_HPUX || defined ZMQ_HAVE_ANDROID
 #include <sys/ioctl.h>
 #include <net/if.h>
 
@@ -188,7 +188,7 @@ int zmq::open_socket (int domain_, int type_, int protocol_)
 {
     //  Setting this option result in sane behaviour when exec() functions
     //  are used. Old sockets are closed and don't block TCP ports etc.
-#if defined SOCK_CLOEXEC
+#if defined HAVE_SOCK_CLOEXEC
     type_ |= SOCK_CLOEXEC;
 #endif
 
@@ -199,7 +199,7 @@ int zmq::open_socket (int domain_, int type_, int protocol_)
     //  If there's no SOCK_CLOEXEC, let's try the second best option. Note that
     //  race condition can cause socket not to be closed (if fork happens
     //  between socket creation and this point).
-#if !defined SOCK_CLOEXEC && defined FD_CLOEXEC
+#if !defined HAVE_SOCK_CLOEXEC && defined FD_CLOEXEC
     int rc = fcntl (s, F_SETFD, FD_CLOEXEC);
     errno_assert (rc != -1);
 #endif

@@ -1,5 +1,8 @@
 # encoding: utf-8
 
+# Prefer compiled Rubinius bytecode in .rbx/
+ENV["RBXOPT"] = "-Xrbc.db"
+
 require "zmq/rbczmq_ext"
 require 'zmq/version' unless defined? ZMQ::VERSION
 
@@ -9,7 +12,7 @@ module ZMQ
   end
 
   def self.context
-    @__zmq_ctx_process
+    @__zmq_ctx_process[Process.pid]
   end
 
   def self.loop
@@ -20,6 +23,7 @@ module ZMQ
   autoload :DefaultHandler, 'zmq/default_handler'
 end
 
+require "zmq/context"
 require "zmq/socket"
 require "zmq/loop"
 require "zmq/timer"

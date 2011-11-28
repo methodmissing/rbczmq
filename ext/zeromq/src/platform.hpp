@@ -31,6 +31,9 @@
 /* Define to 1 if you have the `crypto' library (-lcrypto). */
 /* #undef HAVE_LIBCRYPTO */
 
+/* Define to 1 if you have the `dcekt' library (-ldcekt). */
+/* #undef HAVE_LIBDCEKT */
+
 /* Define to 1 if you have the `iphlpapi' library (-liphlpapi). */
 /* #undef HAVE_LIBIPHLPAPI */
 
@@ -75,6 +78,9 @@
 
 /* Define to 1 if you have the `socket' function. */
 #define HAVE_SOCKET 1
+
+/* Whether SOCK_CLOEXEC is defined and functioning. */
+/* #undef HAVE_SOCK_CLOEXEC */
 
 /* Define to 1 if stdbool.h conforms to C99. */
 #define HAVE_STDBOOL_H 1
@@ -132,16 +138,13 @@
 #define PACKAGE_NAME "zeromq"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "zeromq 2.1.10"
+#define PACKAGE_STRING "zeromq 2.1.11"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "zeromq"
 
-/* Define to the home page for this package. */
-#define PACKAGE_URL ""
-
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "2.1.10"
+#define PACKAGE_VERSION "2.1.11"
 
 /* Define as the return type of signal handlers (`int' or `void'). */
 #define RETSIGTYPE void
@@ -153,7 +156,7 @@
 #define TIME_WITH_SYS_TIME 1
 
 /* Version number of package */
-#define VERSION "2.1.10"
+#define VERSION "2.1.11"
 
 /* Force to use mutexes */
 /* #undef ZMQ_FORCE_MUTEXES */
@@ -204,7 +207,7 @@
 /* #undef ZMQ_HAVE_WINDOWS */
 
 /* Define for Solaris 2.5.1 so the uint32_t typedef from <sys/synch.h>,
-   <pthread.h>, or <semaphore.h> is not used. If the typedef were allowed, the
+   <pthread.h>, or <semaphore.h> is not used. If the typedef was allowed, the
    #define below would cause a syntax error. */
 /* #undef _UINT32_T */
 

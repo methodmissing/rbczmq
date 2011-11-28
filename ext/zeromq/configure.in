@@ -179,7 +179,14 @@ case "${host_os}" in
         CPPFLAGS="-D_POSIX_C_SOURCE=200112L $CPPFLAGS"
         AC_DEFINE(ZMQ_HAVE_HPUX, 1, [Have HPUX OS])
         AC_CHECK_LIB(rt, sem_init)
-        AC_CHECK_LIB(crypto, RAND_bytes)
+        AC_ARG_WITH([dce],
+                    [AS_HELP_STRING([--without-dce],
+                                    [HP-UX only: Do not use DCE library for UUID functions])],,
+                    [],
+                    [with_dce=yes])
+        AS_IF([test "x$with_dce" != xno],
+              [AC_CHECK_LIB(dcekt, uuid_create)],
+              [AC_CHECK_LIB(crypto, RAND_bytes)])
         ;;
     *mingw32*)
         AC_DEFINE(ZMQ_HAVE_WINDOWS, 1, [Have Windows OS])
@@ -275,7 +282,7 @@ AC_C_VOLATILE
 #  PGM extension
 libzmq_pgm_ext="no"
 
-pgm_basename="libpgm-5.1.115~dfsg"
+pgm_basename="libpgm-5.1.118~dfsg"
 
 AC_ARG_WITH([pgm], [AS_HELP_STRING([--with-pgm], 
     [build libzmq with PGM extension [default=no]])], 
@@ -371,6 +378,11 @@ AM_CONDITIONAL(ON_MINGW, test "x$libzmq_on_mingw32" = "xyes")
 AC_TYPE_SIGNAL
 AC_CHECK_FUNCS(perror gettimeofday memset socket getifaddrs freeifaddrs)
 AC_CHECK_HEADERS([alloca.h])
+LIBZMQ_CHECK_SOCK_CLOEXEC([AC_DEFINE(
+                              [HAVE_SOCK_CLOEXEC],
+                              [1],
+                              [Whether SOCK_CLOEXEC is defined and functioning.])
+                          ])
 
 # Subst LIBZMQ_EXTRA_CFLAGS & CXXFLAGS & LDFLAGS
 AC_SUBST(LIBZMQ_EXTRA_CFLAGS)

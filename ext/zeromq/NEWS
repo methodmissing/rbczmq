@@ -1,3 +1,31 @@
+0MQ version 2.1.11 (Stable), released on 2011/10/xx
+===================================================
+
+Bug fixes
+---------
+
+* Fixed issue 281, crash opn heavy socket creation - assertion failure in
+  mutex.hpp:91. (Mika Fischer).
+
+* Fixed issue 273, O_CLOEXEC flag used in ip.cpp:192 is supported only 
+  on Linux kernels 2.6.27+
+
+* Fixed issue 261, assertion failure in kqueue.cpp:76.
+
+* Fixed issue 269, faulty diagnostic code in 2.1.10.
+
+Changes
+-------
+
+* Now builds properly on AIX 6.1 (AJ Lewis).
+
+* Builds using libdcekt on HP-UX (AJ Lewis).
+
+* New upstream OpenPGM maintenance release 5.1.118.
+
+* Enabled debugging on assertion failure on Windows (Paul Betts).
+
+
 0MQ version 2.1.10 (Stable), released on 2011/10/03
 ===================================================
 
@@ -15,11 +43,10 @@ Bug fixes
 * Fixed issue 218, sockets not opened with SOCK_CLOEXEC, causing fork/exec
   to sit on sockets unnecessarily.
 
-* Fixed issue 250, build errors on Windows.
+* Fixed issue 250, build errors on Windows (Mikko Koppanen).
 
-* Fixed issue 252, assertion failure in req.cpp:87 and req.cpp:88.
-
-* Fixed issue 261, assertion failure in kqueue.cpp:76 on OS/X.
+* Fixed issue 252, assertion failure in req.cpp:87 and req.cpp:88 (Mikko
+  Koppanen).
 
 
 0MQ version 2.1.9 (Stable), released on 2011/08/29

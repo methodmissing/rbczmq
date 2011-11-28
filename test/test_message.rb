@@ -22,10 +22,10 @@ class TestZmqMessage < Test::Unit::TestCase
 
   def test_push_pop
     msg = ZMQ::Message.new
-    msg.push ZMQ::Frame("body")
+    assert msg.push ZMQ::Frame("body")
     assert_equal 1, msg.size
     assert_equal 4, msg.content_size
-    msg.push ZMQ::Frame("header")
+    assert msg.push ZMQ::Frame("header")
     assert_equal 2, msg.size
     assert_equal 10, msg.content_size
 
@@ -41,7 +41,7 @@ class TestZmqMessage < Test::Unit::TestCase
   def test_add
     msg = ZMQ::Message.new
     msg.push ZMQ::Frame("header")
-    msg.add ZMQ::Frame("body")
+    assert msg.add ZMQ::Frame("body")
     assert_equal 2, msg.size
     assert_equal ZMQ::Frame("header"), msg.pop
     assert_equal ZMQ::Frame("body"), msg.pop
@@ -92,10 +92,10 @@ class TestZmqMessage < Test::Unit::TestCase
 
   def test_pushstr_popstr
     msg = ZMQ::Message.new
-    msg.pushstr "body"
+    assert msg.pushstr "body"
     assert_equal 1, msg.size
     assert_equal 4, msg.content_size
-    msg.pushstr "header"
+    assert msg.pushstr "header"
     assert_equal 2, msg.size
     assert_equal 10, msg.content_size
 
@@ -111,7 +111,7 @@ class TestZmqMessage < Test::Unit::TestCase
   def test_addstr
     msg = ZMQ::Message.new
     msg.pushstr "header"
-    msg.addstr "body"
+    assert msg.addstr "body"
     assert_equal 2, msg.size
     assert_equal "header", msg.popstr
     assert_equal "body", msg.popstr
@@ -120,14 +120,14 @@ class TestZmqMessage < Test::Unit::TestCase
   def test_wrap_unwrap
     msg = ZMQ::Message.new
     body = ZMQ::Frame("body")
-    msg.wrap(body)
+    assert msg.wrap(body)
     assert_equal 2, msg.size
     assert_equal 4, msg.content_size
     assert_equal body, msg.pop
     assert_equal ZMQ::Frame(""), msg.pop
 
     assert_equal 0, msg.size
-    msg.wrap(body)
+    assert msg.wrap(body)
     assert_equal 2, msg.size
     assert_equal body, msg.unwrap
     assert_equal 0, msg.size

@@ -9,9 +9,8 @@
 #define TRAP_BEG
 #define TRAP_END
 
-#define THREAD_PASS rb_thread_schedule();
+#define ZMQ_DEFAULT_SOCKET_TIMEOUT Qnil
 
-#define ZmqBlockingRead(fcall, fd) fcall;
-#define ZmqBlockingWrite(fcall, fd) fcall;
+#define THREAD_PASS rb_thread_schedule();
 
 #endif
