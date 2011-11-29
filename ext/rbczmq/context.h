@@ -17,6 +17,8 @@ struct nogvl_socket_args {
     int type;
 };
 
+static VALUE rb_czmq_ctx_set_iothreads(VALUE context, VALUE io_threads);
+
 void _init_rb_czmq_context();
 
 #endif

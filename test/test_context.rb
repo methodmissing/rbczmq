@@ -15,6 +15,17 @@ class TestZmqContext < Test::Unit::TestCase
     assert_nil ctx.destroy
   end
 
+  def test_context_with_iothreads
+    ctx = ZMQ::Context.new(2)
+    assert_instance_of ZMQ::Context, ctx
+    assert_raises(ZMQ::Error) do
+      ZMQ::Context.new
+    end
+    assert_equal ctx, ZMQ.context
+  ensure
+    assert_nil ctx.destroy
+  end
+
   def test_iothreads
     ctx = ZMQ::Context.new
     assert_raises TypeError do

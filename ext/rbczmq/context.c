@@ -38,18 +38,22 @@ static VALUE rb_czmq_nogvl_zctx_new(ZMQ_UNUSED void *ptr)
 /*
  *  call-seq:
  *     ZMQ::Context.new    =>  ZMQ::Context
+ *     ZMQ::Context.new(1)    =>  ZMQ::Context
  *
- *  Returns a handle to a new ZMQ context.
+ *  Returns a handle to a new ZMQ context. Optional I/O threads argument.
  *
  * === Examples
  *     ZMQ::Context.new    =>  ZMQ::Context
+ *     ZMQ::Context.new(1)    =>  ZMQ::Context
  *
 */
 
-static VALUE rb_czmq_ctx_new(VALUE context)
+static VALUE rb_czmq_ctx_s_new(int argc, VALUE *argv, VALUE context)
 {
     VALUE ctx_map;
+    VALUE io_threads;
     zmq_ctx_wrapper *ctx = NULL;
+    rb_scan_args(argc, argv, "01", &io_threads);
     ctx_map = rb_ivar_get(rb_mZmq, intern_zctx_process);
     if (!NIL_P(rb_hash_aref(ctx_map, get_pid()))) rb_raise(rb_eZmqError, "single ZMQ context per process allowed");
     context = Data_Make_Struct(rb_cZmqContext, zmq_ctx_wrapper, 0, rb_czmq_free_ctx_gc, ctx);
@@ -57,6 +61,7 @@ static VALUE rb_czmq_ctx_new(VALUE context)
     ZmqAssertObjOnAlloc(ctx->ctx, ctx);
     rb_hash_aset(ctx_map, get_pid(), context);
     rb_obj_call_init(context, 0, NULL);
+    if (!NIL_P(io_threads)) rb_czmq_ctx_set_iothreads(context, io_threads);
     return context;
 }
 
@@ -196,7 +201,7 @@ void _init_rb_czmq_context() {
 
     rb_cZmqContext = rb_define_class_under(rb_mZmq, "Context", rb_cObject);
 
-    rb_define_alloc_func(rb_cZmqContext, rb_czmq_ctx_new);
+    rb_define_singleton_method(rb_cZmqContext, "new", rb_czmq_ctx_s_new, -1);
     rb_define_method(rb_cZmqContext, "destroy", rb_czmq_ctx_destroy, 0);
     rb_define_method(rb_cZmqContext, "iothreads=", rb_czmq_ctx_set_iothreads, 1);
     rb_define_method(rb_cZmqContext, "linger=", rb_czmq_ctx_set_linger, 1);
