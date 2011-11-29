@@ -57,7 +57,7 @@ task :build_czmq do
   cp lib, "ext/rbczmq"
 end
 
-RDOC_FILES = FileList["README.rdoc", "ext/rbczmq/rbczmq_ext.c", "lib/zmq.rb"]
+RDOC_FILES = FileList["README.rdoc", "ext/rbczmq/*.c", "lib/**/*.rb"]
 
 Rake::RDocTask.new do |rd|
   rd.title = ""
