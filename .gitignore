@@ -12,5 +12,3 @@ tmp/*
 true/*
 *.bundle
 *.gem
-ext/zeromq/src/.libs/*
-ext/czmq/src/.libs/*
