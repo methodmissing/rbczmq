@@ -11,6 +11,7 @@ void rb_czmq_free_sock(zmq_sock_wrapper *sock)
 {
     if (sock->ctx) {
         rb_thread_blocking_region(rb_czmq_nogvl_zsocket_destroy, sock, RUBY_UBF_IO, 0);
+        if (zmq_errno() == ENOTSOCK) ZmqRaiseSysError;
         sock->socket = NULL;
     }
 }
