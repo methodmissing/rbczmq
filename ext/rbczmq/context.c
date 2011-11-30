@@ -12,9 +12,9 @@ static VALUE rb_czmq_nogvl_zctx_destroy(void *ptr)
 static void rb_czmq_free_ctx(zmq_ctx_wrapper *ctx)
 {
     VALUE ctx_map;
-    ctx_map = rb_ivar_get(rb_mZmq, intern_zctx_process);
     rb_thread_blocking_region(rb_czmq_nogvl_zctx_destroy, ctx, RUBY_UBF_IO, 0);
     ctx->ctx = NULL;
+    ctx_map = rb_ivar_get(rb_mZmq, intern_zctx_process);
     rb_hash_aset(ctx_map, get_pid(), Qnil);
 }
 

@@ -16,6 +16,7 @@ VALUE rb_czmq_alloc_frame(zframe_t **frame, int flags)
 void rb_czmq_free_frame(zmq_frame_wrapper *frame)
 {
     zframe_destroy(&(frame->frame));
+    ZmqAssertSysError();
     frame->frame = NULL;
     frame->flags |= ZMQ_FRAME_RECYCLED;
 }
@@ -43,6 +44,7 @@ static VALUE rb_czmq_frame_s_new(int argc, VALUE *argv, VALUE frame)
     }
     fr->flags = ZMQ_FRAME_NEW;
     ZmqAssertObjOnAlloc(fr->frame, fr);
+    /*ZmqAssertSysError();*/
     rb_obj_call_init(frame, 0, NULL);
     return frame;
 }
@@ -154,6 +156,7 @@ static VALUE rb_czmq_frame_reset(VALUE obj, VALUE data)
     ZmqGetFrame(obj);
     Check_Type(data, T_STRING);
     zframe_reset(frame->frame, (char *)RSTRING_PTR(data), (size_t)RSTRING_LEN(data));
+    ZmqAssertSysError();
     return Qnil;
 }
 

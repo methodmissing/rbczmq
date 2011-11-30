@@ -350,6 +350,7 @@ static VALUE rb_czmq_socket_recv(VALUE obj)
     args.socket = sock;
     str = (char *)rb_thread_blocking_region(rb_czmq_nogvl_recv, (void *)&args, RUBY_UBF_IO, 0);
     if (str == NULL) return Qnil;
+    ZmqAssertSysError();
     if (sock->verbose)
         zclock_log ("I: %s socket %p: recv \"%s\"", zsocket_type_str(sock->socket), sock->socket, str);
     return ZmqEncode(rb_str_new2(str));
@@ -376,6 +377,7 @@ static VALUE rb_czmq_socket_recv_nonblock(VALUE obj)
     ZmqSockGuardCrossThread(sock);
     str = zstr_recv_nowait(sock->socket);
     if (str == NULL) return Qnil;
+    ZmqAssertSysError();
     if (sock->verbose)
         zclock_log ("I: %s socket %p: recv_nonblock \"%s\"", zsocket_type_str(sock->socket), sock->socket, str);
     return ZmqEncode(rb_str_new2(str));

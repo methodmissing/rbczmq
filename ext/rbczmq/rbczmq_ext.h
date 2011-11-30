@@ -17,16 +17,17 @@
 #include <rbczmq_prelude.h>
 
 #define ZmqRaiseSysError rb_sys_fail(zmq_strerror(zmq_errno()))
-/* What about EINVAL ? */
+#define ZmqAssertSysError() if (zmq_errno() != 0 && zmq_errno() != EAGAIN) ZmqRaiseSysError;
 #define ZmqAssert(rc) \
     if (rc != 0) { \
-        if (zmq_errno() != 0) ZmqRaiseSysError; \
+        ZmqAssertSysError(); \
         if (rc == ENOMEM) rb_memerror(); \
         return Qfalse; \
     }
 #define ZmqAssertObjOnAlloc(obj, wrapper) \
     if (obj == NULL) { \
         xfree(wrapper); \
+        ZmqAssertSysError(); \
         rb_memerror(); \
     }
 #define ZmqAssertType(obj, type, desc) \
