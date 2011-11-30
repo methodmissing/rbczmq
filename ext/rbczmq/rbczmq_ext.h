@@ -16,11 +16,11 @@
 
 #include <rbczmq_prelude.h>
 
-#define ZmqRaiseError rb_sys_fail(zmq_strerror(zmq_errno()))
+#define ZmqRaiseSysError rb_sys_fail(zmq_strerror(zmq_errno()))
 /* What about EINVAL ? */
 #define ZmqAssert(rc) \
     if (rc != 0) { \
-        if (errno != 0) ZmqRaiseError; \
+        if (zmq_errno() != 0) ZmqRaiseSysError; \
         if (rc == ENOMEM) rb_memerror(); \
         return Qfalse; \
     }

@@ -7,6 +7,7 @@
 *.dylib.dSYM
 *.dylib
 *.o
+*.a
 *.log
 tmp/*
 true/*

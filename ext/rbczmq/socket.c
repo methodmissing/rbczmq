@@ -166,7 +166,7 @@ static VALUE rb_czmq_socket_bind(VALUE obj, VALUE endpoint)
     args.socket = sock;
     args.endpoint = StringValueCStr(endpoint);
     rc = (int)rb_thread_blocking_region(rb_czmq_nogvl_socket_bind, (void *)&args, RUBY_UBF_IO, 0);
-    if (rc == -1) ZmqRaiseError;
+    if (rc == -1) ZmqRaiseSysError;
     if (sock->verbose)
         zclock_log ("I: %s socket %p: bound \"%s\"", zsocket_type_str(sock->socket), obj, StringValueCStr(endpoint));
     sock->state |= ZMQ_SOCKET_BOUND;

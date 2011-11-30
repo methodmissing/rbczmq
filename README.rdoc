@@ -26,5 +26,4 @@
 * czmq git ref: https://github.com/zeromq/czmq/commit/18c8b8daf3013632f2a444a0127f4fa80dbd866e
 * Test cases for Frame, Message etc. with GC.stress = true
 * Should the current ZMQ context referenced be indexed by PID ?
-* ZmqRaiseError -> ZmqRaiseSysError ?
 * Distribute vendor'ed libs (czmq && zeromq) in tar.gz format instead
