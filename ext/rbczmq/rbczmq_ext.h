@@ -16,8 +16,8 @@
 
 #include <rbczmq_prelude.h>
 
-#define ZmqRaiseSysError rb_sys_fail(zmq_strerror(zmq_errno()))
-#define ZmqAssertSysError() if (zmq_errno() != 0 && zmq_errno() != EAGAIN) ZmqRaiseSysError;
+#define ZmqRaiseSysError() rb_sys_fail(zmq_strerror(zmq_errno()))
+#define ZmqAssertSysError() if (zmq_errno() != 0 && zmq_errno() != EAGAIN) ZmqRaiseSysError();
 #define ZmqAssert(rc) \
     if (rc != 0) { \
         ZmqAssertSysError(); \

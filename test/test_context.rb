@@ -1,9 +1,6 @@
-# encoding: utf-8
+require File.join(File.dirname(__FILE__), 'helper')
 
-require 'test/unit'
-require 'zmq'
-
-class TestZmqContext < Test::Unit::TestCase
+class TestZmqContext < ZmqTestCase
   def test_context
     ctx = ZMQ::Context.new
     assert_instance_of ZMQ::Context, ctx

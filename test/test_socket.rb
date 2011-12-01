@@ -1,10 +1,6 @@
-# encoding: utf-8
+require File.join(File.dirname(__FILE__), 'helper')
 
-require 'test/unit'
-require 'zmq'
-require 'socket'
-
-class TestZmqSocket < Test::Unit::TestCase
+class TestZmqSocket < ZmqTestCase
   def test_fd
     ctx = ZMQ::Context.new
     sock = ctx.socket(:REP)

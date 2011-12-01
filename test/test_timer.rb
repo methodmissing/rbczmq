@@ -1,9 +1,6 @@
-# encoding: utf-8
+require File.join(File.dirname(__FILE__), 'helper')
 
-require 'test/unit'
-require 'zmq'
-
-class TestZmqTimer < Test::Unit::TestCase
+class TestZmqTimer < ZmqTestCase
 
   def test_alloc
     cb = Proc.new{ :done }

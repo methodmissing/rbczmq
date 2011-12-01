@@ -1,11 +1,8 @@
-# encoding: utf-8
-
-require 'test/unit'
-require 'zmq'
+require File.join(File.dirname(__FILE__), 'helper')
 
 Thread.abort_on_exception = true
 
-class TestZmqThreading < Test::Unit::TestCase
+class TestZmqThreading < ZmqTestCase
   def test_threaded
     ctx = ZMQ::Context.new
     rep, req, threads = nil, nil, []

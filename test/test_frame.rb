@@ -1,10 +1,6 @@
-# encoding: utf-8
+require File.join(File.dirname(__FILE__), 'helper')
 
-require 'test/unit'
-require 'zmq'
-require 'stringio'
-
-class TestZmqFrame < Test::Unit::TestCase
+class TestZmqFrame < ZmqTestCase
   def test_alloc
     frame = ZMQ::Frame("message")
     assert_instance_of ZMQ::Frame, frame

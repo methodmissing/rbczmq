@@ -11,7 +11,7 @@ void rb_czmq_free_sock(zmq_sock_wrapper *sock)
 {
     if (sock->ctx) {
         rb_thread_blocking_region(rb_czmq_nogvl_zsocket_destroy, sock, RUBY_UBF_IO, 0);
-        if (zmq_errno() == ENOTSOCK) ZmqRaiseSysError;
+        if (zmq_errno() == ENOTSOCK) ZmqRaiseSysError();
         sock->socket = NULL;
     }
 }
@@ -167,7 +167,7 @@ static VALUE rb_czmq_socket_bind(VALUE obj, VALUE endpoint)
     args.socket = sock;
     args.endpoint = StringValueCStr(endpoint);
     rc = (int)rb_thread_blocking_region(rb_czmq_nogvl_socket_bind, (void *)&args, RUBY_UBF_IO, 0);
-    if (rc == -1) ZmqRaiseSysError;
+    if (rc == -1) ZmqRaiseSysError();
     if (sock->verbose)
         zclock_log ("I: %s socket %p: bound \"%s\"", zsocket_type_str(sock->socket), obj, StringValueCStr(endpoint));
     sock->state |= ZMQ_SOCKET_BOUND;

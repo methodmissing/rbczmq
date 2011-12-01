@@ -102,7 +102,7 @@ static VALUE rb_czmq_ctx_set_iothreads(VALUE obj, VALUE threads)
     Check_Type(threads, T_FIXNUM);
     rb_warn("You probably don't want to spawn more than 1 IO thread per ZMQ context.");
     zctx_set_iothreads(ctx->ctx, FIX2INT(threads));
-    if (zmq_errno() == EINVAL) ZmqRaiseSysError;
+    if (zmq_errno() == EINVAL) ZmqRaiseSysError();
     return Qnil;
 }
 

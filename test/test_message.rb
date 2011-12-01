@@ -1,9 +1,6 @@
-# encoding: utf-8
+require File.join(File.dirname(__FILE__), 'helper')
 
-require 'test/unit'
-require 'zmq'
-
-class TestZmqMessage < Test::Unit::TestCase
+class TestZmqMessage < ZmqTestCase
   def test_message
     msg = ZMQ::Message.new
     assert_instance_of ZMQ::Message, msg

@@ -1,9 +1,6 @@
-# encoding: utf-8
+require File.join(File.dirname(__FILE__), 'helper')
 
-require 'test/unit'
-require 'zmq'
-
-class TestZmq < Test::Unit::TestCase
+class TestZmq < ZmqTestCase
   def test_interrupted_p
     assert !ZMQ.interrupted?
   end

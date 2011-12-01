@@ -15,7 +15,6 @@
 * Assert gem builds and installs as expected against all implementations with the vendor'ed dependences in /ext
 * Frame recycle: - message_popstr
                  - message_destroy
-* check socket types for send / receive in examples
 * ZMQ::Message#save && ZMQ::Message.load
 * ZMQ::Socket#handler = x. Assert handler interface here instead ???
 * Callback handler for ZMQ::Socket useful beyond just ZMQ::Loop ?
@@ -24,6 +23,5 @@
 * OS X leaks utility - http://developer.apple.com/library/mac/#documentation/Darwin/Reference/ManPages/man1/leaks.1.html
 * zeromq git ref: https://github.com/zeromq/zeromq2-1/commit/35df57cda6861cac31710ad2a10fae4c97c0e63c
 * czmq git ref: https://github.com/zeromq/czmq/commit/18c8b8daf3013632f2a444a0127f4fa80dbd866e
-* Test cases for Frame, Message etc. with GC.stress = true
-* Should the current ZMQ context referenced be indexed by PID ?
 * Distribute vendor'ed libs (czmq && zeromq) in tar.gz format instead
+* Handle GC issue with timers in loop callbacks

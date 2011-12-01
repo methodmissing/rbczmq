@@ -1,9 +1,6 @@
-# encoding: utf-8
+require File.join(File.dirname(__FILE__), 'helper')
 
-require 'test/unit'
-require 'zmq'
-
-class TestZmqLoop < Test::Unit::TestCase
+class TestZmqLoop < ZmqTestCase
   def test_alloc
     ctx = ZMQ::Context.new
     assert_instance_of ZMQ::Context, ctx
@@ -36,6 +33,7 @@ class TestZmqLoop < Test::Unit::TestCase
     ctx.destroy
   end
 
+=begin
   def test_callback_error_stops_event_loop
     ctx = ZMQ::Context.new
     assert_raises RuntimeError do
@@ -209,4 +207,5 @@ class TestZmqLoop < Test::Unit::TestCase
   ensure
     ctx.destroy
   end
+=end
 end

@@ -47,7 +47,7 @@ extern VALUE rb_eZmqError;
           if (rb_io_wait_readable(zsockopt_fd((sock)->socket)) == Qtrue) { \
               goto retry_read; \
           } else { \
-              ZmqRaiseSysError; \
+              ZmqRaiseSysError(); \
           } \
       }
 #define ZmqBlockingWrite(fcall, sock) \
@@ -58,7 +58,7 @@ extern VALUE rb_eZmqError;
           if (rb_io_wait_writable(zsockopt_fd((sock)->socket)) == Qtrue) { \
               goto retry_write; \
           } else { \
-              ZmqRaiseSysError; \
+              ZmqRaiseSysError(); \
           } \
       }
 #else
