@@ -2,6 +2,7 @@
 
 static VALUE rb_czmq_nogvl_zsocket_destroy(void *ptr)
 {
+    errno = 0;
     zmq_sock_wrapper *sock = ptr;
     zsocket_destroy(sock->ctx, sock->socket);
     return Qnil;
@@ -123,6 +124,7 @@ static VALUE rb_czmq_socket_fd(VALUE obj)
 VALUE rb_czmq_nogvl_socket_bind(void *ptr) {
     int rc;
     struct nogvl_conn_args *args = ptr;
+    errno = 0;
     zmq_sock_wrapper *socket = args->socket;
 #ifdef HAVE_RB_THREAD_BLOCKING_REGION
     rc = zsocket_bind(socket->socket, args->endpoint);
@@ -135,6 +137,7 @@ VALUE rb_czmq_nogvl_socket_bind(void *ptr) {
 VALUE rb_czmq_nogvl_socket_connect(void *ptr) {
     int rc;
     struct nogvl_conn_args *args = ptr;
+    errno = 0;
     zmq_sock_wrapper *socket = args->socket;
 #ifdef HAVE_RB_THREAD_BLOCKING_REGION
     rc = zsocket_connect(socket->socket, args->endpoint);
@@ -233,6 +236,7 @@ static VALUE rb_czmq_socket_set_verbose(VALUE obj, VALUE level)
 static VALUE rb_czmq_nogvl_zstr_send(void *ptr) {
     int rc;
     struct nogvl_send_args *args = ptr;
+    errno = 0;
     zmq_sock_wrapper *socket = args->socket;
 #ifdef HAVE_RB_THREAD_BLOCKING_REGION
     rc = zstr_send(socket->socket, args->msg);
@@ -245,6 +249,7 @@ static VALUE rb_czmq_nogvl_zstr_send(void *ptr) {
 static VALUE rb_czmq_nogvl_zstr_sendm(void *ptr) {
     int rc;
     struct nogvl_send_args *args = ptr;
+    errno = 0;
     zmq_sock_wrapper *socket = args->socket;
 #ifdef HAVE_RB_THREAD_BLOCKING_REGION
     rc = zstr_sendm(socket->socket, args->msg);
@@ -318,6 +323,7 @@ static VALUE rb_czmq_socket_sendm(VALUE obj, VALUE msg)
 static VALUE rb_czmq_nogvl_recv(void *ptr) {
     char *str = NULL;
     struct nogvl_recv_args *args = ptr;
+    errno = 0;
     zmq_sock_wrapper *socket = args->socket;
 #ifdef HAVE_RB_THREAD_BLOCKING_REGION
     str = zstr_recv(socket->socket);
@@ -373,6 +379,7 @@ static VALUE rb_czmq_socket_recv(VALUE obj)
 static VALUE rb_czmq_socket_recv_nonblock(VALUE obj)
 {
     char *str = NULL;
+    errno = 0;
     GetZmqSocket(obj);
     ZmqSockGuardCrossThread(sock);
     str = zstr_recv_nowait(sock->socket);
@@ -386,6 +393,7 @@ static VALUE rb_czmq_socket_recv_nonblock(VALUE obj)
 static VALUE rb_czmq_nogvl_send_frame(void *ptr) {
     int rc;
     struct nogvl_send_frame_args *args = ptr;
+    errno = 0;
     zmq_sock_wrapper *socket = args->socket;
 #ifdef HAVE_RB_THREAD_BLOCKING_REGION
     rc = zframe_send(&(args->frame), socket->socket, args->flags);
@@ -450,6 +458,7 @@ int wrap_zmsg_send(zmsg_t **m, void *socket) {
 static VALUE rb_czmq_nogvl_send_message(void *ptr) {
     struct nogvl_send_message_args *args = ptr;
     zmq_sock_wrapper *socket = args->socket;
+    errno = 0;
 #ifdef HAVE_RB_THREAD_BLOCKING_REGION
     zmsg_send(&(args->message), socket->socket);
 #else
@@ -493,6 +502,7 @@ static VALUE rb_czmq_socket_send_message(VALUE obj, VALUE message_obj)
 static VALUE rb_czmq_nogvl_recv_frame(void *ptr) {
     zframe_t *frame = NULL;
     struct nogvl_recv_args *args = ptr;
+    errno = 0;
     zmq_sock_wrapper *socket = args->socket;
 #ifdef HAVE_RB_THREAD_BLOCKING_REGION
     frame = zframe_recv(socket->socket);
@@ -553,6 +563,7 @@ static VALUE rb_czmq_socket_recv_frame_nonblock(VALUE obj)
     zframe_t *frame = NULL;
     char print_prefix[255];
     char *cur_time = NULL;
+    errno = 0;
     GetZmqSocket(obj);
     ZmqSockGuardCrossThread(sock);
     frame = zframe_recv_nowait(sock->socket);
@@ -567,6 +578,7 @@ static VALUE rb_czmq_socket_recv_frame_nonblock(VALUE obj)
 static VALUE rb_czmq_nogvl_recv_message(void *ptr) {
     zmsg_t *message = NULL;
     struct nogvl_recv_args *args = ptr;
+    errno = 0;
     zmq_sock_wrapper *socket = args->socket;
 #ifdef HAVE_RB_THREAD_BLOCKING_REGION
     message = zmsg_recv(socket->socket);

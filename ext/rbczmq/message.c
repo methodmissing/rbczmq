@@ -2,6 +2,7 @@
 
 void rb_czmq_free_message(zmq_message_wrapper *message)
 {
+    errno = 0;
     zmsg_destroy(&(message->message));
     message->flags |= ZMQ_FRAME_RECYCLED;
     message->message = NULL;
@@ -20,6 +21,7 @@ VALUE rb_czmq_alloc_message(zmsg_t *message)
 {
     VALUE message_obj;
     zmq_message_wrapper *m = NULL;
+    errno = 0;
     message_obj = Data_Make_Struct(rb_cZmqMessage, zmq_message_wrapper, 0, rb_czmq_free_message_gc, m);
     m->message = message;
     ZmqAssertObjOnAlloc(m->message, m);
@@ -31,6 +33,7 @@ VALUE rb_czmq_alloc_message(zmsg_t *message)
 static VALUE rb_czmq_message_new(VALUE message)
 {
     zmq_message_wrapper *msg = NULL;
+    errno = 0;
     message = Data_Make_Struct(rb_cZmqMessage, zmq_message_wrapper, 0, rb_czmq_free_message_gc, msg);
     msg->message = zmsg_new();
     ZmqAssertObjOnAlloc(msg->message, msg);
@@ -54,6 +57,7 @@ static VALUE rb_czmq_message_content_size(VALUE obj)
 static VALUE rb_czmq_message_push(VALUE obj, VALUE frame_obj)
 {
     int rc = 0;
+    errno = 0;
     ZmqGetMessage(obj);
     ZmqGetFrame(frame_obj);
     rc = zmsg_push(message->message, frame->frame);
@@ -65,6 +69,7 @@ static VALUE rb_czmq_message_push(VALUE obj, VALUE frame_obj)
 static VALUE rb_czmq_message_add(VALUE obj, VALUE frame_obj)
 {
     int rc = 0;
+    errno = 0;
     ZmqGetMessage(obj);
     ZmqGetFrame(frame_obj);
     rc = zmsg_add(message->message, frame->frame);
@@ -127,6 +132,7 @@ static VALUE rb_czmq_message_remove(VALUE obj, VALUE frame_obj)
 static VALUE rb_czmq_message_pushstr(VALUE obj, VALUE str)
 {
     int rc = 0;
+    errno = 0;
     ZmqGetMessage(obj);
     Check_Type(str, T_STRING);
     rc = zmsg_pushstr(message->message, StringValueCStr(str));
@@ -137,6 +143,7 @@ static VALUE rb_czmq_message_pushstr(VALUE obj, VALUE str)
 static VALUE rb_czmq_message_addstr(VALUE obj, VALUE str)
 {
     int rc = 0;
+    errno = 0;
     ZmqGetMessage(obj);
     Check_Type(str, T_STRING);
     rc = zmsg_addstr(message->message, StringValueCStr(str));
@@ -156,6 +163,7 @@ static VALUE rb_czmq_message_popstr(VALUE obj)
 static VALUE rb_czmq_message_wrap(VALUE obj, VALUE frame_obj)
 {
     int rc = 0;
+    errno = 0;
     ZmqGetMessage(obj);
     ZmqGetFrame(frame_obj);
     rc = zmsg_wrap(message->message, frame->frame);
@@ -177,6 +185,7 @@ static VALUE rb_czmq_message_dup(VALUE obj)
 {
     VALUE dup;
     zmq_message_wrapper *dup_msg = NULL;
+    errno = 0;
     ZmqGetMessage(obj);
     dup = Data_Make_Struct(rb_cZmqMessage, zmq_message_wrapper, 0, rb_czmq_free_message_gc, dup_msg);
     dup_msg->message = zmsg_dup(message->message);

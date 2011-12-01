@@ -33,7 +33,7 @@ static VALUE rb_czmq_m_version(ZMQ_UNUSED VALUE obj)
 {
     int major, minor, patch;
     zmq_version(&major, &minor, &patch);
-    return rb_ary_new3(3, INT2NUM (major), INT2NUM (minor), INT2NUM (patch));
+    return rb_ary_new3(3, INT2NUM(major), INT2NUM(minor), INT2NUM(patch));
 }
 
 static VALUE rb_czmq_m_now(ZMQ_UNUSED VALUE obj)

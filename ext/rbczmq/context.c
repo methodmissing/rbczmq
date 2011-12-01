@@ -4,6 +4,7 @@ static VALUE intern_zctx_process;
 
 static VALUE rb_czmq_nogvl_zctx_destroy(void *ptr)
 {
+    errno = 0;
     zmq_ctx_wrapper *ctx = ptr;
     zctx_destroy(&ctx->ctx);
     return Qnil;
@@ -12,9 +13,9 @@ static VALUE rb_czmq_nogvl_zctx_destroy(void *ptr)
 static void rb_czmq_free_ctx(zmq_ctx_wrapper *ctx)
 {
     VALUE ctx_map;
+    ctx_map = rb_ivar_get(rb_mZmq, intern_zctx_process);
     rb_thread_blocking_region(rb_czmq_nogvl_zctx_destroy, ctx, RUBY_UBF_IO, 0);
     ctx->ctx = NULL;
-    ctx_map = rb_ivar_get(rb_mZmq, intern_zctx_process);
     rb_hash_aset(ctx_map, get_pid(), Qnil);
 }
 
@@ -29,6 +30,7 @@ static void rb_czmq_free_ctx_gc(void *ptr)
 
 static VALUE rb_czmq_nogvl_zctx_new(ZMQ_UNUSED void *ptr)
 {
+    errno = 0;
     zctx_t *ctx = NULL;
     ctx = zctx_new();
     zctx_set_linger(ctx, 1);
@@ -59,8 +61,8 @@ static VALUE rb_czmq_ctx_s_new(int argc, VALUE *argv, VALUE context)
     context = Data_Make_Struct(rb_cZmqContext, zmq_ctx_wrapper, 0, rb_czmq_free_ctx_gc, ctx);
     ctx->ctx = (zctx_t*)rb_thread_blocking_region(rb_czmq_nogvl_zctx_new, NULL, RUBY_UBF_IO, 0);
     ZmqAssertObjOnAlloc(ctx->ctx, ctx);
-    rb_hash_aset(ctx_map, get_pid(), context);
     rb_obj_call_init(context, 0, NULL);
+    rb_hash_aset(ctx_map, get_pid(), context);
     if (!NIL_P(io_threads)) rb_czmq_ctx_set_iothreads(context, io_threads);
     return context;
 }
@@ -99,6 +101,7 @@ static VALUE rb_czmq_ctx_destroy(VALUE obj)
 static VALUE rb_czmq_ctx_set_iothreads(VALUE obj, VALUE threads)
 {
     int iothreads;
+    errno = 0;
     ZmqGetContext(obj);
     Check_Type(threads, T_FIXNUM);
     iothreads = FIX2INT(threads);
@@ -122,6 +125,7 @@ static VALUE rb_czmq_ctx_set_iothreads(VALUE obj, VALUE threads)
 
 static VALUE rb_czmq_ctx_set_linger(VALUE obj, VALUE linger)
 {
+    errno = 0;
     ZmqGetContext(obj);
     Check_Type(linger, T_FIXNUM);
    /* XXX: boundary checks */
@@ -130,6 +134,7 @@ static VALUE rb_czmq_ctx_set_linger(VALUE obj, VALUE linger)
 }
 
 VALUE rb_czmq_nogvl_socket_new(void *ptr) {
+    errno = 0;
     struct nogvl_socket_args *args = ptr;
     return (VALUE)zsocket_new(args->ctx, args->type);
 }
@@ -177,6 +182,7 @@ static VALUE rb_czmq_ctx_socket(VALUE obj, VALUE type)
     int socket_type;
     struct nogvl_socket_args args;
     zmq_sock_wrapper *sock = NULL;
+    errno = 0;
     ZmqGetContext(obj);
     if (TYPE(type) != T_FIXNUM && TYPE(type) != T_SYMBOL) rb_raise(rb_eTypeError, "wrong socket type %s (expected Fixnum or Symbol)", RSTRING_PTR(rb_obj_as_string(type)));
     socket_type = FIX2INT((SYMBOL_P(type)) ? rb_const_get_at(rb_mZmq, rb_to_id(type)) : type);

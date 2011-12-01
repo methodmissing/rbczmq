@@ -31,7 +31,7 @@ ZMQ_NOINLINE static int rb_czmq_callback(zloop_t *loop, VALUE *args)
     status = 0;
     ret = rb_protect((VALUE(*)(VALUE))rb_czmq_callback0, (VALUE)args, &status);
     if (status) {
-        zloop_timer(loop, 1, 1, rb_czmq_loop_breaker_callback, NULL);
+        zloop_timer(loop, 1, 1, rb_czmq_loop_breaker_callback, args[0]);
         if (NIL_P(rb_errinfo())) {
             rb_jump_tag(status);
         } else {
@@ -39,7 +39,7 @@ ZMQ_NOINLINE static int rb_czmq_callback(zloop_t *loop, VALUE *args)
             return 0;
         }
     } else if (ret == Qfalse) {
-        zloop_timer(loop, 1, 1, rb_czmq_loop_breaker_callback, NULL);
+        zloop_timer(loop, 1, 1, rb_czmq_loop_breaker_callback, args[0]);
         return -1;
     }
     return 0;
@@ -118,6 +118,7 @@ static void rb_czmq_free_loop_gc(void *ptr)
 static VALUE rb_czmq_loop_new(VALUE loop)
 {
     zmq_loop_wrapper *lp = NULL;
+    errno = 0;
     loop = Data_Make_Struct(rb_cZmqLoop, zmq_loop_wrapper, 0, rb_czmq_free_loop_gc, lp);
     lp->loop = zloop_new();
     ZmqAssertObjOnAlloc(lp->loop, lp);
@@ -147,6 +148,7 @@ static VALUE rb_czmq_nogvl_zloop_start(void *ptr)
 static VALUE rb_czmq_loop_start(VALUE obj)
 {
     int rc;
+    errno = 0;
     ZmqGetLoop(obj);
     THREAD_PASS;
     zloop_timer(loop->loop, 1, 1, rb_czmq_loop_started_callback, loop);
@@ -256,6 +258,7 @@ static VALUE rb_czmq_loop_register_socket(VALUE obj, VALUE socket, VALUE event)
 {
     int rc;
     zmq_pollitem_t *pollitem = NULL;
+    errno = 0;
     ZmqGetLoop(obj);
     GetZmqSocket(socket);
     if (!(sock->state & (ZMQ_SOCKET_BOUND | ZMQ_SOCKET_CONNECTED)))
@@ -286,6 +289,7 @@ static VALUE rb_czmq_loop_register_socket(VALUE obj, VALUE socket, VALUE event)
 static VALUE rb_czmq_loop_remove_socket(VALUE obj, VALUE socket)
 {
     zmq_pollitem_t *pollitem = NULL;
+    errno = 0;
     ZmqGetLoop(obj);
     GetZmqSocket(socket);
     pollitem = ruby_xmalloc(sizeof(zmq_pollitem_t));
@@ -311,6 +315,7 @@ static VALUE rb_czmq_loop_remove_socket(VALUE obj, VALUE socket)
 static VALUE rb_czmq_loop_register_timer(VALUE obj, VALUE tm)
 {
     int rc;
+    errno = 0;
     ZmqGetLoop(obj);
     ZmqGetTimer(tm);
     rc = zloop_timer(loop->loop, timer->delay, timer->times, rb_czmq_loop_timer_callback, (void *)tm);
@@ -335,6 +340,7 @@ static VALUE rb_czmq_loop_register_timer(VALUE obj, VALUE tm)
 static VALUE rb_czmq_loop_cancel_timer(VALUE obj, VALUE timer)
 {
     int rc;
+    errno = 0;
     ZmqGetLoop(obj);
     rc = zloop_timer_end(loop->loop, (void *)timer);
     ZmqAssert(rc);

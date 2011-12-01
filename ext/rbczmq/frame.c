@@ -15,6 +15,7 @@ VALUE rb_czmq_alloc_frame(zframe_t **frame, int flags)
 
 void rb_czmq_free_frame(zmq_frame_wrapper *frame)
 {
+    errno = 0;
     zframe_destroy(&(frame->frame));
     ZmqAssertSysError();
     frame->frame = NULL;
@@ -34,6 +35,7 @@ static VALUE rb_czmq_frame_s_new(int argc, VALUE *argv, VALUE frame)
 {
     VALUE data;
     zmq_frame_wrapper *fr = NULL;
+    errno = 0;
     rb_scan_args(argc, argv, "01", &data);
     frame = Data_Make_Struct(rb_cZmqFrame, zmq_frame_wrapper, 0, rb_czmq_free_frame_gc, fr);
     if (NIL_P(data)) {
@@ -87,6 +89,7 @@ static VALUE rb_czmq_frame_dup(VALUE obj)
 {
     VALUE dup;
     zmq_frame_wrapper *dup_fr = NULL;
+    errno = 0;
     ZmqGetFrame(obj);
     dup = Data_Make_Struct(rb_cZmqFrame, zmq_frame_wrapper, 0, rb_czmq_free_frame_gc, dup_fr);
     dup_fr->frame = zframe_dup(frame->frame);
@@ -153,6 +156,7 @@ static VALUE rb_czmq_frame_print(int argc, VALUE *argv, VALUE obj)
 
 static VALUE rb_czmq_frame_reset(VALUE obj, VALUE data)
 {
+    errno = 0;
     ZmqGetFrame(obj);
     Check_Type(data, T_STRING);
     zframe_reset(frame->frame, (char *)RSTRING_PTR(data), (size_t)RSTRING_LEN(data));
