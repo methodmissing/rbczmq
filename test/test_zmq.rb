@@ -18,6 +18,6 @@ class TestZmq < ZmqTestCase
   end
 
   def test_error
-    assert_instance_of String, ZMQ.error
+    assert_nil ZMQ.error
   end
 end

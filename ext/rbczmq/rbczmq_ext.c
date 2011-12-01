@@ -52,8 +52,8 @@ static VALUE rb_czmq_m_error(ZMQ_UNUSED VALUE obj)
 {
     int err;
     err = zmq_errno();
-    if (err == 0) return rb_str_buf_new(0);
-    return rb_str_new2(zmq_strerror(err));
+    if (err == 0) return Qnil;
+    return rb_exc_new2(rb_eZmqError, zmq_strerror(zmq_errno()));
 }
 
 extern void _init_rbczmq_context();
