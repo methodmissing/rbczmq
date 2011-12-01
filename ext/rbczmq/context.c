@@ -98,10 +98,12 @@ static VALUE rb_czmq_ctx_destroy(VALUE obj)
 
 static VALUE rb_czmq_ctx_set_iothreads(VALUE obj, VALUE threads)
 {
+    int iothreads;
     ZmqGetContext(obj);
     Check_Type(threads, T_FIXNUM);
-    rb_warn("You probably don't want to spawn more than 1 IO thread per ZMQ context.");
-    zctx_set_iothreads(ctx->ctx, FIX2INT(threads));
+    iothreads = FIX2INT(threads);
+    if (iothreads > 1) rb_warn("You probably don't want to spawn more than 1 I/O thread per ZMQ context.");
+    zctx_set_iothreads(ctx->ctx, iothreads);
     if (zmq_errno() == EINVAL) ZmqRaiseSysError();
     return Qnil;
 }
