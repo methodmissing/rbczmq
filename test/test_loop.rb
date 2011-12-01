@@ -33,7 +33,6 @@ class TestZmqLoop < ZmqTestCase
     ctx.destroy
   end
 
-=begin
   def test_callback_error_stops_event_loop
     ctx = ZMQ::Context.new
     assert_raises RuntimeError do
@@ -207,5 +206,4 @@ class TestZmqLoop < ZmqTestCase
   ensure
     ctx.destroy
   end
-=end
 end

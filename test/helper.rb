@@ -6,7 +6,9 @@ require 'stringio'
 require 'socket'
 
 class ZmqTestCase < Test::Unit::TestCase
-  if true#ENV['STRESS_GC']
+  undef_method :default_test if method_defined? :default_test
+
+  if ENV['STRESS_GC']
     def setup
       GC.stress = true
     end
