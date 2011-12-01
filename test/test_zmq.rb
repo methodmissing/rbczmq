@@ -18,6 +18,7 @@ class TestZmq < ZmqTestCase
   end
 
   def test_error
-    assert_nil ZMQ.error
+    expected = [ZMQ::Error, NilClass]
+    assert expected.any?{|c| c === ZMQ.error }
   end
 end
