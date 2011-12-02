@@ -99,6 +99,7 @@ static void rb_czmq_free_loop_gc(void *ptr)
 {
     zmq_loop_wrapper *loop = ptr;
     if (loop) {
+        zclock_log ("I: loop %p: GC free", loop);
         rb_czmq_free_loop(loop);
         xfree(loop);
     }

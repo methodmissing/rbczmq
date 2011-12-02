@@ -23,6 +23,7 @@ static void rb_czmq_free_ctx_gc(void *ptr)
 {
     zmq_ctx_wrapper *ctx = ptr;
     if (ctx) {
+        zclock_log ("I: context %p: GC free", ctx);
         rb_czmq_free_ctx(ctx);
         xfree(ctx);
     }

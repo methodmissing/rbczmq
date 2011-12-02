@@ -12,6 +12,7 @@ static void rb_czmq_free_message_gc(void *ptr)
 {
     zmq_message_wrapper *msg = ptr;
     if (msg) {
+        zclock_log ("I: message %p: GC free", msg);
         if (msg->message != NULL && !(msg->flags & ZMQ_MESSAGE_RECYCLED)) rb_czmq_free_message(msg);
         xfree(msg);
     }

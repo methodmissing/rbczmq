@@ -26,6 +26,7 @@ void rb_czmq_free_frame_gc(void *ptr)
 {
     zmq_frame_wrapper *frame = ptr;
     if (frame) {
+        zclock_log ("I: frame %p: GC free", frame);
         if (frame->frame != NULL && !(frame->flags & (ZMQ_FRAME_RECYCLED | ZMQ_FRAME_MESSAGE))) rb_czmq_free_frame(frame);
         xfree(frame);
     }

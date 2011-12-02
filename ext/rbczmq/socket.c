@@ -21,6 +21,8 @@ void rb_czmq_mark_sock(void *ptr)
 {
     zmq_sock_wrapper *sock = ptr;
     if (sock){
+        if (sock->verbose)
+            zclock_log ("I: %s socket %p, context %p: GC mark", zsocket_type_str(sock->socket), sock, sock->ctx);
         rb_gc_mark(sock->handler);
         rb_gc_mark(sock->endpoint);
         rb_gc_mark(sock->thread);
@@ -33,6 +35,8 @@ void rb_czmq_free_sock_gc(void *ptr)
 {
     zmq_sock_wrapper *sock = ptr;
     if (sock){
+        if (sock->verbose)
+            zclock_log ("I: %s socket %p, context %p: GC free", zsocket_type_str(sock->socket), sock, sock->ctx);
         /*if (sock->socket != NULL) rb_czmq_free_sock(sock);*/
         xfree(sock);
     }

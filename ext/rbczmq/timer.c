@@ -5,12 +5,14 @@ static VALUE intern_call;
 static void rb_czmq_mark_timer(void *ptr)
 {
     zmq_timer_wrapper *timer = ptr;
+    zclock_log ("I: timer %p: GC mark", timer);
     rb_gc_mark(timer->callback);
 }
 
 static void rb_czmq_free_timer_gc(void *ptr)
 {
     zmq_timer_wrapper *timer = ptr;
+    zclock_log ("I: timer %p: GC free", timer);
     if (timer) xfree(timer);
 }
 
