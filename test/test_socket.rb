@@ -136,7 +136,12 @@ class TestZmqSocket < ZmqTestCase
     sock = ctx.socket(:PAIR)
     port = sock.bind("tcp://127.0.0.1:*")
     assert sock.fd != -1
+    other = ctx.socket(:PAIR)
+    other.connect("tcp://127.0.0.1:#{port}")
+    sock.send("test")
+    assert_equal "test", other.recv
     sock.close
+    other.close
     sleep 0.2
     assert_raises Errno::ECONNREFUSED do
       TCPSocket.new("127.0.0.1", port)
