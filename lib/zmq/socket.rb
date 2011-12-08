@@ -9,18 +9,36 @@ class ZMQ::Socket
     end
   end
 
+  # Determines if this socket is in a readable state.
+  #
+  # socket.readable? => true
+  #
   def readable?
     events | ZMQ::POLLIN
   end
 
+  # Determines if this socket is in a writable state.
+  #
+  # socket.writable? => true
+  #
   def writable?
     events | ZMQ::POLLOUT
   end
 
+  # Generates a string representation of this socket type
+  #
+  # socket = ctx.socket(:PUB)
+  # socket.type_str => "PUB"
+  #
   def type_str
     self.class.const_get(:TYPE_STR)
   end
 
+  # Generates a string representation of the current socket state
+  #
+  # socket = ctx.bind(:PUB, "tcp://127.0.0.1:5000")
+  # socket.to_s => "PUB socket bound to tcp://127.0.0.1:5000"
+  #
   def to_s
     case state
     when BOUND
@@ -34,6 +52,9 @@ class ZMQ::Socket
 end
 
 module ZMQ::ReceiveSocket
+  # An interface for sockets that can only receive (read) data
+  #
+
   def self.included(sock)
     sock.unsupported_api :send, :sendm, :send_frame, :send_message
   end
@@ -48,6 +69,9 @@ module ZMQ::ReceiveSocket
 end
 
 module ZMQ::SendSocket
+  # An interface for sockets that can only send (write) data
+  #
+
   def self.included(sock)
     sock.unsupported_api :recv, :recv_nonblock, :recv_frame, :recv_frame_nonblock, :recv_message
   end
@@ -62,6 +86,9 @@ module ZMQ::SendSocket
 end
 
 module ZMQ::BiDirectionalSocket
+  # An interface for sockets that can both send and receive data as per the ZMQ spec.
+  #
+
   def poll_readable?
     true
   end

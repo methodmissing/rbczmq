@@ -7,6 +7,13 @@ class TestZmqMessage < ZmqTestCase
     assert_nil msg.destroy
   end
 
+  def test_message_sugar
+    msg = ZMQ::Message("one", "two", "three")
+    assert_equal "one", msg.popstr
+    assert_equal "two", msg.popstr
+    assert_equal "three", msg.popstr
+  end
+
   def test_size
     msg = ZMQ::Message.new
     assert_equal 0, msg.size

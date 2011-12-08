@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 ctx = ZMQ::Context.new
 pull = ctx.socket(:PULL)
 pull.connect(Runner::REMOTE_ENDPOINT)

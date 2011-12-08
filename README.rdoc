@@ -25,3 +25,6 @@
 * czmq git ref: https://github.com/zeromq/czmq/commit/18c8b8daf3013632f2a444a0127f4fa80dbd866e
 * Distribute vendor'ed libs (czmq && zeromq) in tar.gz format instead
 * Handle GC issue with timers in loop callbacks
+* Let sockets registered with a ZMQ::Loop instance be verbose if the reactor is set to verbose mode
+* Sync up libzmq && czmq ( vendor tarballs direct )
+* Let ZMQ::Frame.new(frame) just return the given frame

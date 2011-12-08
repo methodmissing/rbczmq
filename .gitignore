@@ -13,3 +13,4 @@ tmp/*
 true/*
 *.bundle
 *.gem
+doc/*

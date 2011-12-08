@@ -32,6 +32,19 @@ void rb_czmq_free_frame_gc(void *ptr)
     }
 }
 
+/*
+ *  call-seq:
+ *     ZMQ::Frame.new    =>  ZMQ::Frame
+ *     ZMQ::Frame.new("data")    =>  ZMQ::Frame
+ *
+ *  Creates a new ZMQ::Frame instance. Can be initialized with or without data. A frame corresponds to one zmq_msg_t.
+ *
+ * === Examples
+ *     ZMQ::Frame.new    =>  ZMQ::Frame
+ *     ZMQ::Frame.new("data")    =>  ZMQ::Frame
+ *
+*/
+
 static VALUE rb_czmq_frame_s_new(int argc, VALUE *argv, VALUE frame)
 {
     VALUE data;
@@ -52,12 +65,36 @@ static VALUE rb_czmq_frame_s_new(int argc, VALUE *argv, VALUE frame)
     return frame;
 }
 
+/*
+ *  call-seq:
+ *     frame.destroy    =>  nil
+ *
+ *  Explicitly destroys an allocated ZMQ::Frame instance. Also called automatically during GC if the object is unreachable.
+ *
+ * === Examples
+ *     f = ZMQ::Frame.new("data")    =>  ZMQ::Frame
+ *     f.destroy     =>  nil
+ *
+*/
+
 static VALUE rb_czmq_frame_destroy(VALUE obj)
 {
     ZmqGetFrame(obj);
     rb_czmq_free_frame(frame);
     return Qnil;
 }
+
+/*
+ *  call-seq:
+ *     frame.size    =>  Fixnum
+ *
+ *  Returns the size of the frame.
+ *
+ * === Examples
+ *     f = ZMQ::Frame.new("data")    =>  ZMQ::Frame
+ *     f.size     =>  4
+ *
+*/
 
 static VALUE rb_czmq_frame_size(VALUE obj)
 {
@@ -67,6 +104,18 @@ static VALUE rb_czmq_frame_size(VALUE obj)
     return LONG2FIX(size);
 }
 
+/*
+ *  call-seq:
+ *     frame.data    =>  String
+ *
+ *  Returns the data represented by the frame.
+ *
+ * === Examples
+ *     f = ZMQ::Frame.new("data")    =>  ZMQ::Frame
+ *     f.data     =>  "data"
+ *
+*/
+
 static VALUE rb_czmq_frame_data(VALUE obj)
 {
     size_t size;
@@ -75,16 +124,52 @@ static VALUE rb_czmq_frame_data(VALUE obj)
     return ZmqEncode(rb_str_new((char *)zframe_data(frame->frame), (long)size));
 }
 
+/*
+ *  call-seq:
+ *     frame.to_s    =>  String
+ *
+ *  Returns a String representation of this frame.
+ *
+ * === Examples
+ *     f = ZMQ::Frame.new("data")    =>  ZMQ::Frame
+ *     f.to_s     =>  "data"
+ *
+*/
+
 static VALUE rb_czmq_frame_to_s(VALUE obj)
 {
     return rb_funcall(obj, intern_data, 0, 0);
 }
+
+/*
+ *  call-seq:
+ *     frame.strhex    =>  String
+ *
+ *  Returns a printable hex representation of this frame
+ *
+ * === Examples
+ *     f = ZMQ::Frame.new("message")    =>  ZMQ::Frame
+ *     f.strhex     =>  "6D657373616765"
+ *
+*/
 
 static VALUE rb_czmq_frame_strhex(VALUE obj)
 {
     ZmqGetFrame(obj);
     return rb_str_new2(zframe_strhex(frame->frame));
 }
+
+/*
+ *  call-seq:
+ *     frame.dup    =>  ZMQ::Frame
+ *
+ *  Returns a copy of the current frame
+ *
+ * === Examples
+ *     f = ZMQ::Frame.new("message")    =>  ZMQ::Frame
+ *     f.dup     =>  ZMQ::Frame
+ *
+*/
 
 static VALUE rb_czmq_frame_dup(VALUE obj)
 {
@@ -100,6 +185,18 @@ static VALUE rb_czmq_frame_dup(VALUE obj)
     return dup;
 }
 
+/*
+ *  call-seq:
+ *     frame.data_equals?("data")    =>  boolean
+ *
+ *  Determines if the current frame's payload matches a given string
+ *
+ * === Examples
+ *     f = ZMQ::Frame.new("message")    =>  ZMQ::Frame
+ *     f.data_matches?("message")     =>  true
+ *
+*/
+
 static VALUE rb_czmq_frame_data_equals_p(VALUE obj, VALUE data)
 {
     ZmqGetFrame(obj);
@@ -107,11 +204,36 @@ static VALUE rb_czmq_frame_data_equals_p(VALUE obj, VALUE data)
     return (zframe_streq(frame->frame, RSTRING_PTR(data)) == TRUE) ? Qtrue : Qfalse;
 }
 
+/*
+ *  call-seq:
+ *     frame.more?    =>  boolean
+ *
+ *  Determines if the current frame is part of a multipart message.
+ *
+ * === Examples
+ *     f = ZMQ::Frame.new("message")    =>  ZMQ::Frame
+ *     f.more?     =>  false
+ *
+*/
+
 static VALUE rb_czmq_frame_more_p(VALUE obj)
 {
     ZmqGetFrame(obj);
     return (zframe_more(frame->frame) == ZFRAME_MORE) ? Qtrue : Qfalse;
 }
+
+/*
+ *  call-seq:
+ *     frame.eq?(other)    =>  boolean
+ *
+ *  Determines if the current frame is equal to another (identical size and data).
+ *
+ * === Examples
+ *     f = ZMQ::Frame.new("message")    =>  ZMQ::Frame
+ *     of = ZMQ::Frame.new("other")
+ *     f.eql?(of)     =>  false
+ *
+*/
 
 static VALUE rb_czmq_frame_eql_p(VALUE obj, VALUE other_frame)
 {
@@ -123,11 +245,38 @@ static VALUE rb_czmq_frame_eql_p(VALUE obj, VALUE other_frame)
     return (zframe_eq(frame->frame, other->frame)) ? Qtrue : Qfalse;
 }
 
+/*
+ *  call-seq:
+ *     frame == other    =>  boolean
+ *
+ *  Determines if the current frame is equal to another (identical size and data).
+ *
+ * === Examples
+ *     f = ZMQ::Frame.new("message")    =>  ZMQ::Frame
+ *     of = ZMQ::Frame.new("other")
+ *     f == of     =>  false
+ *     f == f      =>  true
+ *
+*/
+
 static VALUE rb_czmq_frame_equals(VALUE obj, VALUE other_frame)
 {
     if (obj == other_frame) return Qtrue;
     return rb_czmq_frame_eql_p(obj, other_frame);
 }
+
+/*
+ *  call-seq:
+ *     frame <=> other    =>  boolean
+ *
+ *  Comparable support for ZMQ::Frame instances.
+ *
+ * === Examples
+ *     f = ZMQ::Frame.new("message")    =>  ZMQ::Frame
+ *     of = ZMQ::Frame.new("other")
+ *     f > of     =>  true
+ *
+*/
 
 static VALUE rb_czmq_frame_cmp(VALUE obj, VALUE other_frame)
 {
@@ -144,6 +293,18 @@ static VALUE rb_czmq_frame_cmp(VALUE obj, VALUE other_frame)
     return INT2FIX(-1);
 }
 
+/*
+ *  call-seq:
+ *     frame.print    =>  nil
+ *
+ *  Dumps out frame contents to stderr
+ *
+ * === Examples
+ *     f = ZMQ::Frame.new("message")    =>  ZMQ::Frame
+ *     f.print  =>  nil
+ *
+*/
+
 static VALUE rb_czmq_frame_print(int argc, VALUE *argv, VALUE obj)
 {
     VALUE prefix;
@@ -154,6 +315,19 @@ static VALUE rb_czmq_frame_print(int argc, VALUE *argv, VALUE obj)
     zframe_print(frame->frame, (char *)print_prefix);
     return Qnil;
 }
+
+/*
+ *  call-seq:
+ *     frame.reset("new")   =>  nil
+ *
+ *  Sets new content for this frame
+ *
+ * === Examples
+ *     f = ZMQ::Frame.new("message")    =>  ZMQ::Frame
+ *     f.reset("new")   =>  nil
+ *     f.data   =>   "new"
+ *
+*/
 
 static VALUE rb_czmq_frame_reset(VALUE obj, VALUE data)
 {

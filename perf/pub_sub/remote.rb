@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 ctx = ZMQ::Context.new
 pub = ctx.socket(:PUB);
 pub.bind(Runner::REMOTE_ENDPOINT);

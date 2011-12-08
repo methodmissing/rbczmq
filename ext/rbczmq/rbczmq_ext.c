@@ -24,10 +24,32 @@ VALUE rb_cZmqTimer;
 rb_encoding *binary_encoding;
 #endif
 
+/*
+ *  call-seq:
+ *     ZMQ.interrupted?    =>  boolean
+ *
+ *  Returns true if the process was interrupted by signal.
+ *
+ * === Examples
+ *     ZMQ.interrupted?    =>  boolean
+ *
+*/
+
 static VALUE rb_czmq_m_interrupted_p(ZMQ_UNUSED VALUE obj)
 {
     return (zctx_interrupted == TRUE) ? Qtrue : Qfalse;
 }
+
+/*
+ *  call-seq:
+ *     ZMQ.version    =>  Array
+ *
+ *  Returns the libzmq version linked against.
+ *
+ * === Examples
+ *     ZMQ.version    =>  [2,1,11]
+ *
+*/
 
 static VALUE rb_czmq_m_version(ZMQ_UNUSED VALUE obj)
 {
@@ -36,10 +58,32 @@ static VALUE rb_czmq_m_version(ZMQ_UNUSED VALUE obj)
     return rb_ary_new3(3, INT2NUM(major), INT2NUM(minor), INT2NUM(patch));
 }
 
+/*
+ *  call-seq:
+ *     ZMQ.now    =>  Fixnum
+ *
+ *  Returns a current timestamp as a Fixnum
+ *
+ * === Examples
+ *     ZMQ.now    =>  1323206405148
+ *
+*/
+
 static VALUE rb_czmq_m_now(ZMQ_UNUSED VALUE obj)
 {
     return INT2NUM(zclock_time());
 }
+
+/*
+ *  call-seq:
+ *     ZMQ.log("msg")    =>  nil
+ *
+ *  Logs a timestamped message to stdout.
+ *
+ * === Examples
+ *     ZMQ.log("msg")    =>  nil # 11-12-06 21:20:55 msg
+ *
+*/
 
 static VALUE rb_czmq_m_log(ZMQ_UNUSED VALUE obj, VALUE msg)
 {
@@ -47,6 +91,17 @@ static VALUE rb_czmq_m_log(ZMQ_UNUSED VALUE obj, VALUE msg)
     zclock_log(StringValueCStr(msg));
     return Qnil;
 }
+
+/*
+ *  call-seq:
+ *     ZMQ.error    =>  ZMQ::Error
+ *
+ *  Returns the last known ZMQ error (if any) as a ZMQ::Error instance.
+ *
+ * === Examples
+ *     ZMQ.error    =>  ZMQ::Error or nil
+ *
+*/
 
 static VALUE rb_czmq_m_error(ZMQ_UNUSED VALUE obj)
 {

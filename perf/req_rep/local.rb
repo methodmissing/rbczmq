@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 ctx = ZMQ::Context.new
 req = ctx.socket(:REQ)
 req.connect(Runner::REMOTE_ENDPOINT)

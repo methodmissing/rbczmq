@@ -6,6 +6,6 @@ class ZMQ::DefaultHandler < ZMQ::Handler
   end
 
   def on_writable
-    socket.send("!!")
+    socket.send("")
   end
 end

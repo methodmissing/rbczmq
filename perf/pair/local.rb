@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 ctx = ZMQ::Context.new
 pair = ctx.socket(:PAIR)
 pair.connect(Runner::REMOTE_ENDPOINT)

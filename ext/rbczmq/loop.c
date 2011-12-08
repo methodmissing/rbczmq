@@ -109,7 +109,7 @@ static void rb_czmq_free_loop_gc(void *ptr)
  *  call-seq:
  *     ZMQ::Loop.new    =>  ZMQ::Loop
  *
- *  Creates a new reactor instance.
+ *  Creates a new reactor instance. Several loops per process is supported for the lower level API.
  *
  * === Examples
  *     ZMQ::Loop.new    =>   ZMQ::Loop
@@ -138,7 +138,8 @@ static VALUE rb_czmq_nogvl_zloop_start(void *ptr)
  *  call-seq:
  *     loop.start    =>  Fixnum
  *
- *  Creates a new reactor instance.
+ *  Creates a new reactor instance and blocks the caller until the process is interrupted, the context terminates or the
+ *  loop's explicitly stopped via callback. Returns 0 if interrupted and -1 when stopped via a handler.
  *
  * === Examples
  *     loop = ZMQ::Loop.new    =>   ZMQ::Loop
@@ -163,7 +164,7 @@ static VALUE rb_czmq_loop_start(VALUE obj)
  *  call-seq:
  *     loop.running?    =>  boolean
  *
- *  Predicate that returns true if the reactor is currently running..
+ *  Predicate that returns true if the reactor is currently running.
  *
  * === Examples
  *     loop = ZMQ::Loop.new    =>   ZMQ::Loop
@@ -186,7 +187,7 @@ static void rb_czmq_loop_stop0(zmq_loop_wrapper *loop)
  *  call-seq:
  *     loop.stop    =>  nil
  *
- *  Stops the reactor loop.
+ *  Stops the reactor loop. ZMQ::Loop#start will return a -1 status code as this can only be called via a handler.
  *
  * === Examples
  *     loop = ZMQ::Loop.new    =>   ZMQ::Loop
@@ -207,7 +208,8 @@ static VALUE rb_czmq_loop_stop(VALUE obj)
  *  call-seq:
  *     loop.destroy    =>  nil
  *
- *  Destroy a reactor instance
+ *  Explicitly destroys a reactor instance. This is a lower level API, also invoked during garbage collection if the reactor
+ *  instance is unreachable.
  *
  * === Examples
  *     loop = ZMQ::Loop.new    =>   ZMQ::Loop
@@ -226,7 +228,7 @@ static VALUE rb_czmq_loop_destroy(VALUE obj)
  *  call-seq:
  *     loop.verbose = true    =>  nil
  *
- *  Logs reactor activity to stdout.
+ *  Logs reactor activity to stdout - useful for debugging, but can be quite noisy with lots of activity.
  *
  * === Examples
  *     loop = ZMQ::Loop.new    =>   ZMQ::Loop
@@ -247,7 +249,8 @@ static VALUE rb_czmq_loop_set_verbose(VALUE obj, VALUE level)
  *  call-seq:
  *     loop.register_socket(sock, ZMQ::POLLIN)    =>  true
  *
- *  Registers a socket for read or write events.
+ *  Registers a socket for read or write events. Only ZMQ::POLLIN and ZMQ::POLLOUT events are supported. All sockets are
+ *  implicitly registered for ZMQ::POLLERR events.
  *
  * === Examples
  *     loop = ZMQ::Loop.new    =>   ZMQ::Loop
@@ -257,7 +260,7 @@ static VALUE rb_czmq_loop_set_verbose(VALUE obj, VALUE level)
 
 static VALUE rb_czmq_loop_register_socket(VALUE obj, VALUE socket, VALUE event)
 {
-    int rc;
+    int rc, evt;
     zmq_pollitem_t *pollitem = NULL;
     errno = 0;
     ZmqGetLoop(obj);
@@ -265,9 +268,12 @@ static VALUE rb_czmq_loop_register_socket(VALUE obj, VALUE socket, VALUE event)
     if (!(sock->state & (ZMQ_SOCKET_BOUND | ZMQ_SOCKET_CONNECTED)))
         rb_raise(rb_eZmqError, "socket in a pending state (not bound or connected) and cannot be registered with the event loop!");
     Check_Type(event, T_FIXNUM);
+    evt = FIX2INT(event);
+    if (evt != ZMQ_POLLIN && evt != ZMQ_POLLOUT)
+        rb_raise(rb_eZmqError, "invalid socket event: Only ZMQ::POLLIN and ZMQ::POLLOUT events are supported!");
     pollitem = ruby_xmalloc(sizeof(zmq_pollitem_t));
     pollitem->socket = sock->socket;
-    pollitem->events |= ZMQ_POLLERR | FIX2INT(event);
+    pollitem->events |= ZMQ_POLLERR | evt;
     rc = zloop_poller(loop->loop, pollitem, rb_czmq_loop_socket_callback, (void *)sock);
     ZmqAssert(rc);
     /* Do not block on socket close */
@@ -279,7 +285,7 @@ static VALUE rb_czmq_loop_register_socket(VALUE obj, VALUE socket, VALUE event)
  *  call-seq:
  *     loop.remove_socket(sock)    =>  nil
  *
- *  Removes a previously registered socket from the loop.
+ *  Removes a previously registered socket from the reactor loop.
  *
  * === Examples
  *     loop = ZMQ::Loop.new    =>   ZMQ::Loop

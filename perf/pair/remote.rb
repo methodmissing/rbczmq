@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 ctx = ZMQ::Context.new
 pair = ctx.socket(:PAIR);
 pair.bind(Runner::REMOTE_ENDPOINT);

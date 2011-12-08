@@ -43,7 +43,9 @@ static VALUE rb_czmq_nogvl_zctx_new(ZMQ_UNUSED void *ptr)
  *     ZMQ::Context.new    =>  ZMQ::Context
  *     ZMQ::Context.new(1)    =>  ZMQ::Context
  *
- *  Returns a handle to a new ZMQ context. Optional I/O threads argument.
+ *  Returns a handle to a new ZMQ context. A single context per process is supported in order to guarantee stability across
+ *  all Ruby implementations. A context should be passed as an argument to any Ruby threads. Optionally a context can be
+ *  initialized with an I/O threads value (default: 1) - there should be no need to fiddle with this.
  *
  * === Examples
  *     ZMQ::Context.new    =>  ZMQ::Context
@@ -72,7 +74,8 @@ static VALUE rb_czmq_ctx_s_new(int argc, VALUE *argv, VALUE context)
  *  call-seq:
  *     ctx.destroy    =>  nil
  *
- *  Destroy a ZMQ context and all sockets in it.
+ *  Destroy a ZMQ context and all sockets in it. This also happens when a ZMQ::Context instance is garbage collected or
+ *  finalized on process termination.
  *
  * === Examples
  *     ctx = ZMQ::Context.new
@@ -91,7 +94,7 @@ static VALUE rb_czmq_ctx_destroy(VALUE obj)
  *  call-seq:
  *     ctx.iothreads = 2    =>  nil
  *
- *  Raises default I/O threads from 1.
+ *  Raises default I/O threads from 1 - there should be no need to fiddle with this.
  *
  * === Examples
  *     ctx = ZMQ::Context.new
@@ -116,7 +119,9 @@ static VALUE rb_czmq_ctx_set_iothreads(VALUE obj, VALUE threads)
  *  call-seq:
  *     ctx.linger = 100    =>  nil
  *
- *  Set msecs to flush sockets when closing them
+ *  Set msecs to flush sockets when closing them. A high value may block / pause the application on socket close. This
+ *  binding defaults to a linger value of 1 msec set for all sockets, which is important for the reactor implementation
+ *  in ZMQ::Loop to avoid stalling the event loop.
  *
  * === Examples
  *     ctx = ZMQ::Context.new
@@ -168,8 +173,11 @@ static inline VALUE rb_czmq_ctx_socket_klass(int socket_type) {
 /*
  *  call-seq:
  *     ctx.socket(:PUSH)    =>  ZMQ::Socket
+ *     ctx.socket(ZMQ::PUSH)    =>  ZMQ::Socket
  *
- *  Creates a socket within this ZMQ context.
+ *  Creates a socket within this ZMQ context. This is the only API exposed for creating sockets - they're always spawned off
+ *  a context. Sockets also track state of the current Ruby thread they're created in to ensure they always only ever do work
+ *  on the thread they were spawned on.
  *
  * === Examples
  *     ctx = ZMQ::Context.new
