@@ -28,3 +28,4 @@
 * Let sockets registered with a ZMQ::Loop instance be verbose if the reactor is set to verbose mode
 * Sync up libzmq && czmq ( vendor tarballs direct )
 * Let ZMQ::Frame.new(frame) just return the given frame
+* Revisit threading integration on 1.8
