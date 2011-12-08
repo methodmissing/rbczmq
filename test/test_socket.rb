@@ -110,11 +110,13 @@ class TestZmqSocket < ZmqTestCase
 
   def test_to_s
     ctx = ZMQ::Context.new
+    sock = ctx.socket(:PAIR)
     rep = ctx.socket(:PAIR)
     port = rep.bind("tcp://127.0.0.1:*")
     req = ctx.socket(:PAIR)
     assert(req.state & ZMQ::Socket::PENDING)
     req.connect("tcp://127.0.0.1:#{port}")
+    assert_equal "PAIR socket", sock.to_s
     assert_equal "PAIR socket bound to tcp://127.0.0.1:*", rep.to_s
     assert_equal "PAIR socket connected to tcp://127.0.0.1:49152", req.to_s
   ensure
