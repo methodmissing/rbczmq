@@ -18,7 +18,6 @@
 * ZMQ::Message#save && ZMQ::Message.load
 * ZMQ::Socket#handler = x. Assert handler interface here instead ???
 * Callback handler for ZMQ::Socket useful beyond just ZMQ::Loop ?
-* Handler#post_init callback ?
 * Optimize zloop handler callbacks (perftools)
 * OS X leaks utility - http://developer.apple.com/library/mac/#documentation/Darwin/Reference/ManPages/man1/leaks.1.html
 * zeromq git ref: https://github.com/zeromq/zeromq2-1/commit/35df57cda6861cac31710ad2a10fae4c97c0e63c

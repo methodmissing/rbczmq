@@ -23,11 +23,4 @@ class ZMQ::Handler
   def on_error(exception)
     raise exception
   end
-
-  # Stub for on connect / bind callbacks
-  #
-  # XXX: viable to support this ?
-  #
-  def post_init
-  end
 end
