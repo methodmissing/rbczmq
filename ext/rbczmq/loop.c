@@ -281,7 +281,7 @@ static VALUE rb_czmq_loop_register_socket(VALUE obj, VALUE socket, VALUE event)
     /* Do not block on socket close */
     zsockopt_set_linger(sock->socket, 1);
    /* Let socket be verbose if loop is verbose */
-    sock->verbose = loop->verbose;
+    if (loop->verbose == TRUE) sock->verbose = loop->verbose;
     return Qtrue;
 }
 
