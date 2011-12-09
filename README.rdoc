@@ -32,4 +32,3 @@
 * Also handle bind / connect support in socket specific mixins eg. REP socket can't connect
 * Socket GC - only attempt to close if socket is not in a pending state
 * Assert per socket type behavior in socket specific test cases
-* Check for cross thread socket violations on loop registeration as well
