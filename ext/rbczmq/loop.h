@@ -3,6 +3,7 @@
 
 typedef struct {
     zloop_t  *loop;
+    Bool verbose;
     Bool running;
 } zmq_loop_wrapper;
 

@@ -124,6 +124,7 @@ static VALUE rb_czmq_loop_new(VALUE loop)
     lp->loop = zloop_new();
     ZmqAssertObjOnAlloc(lp->loop, lp);
     lp->running = FALSE;
+    lp->verbose = FALSE;
     rb_obj_call_init(loop, 0, NULL);
     return loop;
 }
@@ -242,6 +243,7 @@ static VALUE rb_czmq_loop_set_verbose(VALUE obj, VALUE level)
     ZmqGetLoop(obj);
     vlevel = (level == Qtrue) ? TRUE : FALSE;
     zloop_set_verbose(loop->loop, vlevel);
+    loop->verbose = vlevel;
     return Qnil;
 }
 
@@ -278,6 +280,8 @@ static VALUE rb_czmq_loop_register_socket(VALUE obj, VALUE socket, VALUE event)
     ZmqAssert(rc);
     /* Do not block on socket close */
     zsockopt_set_linger(sock->socket, 1);
+   /* Let socket be verbose if loop is verbose */
+    sock->verbose = loop->verbose;
     return Qtrue;
 }
 
