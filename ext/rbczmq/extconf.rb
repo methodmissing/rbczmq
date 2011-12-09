@@ -18,7 +18,7 @@ $INCFLAGS << " -I#{czmq_include_path}" if find_header("czmq.h", czmq_include_pat
 
 find_library("zmq", "zmq_init", libs_path)
 find_library("czmq", "zctx_new", libs_path)
-$LDFLAGS << " -L#{libs_path}"
+$LDFLAGS = "-L. -L#{libs_path}"
 
 $defs << "-pedantic"
 
