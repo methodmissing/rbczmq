@@ -49,18 +49,22 @@ class ZMQ::Socket
       "#{type_str} socket"
     end
   end
+
+  def poll_readable?
+    true
+  end
+
+  def poll_writable?
+    true
+  end
 end
 
-module ZMQ::ReceiveSocket
+module ZMQ::DownstreamSocket
   # An interface for sockets that can only receive (read) data
   #
 
   def self.included(sock)
-    sock.unsupported_api :send, :sendm, :send_frame, :send_message
-  end
-
-  def poll_readable?
-    true
+    sock.unsupported_api :bind, :send, :sendm, :send_frame, :send_message
   end
 
   def poll_writable?
@@ -68,33 +72,16 @@ module ZMQ::ReceiveSocket
   end
 end
 
-module ZMQ::SendSocket
+module ZMQ::UpstreamSocket
   # An interface for sockets that can only send (write) data
   #
 
   def self.included(sock)
-    sock.unsupported_api :recv, :recv_nonblock, :recv_frame, :recv_frame_nonblock, :recv_message
+    sock.unsupported_api :connect, :recv, :recv_nonblock, :recv_frame, :recv_frame_nonblock, :recv_message
   end
 
   def poll_readable?
     false
-  end
-
-  def poll_writable?
-    true
-  end
-end
-
-module ZMQ::BiDirectionalSocket
-  # An interface for sockets that can both send and receive data as per the ZMQ spec.
-  #
-
-  def poll_readable?
-    true
-  end
-
-  def poll_writable?
-    true
   end
 end
 

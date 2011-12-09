@@ -7,6 +7,5 @@ class ZMQ::Socket::Push
     ZMQ::PUSH
   end
 
-  include ZMQ::SendSocket
-  unsupported_api :connect
+  include ZMQ::UpstreamSocket
 end

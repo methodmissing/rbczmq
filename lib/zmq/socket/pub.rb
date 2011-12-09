@@ -7,6 +7,5 @@ class ZMQ::Socket::Pub
     ZMQ::PUB
   end
 
-  include ZMQ::SendSocket
-  unsupported_api :connect
+  include ZMQ::UpstreamSocket
 end

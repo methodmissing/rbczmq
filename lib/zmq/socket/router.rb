@@ -6,6 +6,4 @@ class ZMQ::Socket::Router
   def type
     ZMQ::ROUTER
   end
-
-  include ZMQ::BiDirectionalSocket
 end

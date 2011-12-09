@@ -7,6 +7,5 @@ class ZMQ::Socket::Rep
     ZMQ::REP
   end
 
-  include ZMQ::BiDirectionalSocket
   unsupported_api :connect
 end

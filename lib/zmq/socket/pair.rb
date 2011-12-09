@@ -6,6 +6,4 @@ class ZMQ::Socket::Pair
   def type
     ZMQ::PAIR
   end
-
-  include ZMQ::BiDirectionalSocket
 end

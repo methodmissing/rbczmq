@@ -6,6 +6,4 @@ class ZMQ::Socket::Dealer
   def type
     ZMQ::DEALER
   end
-
-  include ZMQ::BiDirectionalSocket
 end

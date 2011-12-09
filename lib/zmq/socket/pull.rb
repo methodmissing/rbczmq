@@ -7,6 +7,5 @@ class ZMQ::Socket::Pull
     ZMQ::PULL
   end
 
-  include ZMQ::ReceiveSocket
-  unsupported_api :bind
+  include ZMQ::DownstreamSocket
 end
