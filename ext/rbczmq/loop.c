@@ -265,8 +265,7 @@ static VALUE rb_czmq_loop_register_socket(VALUE obj, VALUE socket, VALUE event)
     errno = 0;
     ZmqGetLoop(obj);
     GetZmqSocket(socket);
-    if (!(sock->state & (ZMQ_SOCKET_BOUND | ZMQ_SOCKET_CONNECTED)))
-        rb_raise(rb_eZmqError, "socket in a pending state (not bound or connected) and cannot be registered with the event loop!");
+    ZmqAssertSocketNotPending(sock, "socket in a pending state (not bound or connected) and cannot be registered with the event loop!");
     Check_Type(event, T_FIXNUM);
     evt = FIX2INT(event);
     if (evt != ZMQ_POLLIN && evt != ZMQ_POLLOUT)
@@ -299,6 +298,7 @@ static VALUE rb_czmq_loop_remove_socket(VALUE obj, VALUE socket)
     errno = 0;
     ZmqGetLoop(obj);
     GetZmqSocket(socket);
+    ZmqAssertSocketNotPending(sock, "socket in a pending state (not bound or connected) and cannot be unregistered from the event loop!");
     pollitem = ruby_xmalloc(sizeof(zmq_pollitem_t));
     pollitem->socket = sock->socket;
     pollitem->events |= ZMQ_POLLIN | ZMQ_POLLOUT | ZMQ_POLLERR;

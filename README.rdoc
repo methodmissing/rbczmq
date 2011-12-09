@@ -29,7 +29,7 @@
 * Sync up libzmq && czmq ( vendor tarballs direct )
 * Let ZMQ::Frame.new(frame) just return the given frame
 * Revisit threading integration on 1.8
-* Assert socket bound / connected on send / receive
 * Also handle bind / connect support in socket specific mixins eg. REP socket can't connect
 * Socket GC - only attempt to close if socket is not in a pending state
 * Assert per socket type behavior in socket specific test cases
+* Check for cross thread socket violations on loop registeration as well

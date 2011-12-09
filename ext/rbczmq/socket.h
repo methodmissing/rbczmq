@@ -1,9 +1,9 @@
 #ifndef RBCZMQ_SOCKET_H
 #define RBCZMQ_SOCKET_H
 
-#define ZMQ_SOCKET_PENDING 0
-#define ZMQ_SOCKET_BOUND 2
-#define ZMQ_SOCKET_CONNECTED 4
+#define ZMQ_SOCKET_PENDING 0x01
+#define ZMQ_SOCKET_BOUND 0x02
+#define ZMQ_SOCKET_CONNECTED 0x04
 
 typedef struct {
     zctx_t *ctx;
@@ -84,6 +84,10 @@ typedef struct {
     if (sock->verbose) \
         zclock_log ("I: %s socket %p: set option \"%s\" %d", zsocket_type_str(sock->socket), (void *)obj, (desc),  val); \
     return Qnil;
+
+#define ZmqAssertSocketNotPending(sock, msg) \
+    if (!((sock)->state & (ZMQ_SOCKET_BOUND | ZMQ_SOCKET_CONNECTED))) \
+        rb_raise(rb_eZmqError, msg);
 
 void rb_czmq_free_sock(zmq_sock_wrapper *sock);
 

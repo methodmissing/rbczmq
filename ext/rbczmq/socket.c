@@ -177,7 +177,7 @@ static VALUE rb_czmq_socket_bind(VALUE obj, VALUE endpoint)
     if (rc == -1) ZmqRaiseSysError();
     if (sock->verbose)
         zclock_log ("I: %s socket %p: bound \"%s\"", zsocket_type_str(sock->socket), obj, StringValueCStr(endpoint));
-    sock->state |= ZMQ_SOCKET_BOUND;
+    sock->state = ZMQ_SOCKET_BOUND;
     sock->endpoint = rb_str_dup(endpoint);
     return INT2FIX(rc);
 }
@@ -210,7 +210,7 @@ static VALUE rb_czmq_socket_connect(VALUE obj, VALUE endpoint)
     ZmqAssert(rc);
     if (sock->verbose)
         zclock_log ("I: %s socket %p: connected \"%s\"", zsocket_type_str(sock->socket), obj, StringValueCStr(endpoint));
-    sock->state |= ZMQ_SOCKET_CONNECTED;
+    sock->state = ZMQ_SOCKET_CONNECTED;
     sock->endpoint = rb_str_dup(endpoint);
     return Qtrue;
 }
@@ -282,6 +282,7 @@ static VALUE rb_czmq_socket_send(VALUE obj, VALUE msg)
     int rc;
     struct nogvl_send_args args;
     GetZmqSocket(obj);
+    ZmqAssertSocketNotPending(sock, "can only send on a bound or connected socket!");
     ZmqSockGuardCrossThread(sock);
     Check_Type(msg, T_STRING);
     args.socket = sock;
@@ -313,6 +314,7 @@ static VALUE rb_czmq_socket_sendm(VALUE obj, VALUE msg)
     int rc;
     struct nogvl_send_args args;
     GetZmqSocket(obj);
+    ZmqAssertSocketNotPending(sock, "can only send on a bound or connected socket!");
     ZmqSockGuardCrossThread(sock);
     Check_Type(msg, T_STRING);
     args.socket = sock;
@@ -356,6 +358,7 @@ static VALUE rb_czmq_socket_recv(VALUE obj)
     char *str = NULL;
     struct nogvl_recv_args args;
     GetZmqSocket(obj);
+    ZmqAssertSocketNotPending(sock, "can only receive on a bound or connected socket!");
     ZmqSockGuardCrossThread(sock);
     args.socket = sock;
     str = (char *)rb_thread_blocking_region(rb_czmq_nogvl_recv, (void *)&args, RUBY_UBF_IO, 0);
@@ -385,6 +388,7 @@ static VALUE rb_czmq_socket_recv_nonblock(VALUE obj)
     char *str = NULL;
     errno = 0;
     GetZmqSocket(obj);
+    ZmqAssertSocketNotPending(sock, "can only receive on a bound or connected socket!");
     ZmqSockGuardCrossThread(sock);
     str = zstr_recv_nowait(sock->socket);
     if (str == NULL) return Qnil;
@@ -434,6 +438,7 @@ static VALUE rb_czmq_socket_send_frame(int argc, VALUE *argv, VALUE obj)
     zframe_t *print_frame = NULL;
     int rc;
     GetZmqSocket(obj);
+    ZmqAssertSocketNotPending(sock, "can only send on a bound or connected socket!");
     ZmqSockGuardCrossThread(sock);
     rb_scan_args(argc, argv, "11", &frame_obj, &flags);
     ZmqGetFrame(frame_obj);
@@ -492,6 +497,7 @@ static VALUE rb_czmq_socket_send_message(VALUE obj, VALUE message_obj)
     struct nogvl_send_message_args args;
     zmsg_t *print_message = NULL;
     GetZmqSocket(obj);
+    ZmqAssertSocketNotPending(sock, "can only send on a bound or connected socket!");
     ZmqSockGuardCrossThread(sock);
     ZmqGetMessage(message_obj);
     if (sock->verbose) print_message = zmsg_dup(message->message);
@@ -537,6 +543,7 @@ static VALUE rb_czmq_socket_recv_frame(VALUE obj)
     char print_prefix[255];
     char *cur_time = NULL;
     GetZmqSocket(obj);
+    ZmqAssertSocketNotPending(sock, "can only receive on a bound or connected socket!");
     ZmqSockGuardCrossThread(sock);
     args.socket = sock;
     frame = (zframe_t *)rb_thread_blocking_region(rb_czmq_nogvl_recv_frame, (void *)&args, RUBY_UBF_IO, 0);
@@ -569,6 +576,7 @@ static VALUE rb_czmq_socket_recv_frame_nonblock(VALUE obj)
     char *cur_time = NULL;
     errno = 0;
     GetZmqSocket(obj);
+    ZmqAssertSocketNotPending(sock, "can only receive on a bound or connected socket!");
     ZmqSockGuardCrossThread(sock);
     frame = zframe_recv_nowait(sock->socket);
     if (frame == NULL) return Qnil;
@@ -611,6 +619,7 @@ static VALUE rb_czmq_socket_recv_message(VALUE obj)
     zmsg_t *message = NULL;
     struct nogvl_recv_args args;
     GetZmqSocket(obj);
+    ZmqAssertSocketNotPending(sock, "can only receive on a bound or connected socket!");
     ZmqSockGuardCrossThread(sock);
     args.socket = sock;
     message = (zmsg_t *)rb_thread_blocking_region(rb_czmq_nogvl_recv_message, (void *)&args, RUBY_UBF_IO, 0);
