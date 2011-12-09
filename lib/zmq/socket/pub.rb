@@ -8,4 +8,5 @@ class ZMQ::Socket::Pub
   end
 
   include ZMQ::SendSocket
+  unsupported_api :connect
 end

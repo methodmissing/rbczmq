@@ -14,7 +14,7 @@ class Server
       @socket = ctx.socket(:REP)
       # verbose output
       @socket.verbose = true
-      @socket.connect(endpoint)
+      @socket.bind(endpoint)
       @socket.linger = 1
     end
     @jobs, @working = 0, 0.0
@@ -56,18 +56,16 @@ end
 
 class Client
   def initialize(ctx, endpoint)
-    @ctx, @endpoint, @server = ctx, endpoint, nil
+    @ctx, @endpoint, @server, @interrupted = ctx, endpoint, nil, false
     @socket = ctx.socket(:REQ)
     # verbose output
     @socket.verbose = true
-    @socket.bind(endpoint)
-    @socket.linger = 1
-    @interrupted = false
   end
 
   def spawn_server
     @server = Server.new(@ctx, @endpoint).start
     sleep 0.01 # give each thread time to spin up
+    connect
   end
 
   def start(messages = 100)
@@ -85,6 +83,11 @@ class Client
 
   def stop
     @interrupted = true
+  end
+  private
+  def connect
+    @socket.connect(@endpoint)
+    @socket.linger = 1
   end
 end
 

@@ -8,4 +8,5 @@ class ZMQ::Socket::Sub
   end
 
   include ZMQ::ReceiveSocket
+  unsupported_api :bind
 end

@@ -8,4 +8,5 @@ class ZMQ::Socket::Req
   end
 
   include ZMQ::BiDirectionalSocket
+  unsupported_api :bind
 end

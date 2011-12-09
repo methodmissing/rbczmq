@@ -27,8 +27,9 @@
 * Handle GC issue with timers in loop callbacks
 * Let sockets registered with a ZMQ::Loop instance be verbose if the reactor is set to verbose mode
 * Sync up libzmq && czmq ( vendor tarballs direct )
-* Let ZMQ::Frame.new(frame) just return the given frame
 * Revisit threading integration on 1.8
-* Also handle bind / connect support in socket specific mixins eg. REP socket can't connect
 * Socket GC - only attempt to close if socket is not in a pending state
 * Assert per socket type behavior in socket specific test cases
+* Revisit errno specific assertions handled in Ruby land - false positives in perf tests (./perf/push_pull/local.rb:10:in `recv': Invalid argument - Invalid argument (Errno::EINVAL))
+* Handle GC error exposed by perf/req_rep.rb (ruby(47948,0x10e1c5000) malloc: *** error for object 0x7fd68c800200: pointer being freed was not allocated)
+* Revisit uneven distribution with PUSH/PULL && PUB/SUB sock pairs on 1.8 (references ZMQ_FD && ZMQ_EVENTS + edge triggered events)
