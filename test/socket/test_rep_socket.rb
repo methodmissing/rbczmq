@@ -8,6 +8,9 @@ class TestRepSocket < ZmqTestCase
     sock = ctx.socket(:REP)
     assert_equal ZMQ::REP, sock.type
     assert_equal "REP socket", sock.to_s
+    assert_raises ZMQ::Error do
+      sock.connect("tcp://127.0.0.1:5000")
+    end
   ensure
     ctx.destroy
   end

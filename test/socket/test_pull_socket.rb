@@ -8,6 +8,12 @@ class TestPullSocket < ZmqTestCase
     sock = ctx.socket(:PULL)
     assert_equal ZMQ::PULL, sock.type
     assert_equal "PULL socket", sock.to_s
+    assert_raises ZMQ::Error do
+      sock.send("message")
+    end
+    assert_raises ZMQ::Error do
+      sock.bind("tcp://127.0.0.1:*")
+    end
   ensure
     ctx.destroy
   end
