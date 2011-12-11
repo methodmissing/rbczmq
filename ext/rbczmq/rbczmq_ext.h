@@ -16,7 +16,10 @@
 
 #include <rbczmq_prelude.h>
 
-#define ZmqRaiseSysError() rb_sys_fail(zmq_strerror(zmq_errno()))
+#define ZmqRaiseSysError() { \
+        printf("Sys error location: %s:%d\n", __FILE__,__LINE__); \
+        rb_sys_fail(zmq_strerror(zmq_errno())); \
+    }
 #define ZmqAssertSysError() if (zmq_errno() != 0 && zmq_errno() != EAGAIN) ZmqRaiseSysError();
 #define ZmqAssert(rc) \
     if (rc != 0) { \

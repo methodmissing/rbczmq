@@ -38,6 +38,11 @@ void rb_czmq_free_sock_gc(void *ptr)
         if (sock->verbose)
             zclock_log ("I: %s socket %p, context %p: GC free", zsocket_type_str(sock->socket), sock, sock->ctx);
         /*if (sock->socket != NULL) rb_czmq_free_sock(sock);*/
+#ifndef HAVE_RB_THREAD_BLOCKING_REGION
+        zlist_destroy(&(sock->str_buffer));
+        zlist_destroy(&(sock->frame_buffer));
+        zlist_destroy(&(sock->msg_buffer));
+#endif
         xfree(sock);
     }
 }
@@ -133,7 +138,7 @@ VALUE rb_czmq_nogvl_socket_bind(void *ptr) {
 #ifdef HAVE_RB_THREAD_BLOCKING_REGION
     rc = zsocket_bind(socket->socket, args->endpoint);
 #else
-    ZmqBlockingWrite(((rc = zsocket_bind(socket->socket, args->endpoint)) == -1), socket);
+    rc = zsocket_bind(socket->socket, args->endpoint);
 #endif
     return (VALUE)rc;
 }
@@ -146,7 +151,7 @@ VALUE rb_czmq_nogvl_socket_connect(void *ptr) {
 #ifdef HAVE_RB_THREAD_BLOCKING_REGION
     rc = zsocket_connect(socket->socket, args->endpoint);
 #else
-    ZmqBlockingWrite(((rc = zsocket_connect(socket->socket, args->endpoint)) == -1), socket);
+    rc = zsocket_connect(socket->socket, args->endpoint);
 #endif
     return (VALUE)rc;
 }
@@ -238,29 +243,39 @@ static VALUE rb_czmq_socket_set_verbose(VALUE obj, VALUE level)
 }
 
 static VALUE rb_czmq_nogvl_zstr_send(void *ptr) {
-    int rc;
     struct nogvl_send_args *args = ptr;
     errno = 0;
     zmq_sock_wrapper *socket = args->socket;
 #ifdef HAVE_RB_THREAD_BLOCKING_REGION
-    rc = zstr_send(socket->socket, args->msg);
+    return (VALUE)zstr_send(socket->socket, args->msg);
 #else
-    ZmqBlockingWrite(((rc = zstr_send(socket->socket, args->msg)) == -1), socket);
+    if (rb_thread_alone()) return (VALUE)zstr_send(socket->socket, args->msg);
+try_writable:
+    if ((zsockopt_events(socket->socket) & ZMQ_POLLOUT) == ZMQ_POLLOUT) {
+        return (VALUE)zstr_send(socket->socket, args->msg);
+    } else {
+        rb_thread_wait_fd(zsockopt_fd(socket->socket));
+        goto try_writable;
+    }
 #endif
-    return (VALUE)rc;
 }
 
 static VALUE rb_czmq_nogvl_zstr_sendm(void *ptr) {
-    int rc;
     struct nogvl_send_args *args = ptr;
     errno = 0;
     zmq_sock_wrapper *socket = args->socket;
 #ifdef HAVE_RB_THREAD_BLOCKING_REGION
-    rc = zstr_sendm(socket->socket, args->msg);
+    return (VALUE)zstr_sendm(socket->socket, args->msg);
 #else
-    ZmqBlockingWrite(((rc = zstr_sendm(socket->socket, args->msg)) == -1), socket);
+    if (rb_thread_alone()) return (VALUE)zstr_sendm(socket->socket, args->msg);
+try_writable:
+    if ((zsockopt_events(socket->socket) & ZMQ_POLLOUT) == ZMQ_POLLOUT) {
+        return (VALUE)zstr_sendm(socket->socket, args->msg);
+    } else {
+        rb_thread_wait_fd(zsockopt_fd(socket->socket));
+        goto try_writable;
+    }
 #endif
-    return (VALUE)rc;
 }
 
 /*
@@ -327,16 +342,25 @@ static VALUE rb_czmq_socket_sendm(VALUE obj, VALUE msg)
 }
 
 static VALUE rb_czmq_nogvl_recv(void *ptr) {
-    char *str = NULL;
     struct nogvl_recv_args *args = ptr;
     errno = 0;
     zmq_sock_wrapper *socket = args->socket;
 #ifdef HAVE_RB_THREAD_BLOCKING_REGION
-    str = zstr_recv(socket->socket);
+    return (VALUE)zstr_recv(socket->socket);
 #else
-    ZmqBlockingRead(((str = zstr_recv(socket->socket)) == NULL), socket);
+    if (zlist_size(socket->str_buffer) != 0)
+       return zlist_pop(socket->str_buffer);
+try_readable:
+    if ((zsockopt_events(socket->socket) & ZMQ_POLLIN) == ZMQ_POLLIN) {
+        do {
+            zlist_append(socket->str_buffer, zstr_recv_nowait(socket->socket));
+        } while (zmq_errno() != EAGAIN && zmq_errno() != EINTR);
+        return (VALUE)zlist_pop(socket->str_buffer);
+     } else {
+        rb_thread_wait_fd(zsockopt_fd(socket->socket));
+        goto try_readable;
+     }
 #endif
-    return (VALUE)str;
 }
 
 /*
@@ -399,16 +423,21 @@ static VALUE rb_czmq_socket_recv_nonblock(VALUE obj)
 }
 
 static VALUE rb_czmq_nogvl_send_frame(void *ptr) {
-    int rc;
     struct nogvl_send_frame_args *args = ptr;
     errno = 0;
     zmq_sock_wrapper *socket = args->socket;
 #ifdef HAVE_RB_THREAD_BLOCKING_REGION
-    rc = zframe_send(&(args->frame), socket->socket, args->flags);
+    return (VALUE)zframe_send(&(args->frame), socket->socket, args->flags);
 #else
-    ZmqBlockingWrite((rc = zframe_send(&(args->frame), socket->socket, args->flags) == -1), socket);
+    if (rb_thread_alone()) return (VALUE)zframe_send(&(args->frame), socket->socket, args->flags);
+try_writable:
+    if ((zsockopt_events(socket->socket) & ZMQ_POLLOUT) == ZMQ_POLLOUT) {
+        return (VALUE)zframe_send(&(args->frame), socket->socket, args->flags);
+    } else {
+        rb_thread_wait_fd(zsockopt_fd(socket->socket));
+        goto try_writable;
+    }
 #endif
-    return (VALUE)rc;
 }
 
 /*
@@ -471,7 +500,17 @@ static VALUE rb_czmq_nogvl_send_message(void *ptr) {
 #ifdef HAVE_RB_THREAD_BLOCKING_REGION
     zmsg_send(&(args->message), socket->socket);
 #else
-    ZmqBlockingWrite((wrap_zmsg_send(&(args->message), socket->socket) != 0), socket);
+    if (rb_thread_alone()) {
+        zmsg_send(&(args->message), socket->socket);
+        return Qnil;
+    }
+try_writable:
+    if ((zsockopt_events(socket->socket) & ZMQ_POLLOUT) == ZMQ_POLLOUT) {
+        zmsg_send(&(args->message), socket->socket);
+    } else {
+        rb_thread_wait_fd(zsockopt_fd(socket->socket));
+        goto try_writable;
+    }
 #endif
     return Qnil;
 }
@@ -510,16 +549,25 @@ static VALUE rb_czmq_socket_send_message(VALUE obj, VALUE message_obj)
 }
 
 static VALUE rb_czmq_nogvl_recv_frame(void *ptr) {
-    zframe_t *frame = NULL;
     struct nogvl_recv_args *args = ptr;
     errno = 0;
     zmq_sock_wrapper *socket = args->socket;
 #ifdef HAVE_RB_THREAD_BLOCKING_REGION
-    frame = zframe_recv(socket->socket);
+    return (VALUE)zframe_recv(socket->socket);
 #else
-    ZmqBlockingRead(((frame = zframe_recv(socket->socket)) == NULL), socket);
+    if (zlist_size(socket->frame_buffer) != 0)
+       return zlist_pop(socket->frame_buffer);
+try_readable:
+    if ((zsockopt_events(socket->socket) & ZMQ_POLLIN) == ZMQ_POLLIN) {
+        do {
+            zlist_append(socket->frame_buffer, zframe_recv_nowait(socket->socket));
+        } while (zmq_errno() != EAGAIN && zmq_errno() != EINTR);
+        return (VALUE)zlist_pop(socket->frame_buffer);
+     } else {
+        rb_thread_wait_fd(zsockopt_fd(socket->socket));
+        goto try_readable;
+     }
 #endif
-    return (VALUE)frame;
 }
 
 /*
@@ -588,16 +636,25 @@ static VALUE rb_czmq_socket_recv_frame_nonblock(VALUE obj)
 }
 
 static VALUE rb_czmq_nogvl_recv_message(void *ptr) {
-    zmsg_t *message = NULL;
     struct nogvl_recv_args *args = ptr;
     errno = 0;
     zmq_sock_wrapper *socket = args->socket;
 #ifdef HAVE_RB_THREAD_BLOCKING_REGION
-    message = zmsg_recv(socket->socket);
+    return (VALUE)zmsg_recv(socket->socket);
 #else
-    ZmqBlockingRead(((message = zmsg_recv(socket->socket)) == NULL), socket);
+    if (zlist_size(socket->msg_buffer) != 0)
+       return zlist_pop(socket->msg_buffer);
+try_readable:
+    if ((zsockopt_events(socket->socket) & ZMQ_POLLIN) == ZMQ_POLLIN) {
+        do {
+            zlist_append(socket->msg_buffer, zmsg_recv(socket->socket));
+        } while (zmq_errno() != EAGAIN && zmq_errno() != EINTR);
+        return (VALUE)zlist_pop(socket->msg_buffer);
+     } else {
+        rb_thread_wait_fd(zsockopt_fd(socket->socket));
+        goto try_readable;
+     }
 #endif
-    return (VALUE)message;
 }
 
 /*

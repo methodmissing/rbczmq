@@ -75,8 +75,6 @@ class Client
       response = @socket.recv
       break if @interrupted
     end
-    # Let 1.8 catch up
-    sleep 3
     @server.stop
     @ctx.destroy
   end

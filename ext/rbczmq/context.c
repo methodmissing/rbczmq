@@ -201,6 +201,11 @@ static VALUE rb_czmq_ctx_socket(VALUE obj, VALUE type)
     args.type = socket_type;
     sock->socket = (void*)rb_thread_blocking_region(rb_czmq_nogvl_socket_new, (void *)&args, RUBY_UBF_IO, 0);
     ZmqAssertObjOnAlloc(sock->socket, sock);
+#ifndef HAVE_RB_THREAD_BLOCKING_REGION
+    sock->str_buffer = zlist_new();
+    sock->frame_buffer = zlist_new();
+    sock->msg_buffer = zlist_new();
+#endif
     sock->handler = Qnil;
     sock->ctx = ctx->ctx;
     sock->verbose = FALSE;

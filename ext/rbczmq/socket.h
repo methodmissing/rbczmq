@@ -10,6 +10,11 @@ typedef struct {
     void *socket;
     Bool verbose;
     int state;
+#ifndef HAVE_RB_THREAD_BLOCKING_REGION
+    zlist_t *str_buffer;
+    zlist_t *frame_buffer;
+    zlist_t *msg_buffer;
+#endif
     VALUE handler;
     VALUE endpoint;
     VALUE thread;

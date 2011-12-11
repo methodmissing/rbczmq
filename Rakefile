@@ -14,7 +14,7 @@ end
 gemspec = eval(IO.read('rbczmq.gemspec'))
 
 task :compile => [:build_zeromq, :build_czmq]
-task :clobber => [:clobber_zeromq, :clobber_czmq]
+#task :clobber => [:clobber_zeromq, :clobber_czmq]
 
 Rake::ExtensionTask.new('rbczmq', gemspec) do |ext|
   ext.name = 'rbczmq_ext'

@@ -36,36 +36,6 @@ rb_thread_blocking_region(
 
 struct timeval rb_time_interval _((VALUE));
 
-extern VALUE rb_eZmqError;
-
-#ifdef ZMQ_FD
-#define ZmqBlockingRead(fcall, sock) \
-    retry_read: \
-      if (!rb_thread_alone() && !(zsockopt_events((sock)->socket) & ZMQ_POLLIN)) \
-          rb_thread_wait_fd(zsockopt_fd((sock)->socket)); \
-      if ((fcall)) { \
-          if (rb_io_wait_readable(zsockopt_fd((sock)->socket)) == Qtrue) { \
-              goto retry_read; \
-          } else { \
-              ZmqRaiseSysError(); \
-          } \
-      }
-#define ZmqBlockingWrite(fcall, sock) \
-    retry_write: \
-      if (!rb_thread_alone() && !(zsockopt_events((sock)->socket) & ZMQ_POLLOUT)) \
-          rb_thread_fd_writable(zsockopt_fd((sock)->socket)); \
-      if ((fcall)) { \
-          if (rb_io_wait_writable(zsockopt_fd((sock)->socket)) == Qtrue) { \
-              goto retry_write; \
-          } else { \
-              ZmqRaiseSysError(); \
-          } \
-      }
-#else
-#define ZmqBlockingRead(fcall, socket) fcall
-#define ZmqBlockingWrite(fcall, socket) fcall
-#endif
-
 #define rb_errinfo() ruby_errinfo
 
 #endif

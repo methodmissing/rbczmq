@@ -80,8 +80,6 @@ class Producer
       @socket.send(work)
       break if @interrupted
     end
-    # Let 1.8 catch up
-    sleep 3
     @consumers.each{|c| c.stop }
     @ctx.destroy
   end
