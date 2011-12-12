@@ -31,3 +31,12 @@
 * Handle GC error exposed by perf/req_rep.rb (ruby(47948,0x10e1c5000) malloc: *** error for object 0x7fd68c800200: pointer being freed was not allocated)
 * Legal shit
 * czmq send methods aren't non-blocking by default
+* REP/REP pairs cannot support Socket#sendm or send_frame with multi flag set
+* Test cases for
+  - DEALER / ROUTER pairs
+* Catch EFSM for REQ/REP pairs and raise in a format better suited for the user
+* Handle negative context I/O threads
+* IO.select test case / example with Socket#fd && Socket#events
+* Socket identity edges
+  - raise on 0 || > 255 length
+  - do not raise on 1 or 255 length
