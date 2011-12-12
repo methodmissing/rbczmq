@@ -9,7 +9,8 @@ class ZMQ::Socket
     end
   end
 
-  # Determines if this socket is in a readable state.
+  # Determines if there are one or more messages to read from this socket. Should be used in conjunction with the
+  # ZMQ_FD socket option for edge-triggered notifications.
   #
   # socket.readable? => true
   #
@@ -17,7 +18,8 @@ class ZMQ::Socket
     events | ZMQ::POLLIN
   end
 
-  # Determines if this socket is in a writable state.
+  # Determines if this socket is in a writable state. Should be used in conjunction with the ZMQ_FD socket option for
+  # edge-triggered notifications.
   #
   # socket.writable? => true
   #
@@ -50,10 +52,12 @@ class ZMQ::Socket
     end
   end
 
+  # Poll all sockets for readbable states by default
   def poll_readable?
     true
   end
 
+  # Poll all sockets for writable states by default
   def poll_writable?
     true
   end
@@ -62,11 +66,17 @@ end
 module ZMQ::DownstreamSocket
   # An interface for sockets that can only receive (read) data
   #
+  # === Behavior
+  #
+  # [Disabled methods] ZMQ::Socket#bind, ZMQ::Socket#send, ZMQ::Socket#sendm, ZMQ::Socket#send_frame,
+  #                    ZMQ::Socket#send_message
+  # [Socket types] ZMQ::Socket::Pull, ZMQ::Socket::Sub
 
   def self.included(sock)
     sock.unsupported_api :bind, :send, :sendm, :send_frame, :send_message
   end
 
+  # Upstream sockets should never be polled for writable states
   def poll_writable?
     false
   end
@@ -75,11 +85,17 @@ end
 module ZMQ::UpstreamSocket
   # An interface for sockets that can only send (write) data
   #
+  # === Behavior
+  #
+  # [Disabled methods] ZMQ::Socket#connect, ZMQ::Socket#recv, ZMQ::Socket#recv_nonblock, ZMQ::Socket#recv_frame,
+  #                    ZMQ::Socket#recv_frame_nonblock, ZMQ::Socket#recv_message
+  # [Socket types] ZMQ::Socket::Push, ZMQ::Socket::Pub
 
   def self.included(sock)
     sock.unsupported_api :connect, :recv, :recv_nonblock, :recv_frame, :recv_frame_nonblock, :recv_message
   end
 
+  # Upstream sockets should never be polled for readable states
   def poll_readable?
     false
   end
