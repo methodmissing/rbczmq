@@ -40,3 +40,4 @@
 * Socket identity edges
   - raise on 0 || > 255 length
   - do not raise on 1 or 255 length
+* Enforce socket timeouts
