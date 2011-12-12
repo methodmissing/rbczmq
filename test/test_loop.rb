@@ -4,10 +4,8 @@ require File.join(File.dirname(__FILE__), 'helper')
 
 class TestZmqLoop < ZmqTestCase
   def test_alloc
-    ctx = ZMQ::Context.new
-    assert_instance_of ZMQ::Context, ctx
-  ensure
-    ctx.destroy
+    lp = ZMQ::Loop.new
+    assert_instance_of ZMQ::Loop, lp
   end
 
   def test_run_and_stop
