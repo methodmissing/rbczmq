@@ -32,7 +32,6 @@
 * Legal shit
 * czmq send methods aren't non-blocking by default
 * Catch EFSM for REQ/REP pairs and raise in a format better suited for the user
-* Handle negative context I/O threads
 * IO.select test case / example with Socket#fd && Socket#events
 * Socket identity edges
   - raise on 0 || > 255 length

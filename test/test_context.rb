@@ -31,6 +31,9 @@ class TestZmqContext < ZmqTestCase
       ctx.iothreads = :invalid  
     end
     ctx.iothreads = 2
+    assert_raises ZMQ::Error do
+      ctx.iothreads = -2
+    end
   ensure
     ctx.destroy
   end
