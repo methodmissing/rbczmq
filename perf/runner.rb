@@ -41,8 +41,7 @@ require 'zmq'
 require 'pp'
 
 module Runner
-  REMOTE_ENDPOINT = "tcp://127.0.0.1:5221"
-  STATS_ENDPOINT = "tcp://127.0.0.1:5222"
+  ENDPOINT = "tcp://127.0.0.1:5221"
   DEFAULT_MSG_COUNT = 100_000
   DEFAULT_MSG_SIZE = 100
   DEFAULT_ENCODING = :string
@@ -117,6 +116,7 @@ module Runner
     throughput = process_msg_count * 1000000 / elapsed
     megabits = throughput * msg_size * 8 / 1000000
     stats_buf << "====== [#{Process.pid}] transfer stats ======"
+    stats_buf << "message encoding: %s" % encoding
     stats_buf << "message size: %i [B]" % msg_size
     stats_buf << "message count: %i" % process_msg_count
     stats_buf << "mean throughput: %i [msg/s]" % throughput
@@ -125,12 +125,8 @@ module Runner
 
   private
   def sample_mem(w)
-    stats_buf << "====== [#{Process.pid}] ======"
-    stats_buf << "Memory used #{w}: %dkb" % [mem_usage]
+    stats_buf << "[#{$$}] Memory used #{w}: %dkb" % `ps -o rss= -p #{$$}`.to_i
   end
 
-  def mem_usage
-    `ps -o rss= -p #{Process.pid}`.to_i
-  end
   extend self
 end

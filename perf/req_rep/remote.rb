@@ -38,7 +38,7 @@
 
 ctx = ZMQ::Context.new
 rep = ctx.socket(:REP);
-rep.bind(Runner::REMOTE_ENDPOINT);
+rep.bind(Runner::ENDPOINT);
 
 Runner.msg_count.times do
   msg = case Runner.encoding

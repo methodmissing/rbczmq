@@ -38,7 +38,7 @@
 
 ctx = ZMQ::Context.new
 req = ctx.socket(:REQ)
-req.connect(Runner::REMOTE_ENDPOINT)
+req.connect(Runner::ENDPOINT)
 
 msg = Runner.payload
 

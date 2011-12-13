@@ -38,7 +38,7 @@
 
 ctx = ZMQ::Context.new
 sub = ctx.socket(:SUB)
-sub.connect(Runner::REMOTE_ENDPOINT)
+sub.connect(Runner::ENDPOINT)
 
 messages, start_time = 0, nil
 while (case Runner.encoding

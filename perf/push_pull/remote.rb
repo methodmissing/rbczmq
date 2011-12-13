@@ -38,7 +38,7 @@
 
 ctx = ZMQ::Context.new
 push = ctx.socket(:PUSH);
-push.bind(Runner::REMOTE_ENDPOINT);
+push.bind(Runner::ENDPOINT);
 
 msg = Runner.payload
 
