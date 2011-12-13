@@ -27,5 +27,10 @@ class ZMQ::Socket::Req
     ZMQ::REQ
   end
 
-  unsupported_api :bind
+  def send_frame(frame, flags = 0)
+    raise ZMQ::Error, "cannot send multiple frames on REP sockets" if flags == ZMQ::Frame::MORE
+    super
+  end
+
+  unsupported_api :bind, :sendm
 end

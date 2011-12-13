@@ -14,4 +14,15 @@ class TestRepSocket < ZmqTestCase
   ensure
     ctx.destroy
   end
+
+  def test_flow
+    ctx = ZMQ::Context.new
+    sock = ctx.socket(:REP)
+    sock.bind("tcp://127.0.0.1:5000")
+    assert_raises ZMQ::Error do
+      sock.send_frame(ZMQ::Frame("frame"), ZMQ::Frame::MORE)
+    end
+  ensure
+    ctx.destroy
+  end
 end
