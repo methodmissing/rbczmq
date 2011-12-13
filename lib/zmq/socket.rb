@@ -15,7 +15,7 @@ class ZMQ::Socket
   # socket.readable? => true
   #
   def readable?
-    events | ZMQ::POLLIN
+    (events & ZMQ::POLLIN) == ZMQ::POLLIN
   end
 
   # Determines if this socket is in a writable state. Should be used in conjunction with the ZMQ_FD socket option for
@@ -24,7 +24,7 @@ class ZMQ::Socket
   # socket.writable? => true
   #
   def writable?
-    events | ZMQ::POLLOUT
+    (events & ZMQ::POLLOUT) == ZMQ::POLLOUT
   end
 
   # Generates a string representation of this socket type

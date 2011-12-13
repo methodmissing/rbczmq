@@ -24,11 +24,12 @@ class TestZmqSocket < ZmqTestCase
   def test_readable_p
     ctx = ZMQ::Context.new
     rep = ctx.socket(:REP)
+    port = rep.bind("tcp://127.0.0.1:*")
+    req = ctx.connect(:REQ, "tcp://127.0.0.1:#{port}")
+    assert req.writable?
+    req.send("m")
+    sleep 0.1
     assert rep.readable?
-    assert rep.writable?
-    rep.bind("tcp://127.0.0.1:*")
-    assert rep.readable?
-    assert rep.writable?
   ensure
     ctx.destroy
   end

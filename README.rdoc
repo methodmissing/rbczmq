@@ -38,3 +38,4 @@
   - do not raise on 1 or 255 length
 * Enforce socket timeouts
 * Look into handling signals properly
+* ZMQ.poll implementation

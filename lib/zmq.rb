@@ -7,7 +7,6 @@ require "zmq/rbczmq_ext"
 require 'zmq/version' unless defined? ZMQ::VERSION
 
 module ZMQ
-
   # Sugaring for creating new ZMQ frames
   #
   # ZMQ::Frame("frame")  =>  ZMQ::Frame
