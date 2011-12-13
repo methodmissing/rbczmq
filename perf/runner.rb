@@ -1,5 +1,41 @@
 # encoding: utf-8
 
+#--
+#
+# Author:: Lourens Naudé
+# Homepage::  http://github.com/methodmissing/rbczmq
+# Date:: 20111213
+#
+#----------------------------------------------------------------------------
+#
+# Copyright (C) 2011 by Lourens Naudé. All Rights Reserved.
+# Email: lourens at methodmissing dot com
+#
+# (The MIT License)
+#
+# Permission is hereby granted, free of charge, to any person obtaining
+# a copy of this software and associated documentation files (the
+# 'Software'), to deal in the Software without restriction, including
+# without limitation the rights to use, copy, modify, merge, publish,
+# distribute, sublicense, and/or sell copies of the Software, and to
+# permit persons to whom the Software is furnished to do so, subject to
+# the following conditions:
+#
+# The above copyright notice and this permission notice shall be
+# included in all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,
+# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+# IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+# CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+# TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+# SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+#
+#---------------------------------------------------------------------------
+#
+#
+
 $:.unshift File.expand_path('lib')
 require 'zmq'
 require 'pp'
@@ -57,11 +93,9 @@ module Runner
       ENV["MallocScribble"] = "1"
     end
     sample_mem(:before)
-    GC::Profiler.enable if defined?(GC::Profiler)
   end
 
   def after_fork
-    GC::Profiler.disable if defined?(GC::Profiler)
     sample_mem(:after)
     stats_buf.each{|s| String === s ? puts(s) : pp(s) }
   end
@@ -91,11 +125,8 @@ module Runner
 
   private
   def sample_mem(w)
-    return # disabled in the interim - too verbose
     stats_buf << "====== [#{Process.pid}] ======"
     stats_buf << "Memory used #{w}: %dkb" % [mem_usage]
-    stats_buf << GC::Profiler.result if defined?(GC::Profiler)
-    stats_buf << GC.stat if GC.respond_to?(:stat)
   end
 
   def mem_usage
