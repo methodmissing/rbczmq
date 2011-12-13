@@ -1304,7 +1304,17 @@ static VALUE rb_czmq_socket_set_opt_reconnect_ivl_max(VALUE obj, VALUE value)
 
 static VALUE rb_czmq_socket_set_opt_identity(VALUE obj, VALUE value)
 {
-    ZmqSetStringSockOpt(obj, zsockopt_set_identity, "IDENTITY", value, "");
+    char *val;
+    GetZmqSocket(obj);
+    ZmqSockGuardCrossThread(sock);
+    Check_Type(value, T_STRING);
+    if (RSTRING_LEN(value) == 0) rb_raise(rb_eZmqError, "socket identity cannot be empty.");
+    if (RSTRING_LEN(value) > 255) rb_raise(rb_eZmqError, "maximum socket identity is 255 chars.");
+    val = StringValueCStr(value);
+    zsockopt_set_identity(sock->socket, val);
+    if (sock->verbose)
+        zclock_log ("I: %s socket %p: set option \"IDENTITY\" \"%s\"", zsocket_type_str(sock->socket), obj, val);
+    return Qnil;
 }
 
 /*

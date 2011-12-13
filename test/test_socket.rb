@@ -368,6 +368,12 @@ class TestZmqSocket < ZmqTestCase
     assert_equal 5, sock.reconnect_ivl_max
 
     sock.identity = "anonymous"
+    assert_raises ZMQ::Error do
+      sock.identity = ""
+    end
+    assert_raises ZMQ::Error do
+      sock.identity = ("*" * 256)
+    end
 
     assert !sock.rcvmore?
 

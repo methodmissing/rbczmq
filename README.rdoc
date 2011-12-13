@@ -26,16 +26,11 @@
 * Handle GC issue with timers in loop callbacks
 * Sync up libzmq && czmq ( vendor tarballs direct )
 * Socket GC - only attempt to close if socket is not in a pending state
-* Assert per socket type behavior in socket specific test cases
 * Revisit errno specific assertions handled in Ruby land - false positives in perf tests (./perf/push_pull/local.rb:10:in `recv': Invalid argument - Invalid argument (Errno::EINVAL))
 * Handle GC error exposed by perf/req_rep.rb (ruby(47948,0x10e1c5000) malloc: *** error for object 0x7fd68c800200: pointer being freed was not allocated)
 * Legal shit
 * czmq send methods aren't non-blocking by default
 * Catch EFSM for REQ/REP pairs and raise in a format better suited for the user
-* IO.select test case / example with Socket#fd && Socket#events
-* Socket identity edges
-  - raise on 0 || > 255 length
-  - do not raise on 1 or 255 length
 * Enforce socket timeouts
 * Look into handling signals properly
 * ZMQ.poll implementation
