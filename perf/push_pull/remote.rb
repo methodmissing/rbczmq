@@ -42,6 +42,7 @@ push.bind(Runner::ENDPOINT);
 
 msg = Runner.payload
 
+start_time = Time.now
 Runner.msg_count.times do
   case Runner.encoding
   when :string
@@ -57,4 +58,4 @@ Runner.msg_count.times do
   end
 end
 
-puts "Sent #{Runner.msg_count} messages ..."
+puts "Sent #{Runner.msg_count} messages in %ss ..." % (Time.now - start_time)

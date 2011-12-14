@@ -38,14 +38,12 @@
 
 $:.unshift File.expand_path('lib')
 require 'zmq'
-require 'pp'
 
 module Runner
   ENDPOINT = "tcp://127.0.0.1:5221"
-  DEFAULT_MSG_COUNT = 100_000
+  DEFAULT_MSG_COUNT = 1_000_000
   DEFAULT_MSG_SIZE = 100
   DEFAULT_ENCODING = :string
-  STATS = Hash.new{|h,k| h[k] = [] }
 
   %w(INT TERM QUIT).each do |sig|
      trap(sig){ stop }
@@ -61,19 +59,8 @@ module Runner
     @encoding = (encoding || DEFAULT_ENCODING).to_sym
     @processes = (processes || 1).to_i
     @stats_buf, @local_pids = [], []
-    @processes.times do
-      @local_pids << fork do
-        before_fork
-        require File.join(File.dirname(__FILE__), test.to_s, 'local')
-        after_fork
-      end
-    end
-    @remote_pid = fork do
-      before_fork
-      sleep 1
-      require File.join(File.dirname(__FILE__), test.to_s, 'remote')
-      after_fork
-    end
+    @processes.times{ fork_local(test) }
+    fork_remote(test)
     puts "Local pids: #{@local_pids.join(', ')}"
     puts "Remote pid: #{@remote_pid}"
     Process.waitpid(@remote_pid, Process::WNOHANG)
@@ -96,7 +83,7 @@ module Runner
 
   def after_fork
     sample_mem(:after)
-    stats_buf.each{|s| String === s ? puts(s) : pp(s) }
+    stats_buf.each{|s| puts(s) }
   end
 
   def stop
@@ -124,6 +111,23 @@ module Runner
   end
 
   private
+  def fork_local(test)
+    @local_pids << fork do
+      before_fork
+      require File.join(File.dirname(__FILE__), test.to_s, 'local')
+      after_fork
+    end
+  end
+
+  def fork_remote(test)
+    @remote_pid = fork do
+      before_fork
+      sleep 1
+      require File.join(File.dirname(__FILE__), test.to_s, 'remote')
+      after_fork
+    end
+  end
+
   def sample_mem(w)
     stats_buf << "[#{$$}] Memory used #{w}: %dkb" % `ps -o rss= -p #{$$}`.to_i
   end
