@@ -13,6 +13,10 @@ end
 
 gemspec = eval(IO.read('rbczmq.gemspec'))
 
+# XXX fallbacks specific to Darwin for JRuby (does not set these values in RbConfig::CONFIG)
+LIBEXT = RbConfig::CONFIG['LIBEXT'] || 'a'
+DLEXT = RbConfig::CONFIG['DLEXT'] || 'bundle'
+
 task :compile => [:build_zeromq, :build_czmq]
 #task :clobber => [:clobber_zeromq, :clobber_czmq]
 
@@ -21,9 +25,9 @@ Rake::ExtensionTask.new('rbczmq', gemspec) do |ext|
   ext.ext_dir = 'ext/rbczmq'
   ext.lib_dir = File.join('lib', 'zmq')
 
-  CLEAN.include "#{ext.ext_dir}/libzmq.#{RbConfig::CONFIG['LIBEXT']}"
-  CLEAN.include "#{ext.ext_dir}/libczmq.#{RbConfig::CONFIG['LIBEXT']}"
-  CLEAN.include "#{ext.lib_dir}/*.#{RbConfig::CONFIG['DLEXT']}"
+  CLEAN.include "#{ext.ext_dir}/libzmq.#{LIBEXT}"
+  CLEAN.include "#{ext.ext_dir}/libczmq.#{LIBEXT}"
+  CLEAN.include "#{ext.lib_dir}/*.#{DLEXT}"
 end
 
 task :clobber_zeromq do
@@ -33,7 +37,7 @@ task :clobber_zeromq do
 end
 
 task :build_zeromq do
-  lib = "ext/zeromq/src/.libs/libzmq.#{RbConfig::CONFIG['LIBEXT']}"
+  lib = "ext/zeromq/src/.libs/libzmq.#{LIBEXT}"
   Dir.chdir "ext/zeromq" do
     sh "./autogen.sh" unless File.exist?("ext/zeromq/configure")
     sh "./configure && make"
@@ -48,7 +52,7 @@ task :clobber_czmq do
 end
 
 task :build_czmq do
-  lib = "ext/czmq/src/.libs/libczmq.#{RbConfig::CONFIG['LIBEXT']}"
+  lib = "ext/czmq/src/.libs/libczmq.#{LIBEXT}"
   Dir.chdir "ext/czmq" do
     sh "./autogen.sh" unless File.exist?("ext/czmq/configure")
     libzmq = File.join(File.dirname(__FILE__), 'ext', 'zeromq')
