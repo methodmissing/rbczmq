@@ -14,3 +14,4 @@ true/*
 *.bundle
 *.gem
 doc/*
+.DS_Store
