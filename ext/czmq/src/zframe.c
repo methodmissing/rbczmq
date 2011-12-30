@@ -47,6 +47,7 @@
 
 struct _zframe_t {
     zmq_msg_t zmsg;             //  zmq_msg_t blob for frame
+    zframe_free_fn *free_fn;    //  Free function / callback if any
     int more;                   //  More flag, from last read
 };
 
@@ -63,7 +64,7 @@ zframe_new (const void *data, size_t size)
 
     self = (zframe_t *) zmalloc (sizeof (zframe_t));
     if (!self)
-        goto end;
+        return NULL;
 
     if (size) {
         zmq_msg_init_size (&self->zmsg, size);
@@ -73,7 +74,6 @@ zframe_new (const void *data, size_t size)
     else
         zmq_msg_init (&self->zmsg);
 
-end:
     return self;
 }
 
@@ -88,9 +88,24 @@ zframe_destroy (zframe_t **self_p)
     if (*self_p) {
         zframe_t *self = *self_p;
         zmq_msg_close (&self->zmsg);
+        if (self->free_fn)
+            (self->free_fn) (self);
         free (self);
         *self_p = NULL;
     }
+}
+
+//  --------------------------------------------------------------------------
+//  Sets a free function / callback invoked when this frame is recycled. This is
+//  useful for bindings that coerce frames to native objects in languages with
+//  automatic memory management where it's difficult / crufty for the GC to track
+//  frames recycled elsewhere by libczmq eg. when using the zmsg_send API.
+
+void
+zframe_freefn (zframe_t *self, zframe_free_fn *free_fn)
+{
+    assert (self);
+    self->free_fn = free_fn;
 }
 
 
@@ -142,52 +157,34 @@ zframe_recv_nowait (void *socket)
 int
 zframe_send (zframe_t **self_p, void *socket, int flags)
 {
-    int error = 0;
-
     assert (socket);
     assert (self_p);
+
     if (*self_p) {
-        int rc = 0;
         zframe_t *self = *self_p;
         if (flags & ZFRAME_REUSE) {
             zmq_msg_t copy;
-            rc = zmq_msg_init (&copy);
-            // No error conditions currently defined for zmq_msg_init()
-            assert (rc == 0);
-
-            rc = zmq_msg_copy (&copy, &self->zmsg);
-            if (rc == -1) {
-                error = errno;
-                goto end;
+            zmq_msg_init (&copy);
+            if (zmq_msg_copy (&copy, &self->zmsg)) {
+                puts ("copy");
+                return -1;
             }
-
-            rc = zmq_sendmsg (socket, &copy,
-                              (flags & ZFRAME_MORE)? ZMQ_SNDMORE: 0);
-            if (rc == -1) {
-                error = errno;
-                goto end;
+            if (zmq_sendmsg (socket, &copy, (flags & ZFRAME_MORE)? ZMQ_SNDMORE: 0) == -1) {
+                puts ("sendmsg 1");
+                return -1;
             }
-
-            rc = zmq_msg_close (&copy);
-            // Any errors possible should have been caught previously
-            assert (rc == 0);
+            zmq_msg_close (&copy);
         }
         else {
-            rc = zmq_sendmsg (socket, &self->zmsg,
-                              (flags & ZFRAME_MORE)? ZMQ_SNDMORE: 0);
-            if (rc == -1) {
-                // FIXME: Should we destroy the frame anyway here?
-                error = errno;
-                goto end;
+            if (zmq_sendmsg (socket, &self->zmsg, (flags & ZFRAME_MORE)? ZMQ_SNDMORE: 0) == -1) {
+                puts ("sendmsg 2");
+                puts (zmq_strerror (errno));
+                return -1;
             }
             zframe_destroy (self_p);
         }
     }
-    else
-        error = EINVAL;
-
-end:
-    return error;
+    return 0;
 }
 
 
@@ -359,11 +356,19 @@ zframe_reset (zframe_t *self, const void *data, size_t size)
 //  --------------------------------------------------------------------------
 //  Selftest
 
+void
+free_frame_cb(zframe_t *frame)
+{
+    static zframe_t *cb_frame;
+    cb_frame = frame;
+}
+
 int
 zframe_test (Bool verbose)
 {
     printf (" * zframe: ");
     int rc;
+    static zframe_t *cb_frame = NULL;
 
     //  @selftest
     zctx_t *ctx = zctx_new ();
@@ -385,6 +390,7 @@ zframe_test (Bool verbose)
     }
     //  Send same frame five times, test ZFRAME_REUSE
     zframe_t *frame = zframe_new ("Hello", 5);
+    assert (frame);
     for (frame_nbr = 0; frame_nbr < 5; frame_nbr++) {
         rc = zframe_send (&frame, output, ZFRAME_MORE + ZFRAME_REUSE);
         assert (rc == 0);
@@ -425,6 +431,11 @@ zframe_test (Bool verbose)
     assert (frame_nbr == 10);
     frame = zframe_recv_nowait (input);
     assert (frame == NULL);
+
+    frame = zframe_new ("callback", 8);
+    zframe_freefn (frame, free_frame_cb);
+    zframe_destroy (&frame);
+    assert (frame == cb_frame);
 
     zctx_destroy (&ctx);
     //  @end
