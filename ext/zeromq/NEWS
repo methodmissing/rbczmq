@@ -1,10 +1,13 @@
-0MQ version 2.1.11 (Stable), released on 2011/10/xx
+0MQ version 2.1.11 (Stable), released on 2011/12/18
 ===================================================
 
 Bug fixes
 ---------
 
-* Fixed issue 281, crash opn heavy socket creation - assertion failure in
+* Fixed issue 290, zmq_poll was using system time instead of monotonic
+  clock (Mika Fischer).
+
+* Fixed issue 281, crash on heavy socket creation - assertion failure in
   mutex.hpp:91. (Mika Fischer).
 
 * Fixed issue 273, O_CLOEXEC flag used in ip.cpp:192 is supported only 
@@ -13,6 +16,8 @@ Bug fixes
 * Fixed issue 261, assertion failure in kqueue.cpp:76.
 
 * Fixed issue 269, faulty diagnostic code in 2.1.10.
+
+* Fixed issue 254, assertion failure at tcp_socket.cpp:229 on ENOTCONN.
 
 Changes
 -------
