@@ -35,37 +35,32 @@
  */
 
 #include <rbczmq_ext.h>
-
 static VALUE intern_data;
 
-VALUE rb_czmq_alloc_frame(zframe_t **frame, int flags)
+void rb_czmq_frame_freed(zframe_t *frame)
+{
+    st_delete(frames_map, (st_data_t*)&frame, 0);
+}
+
+VALUE rb_czmq_alloc_frame(zframe_t *frame)
 {
     VALUE frame_obj;
-    zmq_frame_wrapper *fr = NULL;
-    frame_obj = Data_Make_Struct(rb_cZmqFrame, zmq_frame_wrapper, 0, rb_czmq_free_frame_gc, fr);
-    fr->frame = *frame;
-    fr->flags = flags;
+    ZmqRegisterFrame(frame);
+    frame_obj = Data_Wrap_Struct(rb_cZmqFrame, 0, rb_czmq_free_frame_gc, frame);
     rb_obj_call_init(frame_obj, 0, NULL);
     return frame_obj;
 }
 
-void rb_czmq_free_frame(zmq_frame_wrapper *frame)
+void rb_czmq_free_frame(zframe_t *frame)
 {
-    errno = 0;
-    zframe_destroy(&(frame->frame));
-    ZmqAssertSysError();
-    frame->frame = NULL;
-    frame->flags |= ZMQ_FRAME_RECYCLED;
+    if (frame)
+        if (st_lookup(frames_map, (st_data_t)frame, 0)) zframe_destroy(&frame);
 }
 
 void rb_czmq_free_frame_gc(void *ptr)
 {
-    zmq_frame_wrapper *frame = ptr;
-    if (frame) {
-        zclock_log ("I: frame %p: GC free", frame);
-        if (frame->frame != NULL && !(frame->flags & (ZMQ_FRAME_RECYCLED | ZMQ_FRAME_MESSAGE))) rb_czmq_free_frame(frame);
-        xfree(frame);
-    }
+    zframe_t *frame = (zframe_t *)ptr;
+    rb_czmq_free_frame(frame);
 }
 
 /*
@@ -84,19 +79,21 @@ void rb_czmq_free_frame_gc(void *ptr)
 static VALUE rb_czmq_frame_s_new(int argc, VALUE *argv, VALUE frame)
 {
     VALUE data;
-    zmq_frame_wrapper *fr = NULL;
     errno = 0;
+    zframe_t *fr;
     rb_scan_args(argc, argv, "01", &data);
-    frame = Data_Make_Struct(rb_cZmqFrame, zmq_frame_wrapper, 0, rb_czmq_free_frame_gc, fr);
     if (NIL_P(data)) {
-        fr->frame = zframe_new(NULL, 0);
+        fr = zframe_new(NULL, 0);
     } else {
         Check_Type(data, T_STRING);
-        fr->frame = zframe_new(RSTRING_PTR(data), (size_t)RSTRING_LEN(data));
+        fr = zframe_new(RSTRING_PTR(data), (size_t)RSTRING_LEN(data));
     }
-    fr->flags = ZMQ_FRAME_NEW;
-    ZmqAssertObjOnAlloc(fr->frame, fr);
-    /*ZmqAssertSysError();*/
+    if (fr == NULL) {
+        ZmqAssertSysError();
+        rb_memerror();
+    }
+    ZmqRegisterFrame(fr);
+    frame = Data_Wrap_Struct(rb_cZmqFrame, 0, rb_czmq_free_frame_gc, fr);
     rb_obj_call_init(frame, 0, NULL);
     return frame;
 }
@@ -136,7 +133,7 @@ static VALUE rb_czmq_frame_size(VALUE obj)
 {
     size_t size;
     ZmqGetFrame(obj);
-    size = zframe_size(frame->frame);
+    size = zframe_size(frame);
     return LONG2FIX(size);
 }
 
@@ -156,8 +153,8 @@ static VALUE rb_czmq_frame_data(VALUE obj)
 {
     size_t size;
     ZmqGetFrame(obj);
-    size = zframe_size(frame->frame);
-    return ZmqEncode(rb_str_new((char *)zframe_data(frame->frame), (long)size));
+    size = zframe_size(frame);
+    return ZmqEncode(rb_str_new((char *)zframe_data(frame), (long)size));
 }
 
 /*
@@ -192,7 +189,7 @@ static VALUE rb_czmq_frame_to_s(VALUE obj)
 static VALUE rb_czmq_frame_strhex(VALUE obj)
 {
     ZmqGetFrame(obj);
-    return rb_str_new2(zframe_strhex(frame->frame));
+    return rb_str_new2(zframe_strhex(frame));
 }
 
 /*
@@ -210,13 +207,16 @@ static VALUE rb_czmq_frame_strhex(VALUE obj)
 static VALUE rb_czmq_frame_dup(VALUE obj)
 {
     VALUE dup;
-    zmq_frame_wrapper *dup_fr = NULL;
+    zframe_t *dup_fr = NULL;
     errno = 0;
     ZmqGetFrame(obj);
-    dup = Data_Make_Struct(rb_cZmqFrame, zmq_frame_wrapper, 0, rb_czmq_free_frame_gc, dup_fr);
-    dup_fr->frame = zframe_dup(frame->frame);
-    dup_fr->flags = ZMQ_FRAME_DUP;
-    ZmqAssertObjOnAlloc(dup_fr->frame, dup_fr);
+    dup_fr = zframe_dup(frame);
+    if (dup_fr == NULL) {
+        ZmqAssertSysError();
+        rb_memerror();
+    }
+    ZmqRegisterFrame(dup_fr);
+    dup = Data_Wrap_Struct(rb_cZmqFrame, 0, rb_czmq_free_frame_gc, dup_fr);
     rb_obj_call_init(dup, 0, NULL);
     return dup;
 }
@@ -237,7 +237,7 @@ static VALUE rb_czmq_frame_data_equals_p(VALUE obj, VALUE data)
 {
     ZmqGetFrame(obj);
     Check_Type(data, T_STRING);
-    return (zframe_streq(frame->frame, RSTRING_PTR(data)) == TRUE) ? Qtrue : Qfalse;
+    return (zframe_streq(frame, RSTRING_PTR(data)) == TRUE) ? Qtrue : Qfalse;
 }
 
 /*
@@ -255,7 +255,7 @@ static VALUE rb_czmq_frame_data_equals_p(VALUE obj, VALUE data)
 static VALUE rb_czmq_frame_more_p(VALUE obj)
 {
     ZmqGetFrame(obj);
-    return (zframe_more(frame->frame) == ZFRAME_MORE) ? Qtrue : Qfalse;
+    return (zframe_more(frame) == ZFRAME_MORE) ? Qtrue : Qfalse;
 }
 
 /*
@@ -273,12 +273,13 @@ static VALUE rb_czmq_frame_more_p(VALUE obj)
 
 static VALUE rb_czmq_frame_eql_p(VALUE obj, VALUE other_frame)
 {
-    zmq_frame_wrapper *other = NULL;
+    zframe_t *other = NULL;
     ZmqGetFrame(obj);
     ZmqAssertFrame(other_frame);
-    Data_Get_Struct(other_frame, zmq_frame_wrapper, other);
-    if (!other) rb_raise(rb_eTypeError, "uninitialized ZMQ frame!");
-    return (zframe_eq(frame->frame, other->frame)) ? Qtrue : Qfalse;
+    Data_Get_Struct(other_frame, zframe_t, other);
+    if (!other) rb_raise(rb_eTypeError, "uninitialized ZMQ frame!"); \
+    if (!(st_lookup(frames_map, (st_data_t)other, 0))) rb_raise(rb_eZmqError, "object %p has been destroyed by the ZMQ framework", (void *)other_frame);
+    return (zframe_eq(frame, other)) ? Qtrue : Qfalse;
 }
 
 /*
@@ -317,13 +318,14 @@ static VALUE rb_czmq_frame_equals(VALUE obj, VALUE other_frame)
 static VALUE rb_czmq_frame_cmp(VALUE obj, VALUE other_frame)
 {
     long diff;
-    zmq_frame_wrapper *other = NULL;
+    zframe_t *other = NULL;
     if (obj == other_frame) return INT2FIX(0);
     ZmqGetFrame(obj);
     ZmqAssertFrame(other_frame);
-    Data_Get_Struct(other_frame, zmq_frame_wrapper, other);
-    if (!other) rb_raise(rb_eTypeError, "uninitialized ZMQ frame!");
-    diff = (zframe_size(frame->frame) - zframe_size(other->frame));
+    Data_Get_Struct(other_frame, zframe_t, other);
+    if (!other) rb_raise(rb_eTypeError, "uninitialized ZMQ frame!"); \
+    if (!(st_lookup(frames_map, (st_data_t)other, 0))) rb_raise(rb_eZmqError, "object %p has been destroyed by the ZMQ framework", (void *)other_frame);
+    diff = (zframe_size(frame) - zframe_size(other));
     if (diff == 0) return INT2FIX(0);
     if (diff > 0) return INT2FIX(1);
     return INT2FIX(-1);
@@ -348,7 +350,7 @@ static VALUE rb_czmq_frame_print(int argc, VALUE *argv, VALUE obj)
     ZmqGetFrame(obj);
     rb_scan_args(argc, argv, "01", &prefix);
     print_prefix = NIL_P(prefix) ? "" : RSTRING_PTR(prefix);
-    zframe_print(frame->frame, (char *)print_prefix);
+    zframe_print(frame, (char *)print_prefix);
     return Qnil;
 }
 
@@ -370,7 +372,7 @@ static VALUE rb_czmq_frame_reset(VALUE obj, VALUE data)
     errno = 0;
     ZmqGetFrame(obj);
     Check_Type(data, T_STRING);
-    zframe_reset(frame->frame, (char *)RSTRING_PTR(data), (size_t)RSTRING_LEN(data));
+    zframe_reset(frame, (char *)RSTRING_PTR(data), (size_t)RSTRING_LEN(data));
     ZmqAssertSysError();
     return Qnil;
 }

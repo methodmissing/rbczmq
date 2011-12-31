@@ -41,6 +41,8 @@
 #define ZmqEncode(str) str
 #include "rubyio.h"
 #include "rubysig.h"
+#include "st.h"
+
 #ifndef RSTRING_PTR
 #define RSTRING_PTR(str) RSTRING(str)->ptr
 #endif

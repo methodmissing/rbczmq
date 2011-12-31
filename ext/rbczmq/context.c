@@ -43,6 +43,7 @@ static VALUE rb_czmq_nogvl_zctx_destroy(void *ptr)
     errno = 0;
     zmq_ctx_wrapper *ctx = ptr;
     zctx_destroy(&ctx->ctx);
+    ctx->flags |= ZMQ_CONTEXT_DESTROYED;
     return Qnil;
 }
 
@@ -59,8 +60,7 @@ static void rb_czmq_free_ctx_gc(void *ptr)
 {
     zmq_ctx_wrapper *ctx = ptr;
     if (ctx) {
-        zclock_log ("I: context %p: GC free", ctx);
-        rb_czmq_free_ctx(ctx);
+        if (ctx->ctx != NULL && !(ctx->flags & ZMQ_CONTEXT_DESTROYED)) rb_czmq_free_ctx(ctx);
         xfree(ctx);
     }
 }
@@ -100,6 +100,7 @@ static VALUE rb_czmq_ctx_s_new(int argc, VALUE *argv, VALUE context)
     context = Data_Make_Struct(rb_cZmqContext, zmq_ctx_wrapper, 0, rb_czmq_free_ctx_gc, ctx);
     ctx->ctx = (zctx_t*)rb_thread_blocking_region(rb_czmq_nogvl_zctx_new, NULL, RUBY_UBF_IO, 0);
     ZmqAssertObjOnAlloc(ctx->ctx, ctx);
+    ctx->flags = 0;
     rb_obj_call_init(context, 0, NULL);
     rb_hash_aset(ctx_map, get_pid(), context);
     if (!NIL_P(io_threads)) rb_czmq_ctx_set_iothreads(context, io_threads);
@@ -244,6 +245,7 @@ static VALUE rb_czmq_ctx_socket(VALUE obj, VALUE type)
     sock->msg_buffer = zlist_new();
 #endif
     sock->handler = Qnil;
+    sock->flags = 0;
     sock->ctx = ctx->ctx;
     sock->verbose = FALSE;
     sock->state = ZMQ_SOCKET_PENDING;

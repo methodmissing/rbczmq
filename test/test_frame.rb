@@ -9,6 +9,14 @@ class TestZmqFrame < ZmqTestCase
     assert_nil frame.destroy
   end
 
+  def test_destroyed_frame
+    frame = ZMQ::Frame("message")
+    frame.destroy
+    assert_raises ZMQ::Error do
+      frame.data
+    end
+  end
+
   def test_alloc_empty
     frame = ZMQ::Frame.new
     assert_equal 0, frame.size

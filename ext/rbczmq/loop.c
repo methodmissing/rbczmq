@@ -67,7 +67,7 @@ ZMQ_NOINLINE static int rb_czmq_callback(zloop_t *loop, VALUE *args)
     status = 0;
     ret = rb_protect((VALUE(*)(VALUE))rb_czmq_callback0, (VALUE)args, &status);
     if (status) {
-        zloop_timer(loop, 1, 1, rb_czmq_loop_breaker_callback, args[0]);
+        zloop_timer(loop, 1, 1, rb_czmq_loop_breaker_callback, (void *)args[0]);
         if (NIL_P(rb_errinfo())) {
             rb_jump_tag(status);
         } else {
@@ -75,7 +75,7 @@ ZMQ_NOINLINE static int rb_czmq_callback(zloop_t *loop, VALUE *args)
             return 0;
         }
     } else if (ret == Qfalse) {
-        zloop_timer(loop, 1, 1, rb_czmq_loop_breaker_callback, args[0]);
+        zloop_timer(loop, 1, 1, rb_czmq_loop_breaker_callback, (void *)args[0]);
         return -1;
     }
     return 0;
@@ -129,14 +129,14 @@ static void rb_czmq_free_loop(zmq_loop_wrapper *loop)
     rb_czmq_loop_stop0(loop);
     zloop_destroy(&(loop->loop));
     loop->loop = NULL;
+    loop->flags |= ZMQ_LOOP_DESTROYED;
 }
 
 static void rb_czmq_free_loop_gc(void *ptr)
 {
     zmq_loop_wrapper *loop = ptr;
     if (loop) {
-        zclock_log ("I: loop %p: GC free", loop);
-        rb_czmq_free_loop(loop);
+        if (loop->loop != NULL && !(loop->flags & ZMQ_LOOP_DESTROYED)) rb_czmq_free_loop(loop);
         xfree(loop);
     }
 }
@@ -159,6 +159,7 @@ static VALUE rb_czmq_loop_new(VALUE loop)
     loop = Data_Make_Struct(rb_cZmqLoop, zmq_loop_wrapper, 0, rb_czmq_free_loop_gc, lp);
     lp->loop = zloop_new();
     ZmqAssertObjOnAlloc(lp->loop, lp);
+    lp->flags = 0;
     lp->running = FALSE;
     lp->verbose = FALSE;
     rb_obj_call_init(loop, 0, NULL);

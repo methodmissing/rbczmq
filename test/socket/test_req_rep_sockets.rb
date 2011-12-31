@@ -10,7 +10,7 @@ class TestReqRepSockets < ZmqTestCase
     begin
       rep.send("message")
     rescue => e
-      assert_match /Operation cannot be accomplished in current state/, e.message
+      assert_match(/Operation cannot be accomplished in current state/, e.message)
     end
   ensure
     ctx.destroy

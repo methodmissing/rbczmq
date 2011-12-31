@@ -64,7 +64,7 @@ class ZMQ::Socket::Rep
   end
 
   def send_frame(frame, flags = 0)
-    raise ZMQ::Error, "cannot send multiple frames on REP sockets" if flags == ZMQ::Frame::MORE
+    raise ZMQ::Error, "cannot send multiple frames on REP sockets" if (flags & ZMQ::Frame::MORE) == ZMQ::Frame::MORE
     super
   end
 

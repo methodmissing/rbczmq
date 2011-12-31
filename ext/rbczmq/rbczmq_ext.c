@@ -56,6 +56,8 @@ VALUE rb_cZmqMessage;
 VALUE rb_cZmqLoop;
 VALUE rb_cZmqTimer;
 
+st_table *frames_map = NULL;
+
 #ifdef HAVE_RUBY_ENCODING_H
 rb_encoding *binary_encoding;
 #endif
@@ -147,10 +149,9 @@ static VALUE rb_czmq_m_error(ZMQ_UNUSED VALUE obj)
     return rb_exc_new2(rb_eZmqError, zmq_strerror(zmq_errno()));
 }
 
-extern void _init_rbczmq_context();
-
 void Init_rbczmq_ext()
 {
+    frames_map = st_init_numtable();
 
 #ifdef HAVE_RUBY_ENCODING_H
     binary_encoding = rb_enc_find("binary");

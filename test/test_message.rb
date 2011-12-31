@@ -9,6 +9,14 @@ class TestZmqMessage < ZmqTestCase
     assert_nil msg.destroy
   end
 
+  def test_destroyed
+    msg = ZMQ::Message("one", "two")
+    msg.destroy
+    assert_raises ZMQ::Error do
+      msg.encode
+    end
+  end
+
   def test_message_sugar
     msg = ZMQ::Message("one", "two", "three")
     assert_equal "one", msg.popstr
@@ -126,14 +134,14 @@ class TestZmqMessage < ZmqTestCase
   def test_wrap_unwrap
     msg = ZMQ::Message.new
     body = ZMQ::Frame("body")
-    assert msg.wrap(body)
+    assert_nil msg.wrap(body)
     assert_equal 2, msg.size
     assert_equal 4, msg.content_size
     assert_equal body, msg.pop
     assert_equal ZMQ::Frame(""), msg.pop
 
     assert_equal 0, msg.size
-    assert msg.wrap(body)
+    assert_nil msg.wrap(body)
     assert_equal 2, msg.size
     assert_equal body, msg.unwrap
     assert_equal 0, msg.size

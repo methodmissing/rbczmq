@@ -14,6 +14,14 @@ class TestZmqContext < ZmqTestCase
     assert_nil ctx.destroy
   end
 
+  def test_destroyed_context
+    ctx = ZMQ::Context.new
+    ctx.destroy
+    assert_raises ZMQ::Error do
+      ctx.iothreads = 2
+    end
+  end
+
   def test_context_with_iothreads
     ctx = ZMQ::Context.new(2)
     assert_instance_of ZMQ::Context, ctx

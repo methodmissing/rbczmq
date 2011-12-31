@@ -37,6 +37,10 @@
 #ifndef RBCZMQ_SOCKET_H
 #define RBCZMQ_SOCKET_H
 
+#define ZMQ_SOCKET_DESTROYED 0x01
+
+/* Connection states */
+
 #define ZMQ_SOCKET_PENDING 0x01
 #define ZMQ_SOCKET_BOUND 0x02
 #define ZMQ_SOCKET_CONNECTED 0x04
@@ -44,6 +48,7 @@
 typedef struct {
     zctx_t *ctx;
     void *socket;
+    int flags;
     Bool verbose;
     int state;
 #ifndef HAVE_RB_THREAD_BLOCKING_REGION
@@ -65,7 +70,8 @@ typedef struct {
     zmq_sock_wrapper *sock = NULL; \
     ZmqAssertSocket(obj); \
     Data_Get_Struct(obj, zmq_sock_wrapper, sock); \
-    if (!sock) rb_raise(rb_eTypeError, "uninitialized ZMQ socket!");
+    if (!sock) rb_raise(rb_eTypeError, "uninitialized ZMQ socket!"); \
+    if (sock->flags & ZMQ_SOCKET_DESTROYED) rb_raise(rb_eZmqError, "object %p has been destroyed by the ZMQ framework", (void *)obj);
 
 #define ZmqDumpFrame(method, frame) \
   do { \
@@ -112,7 +118,7 @@ typedef struct {
     val = StringValueCStr(value); \
     (opt)(sock->socket, val); \
     if (sock->verbose) \
-        zclock_log ("I: %s socket %p: set option \"%s\" \"%s\"", zsocket_type_str(sock->socket), obj, (desc),  val); \
+        zclock_log ("I: %s socket %p: set option \"%s\" \"%s\"", zsocket_type_str(sock->socket), (void *)obj, (desc),  val); \
     return Qnil;
 
 #define ZmqSetBooleanSockOpt(obj, opt, desc, value) \

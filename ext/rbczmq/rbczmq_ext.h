@@ -71,7 +71,7 @@
     }
 #define ZmqAssertType(obj, type, desc) \
     if (!rb_obj_is_kind_of(obj,type)) \
-        rb_raise(rb_eTypeError, "wrong argument type %s (expected %s)", rb_obj_classname(obj), desc);
+        rb_raise(rb_eTypeError, "wrong argument type %s (expected %s): %s", rb_obj_classname(obj), desc, RSTRING_PTR(rb_obj_as_string(obj)));
 
 extern VALUE rb_mZmq;
 extern VALUE rb_eZmqError;
@@ -93,19 +93,14 @@ extern VALUE rb_cZmqMessage;
 extern VALUE rb_cZmqLoop;
 extern VALUE rb_cZmqTimer;
 
+extern st_table *frames_map;
+
 #include <context.h>
 #include <socket.h>
 #include <frame.h>
 #include <message.h>
 #include <loop.h>
 #include <timer.h>
-
-static VALUE
-get_pid()
-{
-    rb_secure(2);
-    return INT2FIX(getpid());
-}
 
 static inline char *rb_czmq_formatted_current_time()
 {

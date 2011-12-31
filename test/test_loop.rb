@@ -8,6 +8,14 @@ class TestZmqLoop < ZmqTestCase
     assert_instance_of ZMQ::Loop, lp
   end
 
+  def test_destroyed
+    lp = ZMQ::Loop.new
+    lp.destroy
+    assert_raises ZMQ::Error do
+      lp.start
+    end
+  end
+
   def test_run_and_stop
     ctx = ZMQ::Context.new
     ZMQ::Loop.run do

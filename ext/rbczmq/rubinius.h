@@ -37,6 +37,8 @@
 #ifndef RBCZMQ_RUBINIUS_H
 #define RBCZMQ_RUBINIUS_H
 
+#include "st.h"
+
 #define RSTRING_NOT_MODIFIED
 
 /* XXX */

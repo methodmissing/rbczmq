@@ -50,6 +50,7 @@ void rb_czmq_free_sock(zmq_sock_wrapper *sock)
         rb_thread_blocking_region(rb_czmq_nogvl_zsocket_destroy, sock, RUBY_UBF_IO, 0);
         if (zmq_errno() == ENOTSOCK) ZmqRaiseSysError();
         sock->socket = NULL;
+        sock->flags |= ZMQ_SOCKET_DESTROYED;
     }
 }
 
@@ -73,7 +74,7 @@ void rb_czmq_free_sock_gc(void *ptr)
     if (sock){
         if (sock->verbose)
             zclock_log ("I: %s socket %p, context %p: GC free", zsocket_type_str(sock->socket), sock, sock->ctx);
-        /*if (sock->socket != NULL) rb_czmq_free_sock(sock);*/
+        /* if (sock>socket != NULL && !(sock->flags & ZMQ_SOCKET_DESTROYED)) rb_czmq_free_sock(sock);*/
 #ifndef HAVE_RB_THREAD_BLOCKING_REGION
         zlist_destroy(&(sock->str_buffer));
         zlist_destroy(&(sock->frame_buffer));
@@ -285,10 +286,10 @@ static VALUE rb_czmq_nogvl_zstr_send(void *ptr) {
 #ifdef HAVE_RB_THREAD_BLOCKING_REGION
     return (VALUE)zstr_send(socket->socket, args->msg);
 #else
-    if (rb_thread_alone()) return (VALUE)zstr_send(socket->socket, args->msg);
+    if (rb_thread_alone()) return (VALUE)zstr_send_nowait(socket->socket, args->msg);
 try_writable:
     if ((zsockopt_events(socket->socket) & ZMQ_POLLOUT) == ZMQ_POLLOUT) {
-        return (VALUE)zstr_send(socket->socket, args->msg);
+        return (VALUE)zstr_send_nowait(socket->socket, args->msg);
     } else {
         rb_thread_wait_fd(zsockopt_fd(socket->socket));
         goto try_writable;
@@ -385,7 +386,7 @@ static VALUE rb_czmq_nogvl_recv(void *ptr) {
     return (VALUE)zstr_recv(socket->socket);
 #else
     if (zlist_size(socket->str_buffer) != 0)
-       return zlist_pop(socket->str_buffer);
+       return (VALUE)zlist_pop(socket->str_buffer);
 try_readable:
     if ((zsockopt_events(socket->socket) & ZMQ_POLLIN) == ZMQ_POLLIN) {
         do {
@@ -501,32 +502,32 @@ static VALUE rb_czmq_socket_send_frame(int argc, VALUE *argv, VALUE obj)
     char print_prefix[255];
     char *cur_time = NULL;
     zframe_t *print_frame = NULL;
-    int rc;
+    int rc, flgs;
     GetZmqSocket(obj);
     ZmqAssertSocketNotPending(sock, "can only send on a bound or connected socket!");
     ZmqSockGuardCrossThread(sock);
     rb_scan_args(argc, argv, "11", &frame_obj, &flags);
     ZmqGetFrame(frame_obj);
-    if (NIL_P(flags)) flags = INT2FIX(0);
-    if (SYMBOL_P(flags)) flags = rb_const_get_at(rb_cZmqFrame, rb_to_id(flags));
 
-   if (sock->verbose) {
+    if (NIL_P(flags)) {
+        flgs = 0;
+    } else {
+        if (SYMBOL_P(flags)) flags = rb_const_get_at(rb_cZmqFrame, rb_to_id(flags));
+        Check_Type(flags, T_FIXNUM);
+        flgs = FIX2INT(flags);
+    }
+
+    if (sock->verbose) {
         cur_time = rb_czmq_formatted_current_time();
-        print_frame = zframe_dup(frame->frame);
+        print_frame = (flgs & ZFRAME_REUSE) ? frame : zframe_dup(frame);
     }
     args.socket = sock;
-    args.frame = frame->frame;
-    args.flags = FIX2INT(flags);
+    args.frame = frame;
+    args.flags = flgs;
     rc = (int)rb_thread_blocking_region(rb_czmq_nogvl_send_frame, (void *)&args, RUBY_UBF_IO, 0);
     ZmqAssert(rc);
-    frame->flags |= ZMQ_FRAME_RECYCLED;
     if (sock->verbose) ZmqDumpFrame("send_frame", print_frame);
     return Qtrue;
-}
-
-int wrap_zmsg_send(zmsg_t **m, void *socket) {
-    zmsg_send(m, socket);
-    return 0;
 }
 
 static VALUE rb_czmq_nogvl_send_message(void *ptr) {
@@ -579,7 +580,7 @@ static VALUE rb_czmq_socket_send_message(VALUE obj, VALUE message_obj)
     args.socket = sock;
     args.message = message->message;
     rb_thread_blocking_region(rb_czmq_nogvl_send_message, (void *)&args, RUBY_UBF_IO, 0);
-    message->flags |= ZMQ_MESSAGE_RECYCLED;
+    message->flags |= ZMQ_MESSAGE_DESTROYED;
     if (sock->verbose) ZmqDumpMessage("send_message", print_message);
     return Qnil;
 }
@@ -592,7 +593,7 @@ static VALUE rb_czmq_nogvl_recv_frame(void *ptr) {
     return (VALUE)zframe_recv(socket->socket);
 #else
     if (zlist_size(socket->frame_buffer) != 0)
-       return zlist_pop(socket->frame_buffer);
+       return (VALUE)zlist_pop(socket->frame_buffer);
 try_readable:
     if ((zsockopt_events(socket->socket) & ZMQ_POLLIN) == ZMQ_POLLIN) {
         do {
@@ -636,7 +637,7 @@ static VALUE rb_czmq_socket_recv_frame(VALUE obj)
         cur_time = rb_czmq_formatted_current_time();
         ZmqDumpFrame("recv_frame", frame);
     }
-    return rb_czmq_alloc_frame(&frame, ZMQ_FRAME_ALLOC);
+    return rb_czmq_alloc_frame(frame);
 }
 
 /*
@@ -668,7 +669,7 @@ static VALUE rb_czmq_socket_recv_frame_nonblock(VALUE obj)
         cur_time = rb_czmq_formatted_current_time();
         ZmqDumpFrame("recv_frame_nonblock", frame);
     }
-    return rb_czmq_alloc_frame(&frame, ZMQ_FRAME_ALLOC);
+    return rb_czmq_alloc_frame(frame);
 }
 
 static VALUE rb_czmq_nogvl_recv_message(void *ptr) {
@@ -679,7 +680,7 @@ static VALUE rb_czmq_nogvl_recv_message(void *ptr) {
     return (VALUE)zmsg_recv(socket->socket);
 #else
     if (zlist_size(socket->msg_buffer) != 0)
-       return zlist_pop(socket->msg_buffer);
+       return (VALUE)zlist_pop(socket->msg_buffer);
 try_readable:
     if ((zsockopt_events(socket->socket) & ZMQ_POLLIN) == ZMQ_POLLIN) {
         do {

@@ -37,28 +37,23 @@
 #ifndef RBCZMQ_FRAME_H
 #define RBCZMQ_FRAME_H
 
-#define ZMQ_FRAME_RECYCLED 2
-#define ZMQ_FRAME_MESSAGE 4
-#define ZMQ_FRAME_NEW 8
-#define ZMQ_FRAME_ALLOC 16
-#define ZMQ_FRAME_DUP 32
-
-typedef struct {
-    zframe_t  *frame;
-    int flags;
-} zmq_frame_wrapper;
-
 #define ZmqAssertFrame(obj) ZmqAssertType(obj, rb_cZmqFrame, "ZMQ::Frame")
 #define ZmqGetFrame(obj) \
-    zmq_frame_wrapper *frame = NULL; \
+    zframe_t *frame = NULL; \
     ZmqAssertFrame(obj); \
-    Data_Get_Struct(obj, zmq_frame_wrapper, frame); \
-    if (!frame) rb_raise(rb_eTypeError, "uninitialized ZMQ frame!");
+    Data_Get_Struct(obj, zframe_t, frame); \
+    if (!frame) rb_raise(rb_eTypeError, "uninitialized ZMQ frame!"); \
+    if (!(st_lookup(frames_map, (st_data_t)frame, 0))) rb_raise(rb_eZmqError, "object %p has been destroyed by the ZMQ framework", (void *)obj);
 
-void rb_czmq_free_frame(zmq_frame_wrapper *frame);
+#define ZmqRegisterFrame(fr) \
+    zframe_freefn((fr), rb_czmq_frame_freed); \
+    st_insert(frames_map, (st_data_t)(fr), (st_data_t)0);
+
+void rb_czmq_free_frame(zframe_t *frame);
 void rb_czmq_free_frame_gc(void *ptr);
+void rb_czmq_frame_freed(zframe_t *frame);
 
-VALUE rb_czmq_alloc_frame(zframe_t **frame, int flags);
+VALUE rb_czmq_alloc_frame(zframe_t *frame);
 
 void _init_rb_czmq_frame();
 
