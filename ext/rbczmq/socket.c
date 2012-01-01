@@ -74,7 +74,7 @@ void rb_czmq_free_sock_gc(void *ptr)
     if (sock){
         if (sock->verbose)
             zclock_log ("I: %s socket %p, context %p: GC free", zsocket_type_str(sock->socket), sock, sock->ctx);
-        /* if (sock>socket != NULL && !(sock->flags & ZMQ_SOCKET_DESTROYED)) rb_czmq_free_sock(sock);*/
+        if (sock>socket != NULL && !(sock->flags & ZMQ_SOCKET_DESTROYED)) rb_czmq_free_sock(sock);
 #ifndef HAVE_RB_THREAD_BLOCKING_REGION
         zlist_destroy(&(sock->str_buffer));
         zlist_destroy(&(sock->frame_buffer));
