@@ -401,7 +401,6 @@ static VALUE rb_czmq_message_popstr(VALUE obj)
 
 static VALUE rb_czmq_message_wrap(VALUE obj, VALUE frame_obj)
 {
-    int rc = 0;
     errno = 0;
     ZmqGetMessage(obj);
     ZmqGetFrame(frame_obj);

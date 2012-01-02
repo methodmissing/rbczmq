@@ -38,6 +38,14 @@
 
 static VALUE intern_zctx_process;
 
+static VALUE rb_czmq_ctx_set_iothreads(VALUE context, VALUE io_threads);
+
+static VALUE get_pid()
+{
+    rb_secure(2);
+    return INT2NUM(getpid());
+}
+
 static VALUE rb_czmq_nogvl_zctx_destroy(void *ptr)
 {
     errno = 0;

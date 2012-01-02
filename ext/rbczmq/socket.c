@@ -74,7 +74,11 @@ void rb_czmq_free_sock_gc(void *ptr)
     if (sock){
         if (sock->verbose)
             zclock_log ("I: %s socket %p, context %p: GC free", zsocket_type_str(sock->socket), sock, sock->ctx);
-        if (sock>socket != NULL && !(sock->flags & ZMQ_SOCKET_DESTROYED)) rb_czmq_free_sock(sock);
+/*
+        XXX: cyclic dependency
+        #4  0x0000000100712524 in zsockopt_set_linger (linger=1, socket=<value temporarily unavailable, due to optimizations>) at zsockopt.c:288
+        if (sock->socket != NULL && !(sock->flags & ZMQ_SOCKET_DESTROYED)) rb_czmq_free_sock(sock);
+*/
 #ifndef HAVE_RB_THREAD_BLOCKING_REGION
         zlist_destroy(&(sock->str_buffer));
         zlist_destroy(&(sock->frame_buffer));
@@ -374,7 +378,7 @@ static VALUE rb_czmq_socket_sendm(VALUE obj, VALUE msg)
     Check_Type(msg, T_STRING);
     args.socket = sock;
     args.msg = StringValueCStr(msg);
-    rc = rb_thread_blocking_region(rb_czmq_nogvl_zstr_sendm, (void *)&args, RUBY_UBF_IO, 0);
+    rc = (int)rb_thread_blocking_region(rb_czmq_nogvl_zstr_sendm, (void *)&args, RUBY_UBF_IO, 0);
     ZmqAssert(rc);
     if (sock->verbose)
         zclock_log ("I: %s socket %p: sendm \"%s\"", zsocket_type_str(sock->socket), sock->socket, StringValueCStr(msg));

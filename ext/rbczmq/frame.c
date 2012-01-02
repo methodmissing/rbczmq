@@ -348,7 +348,7 @@ static VALUE rb_czmq_frame_cmp(VALUE obj, VALUE other_frame)
 static VALUE rb_czmq_frame_print(int argc, VALUE *argv, VALUE obj)
 {
     VALUE prefix;
-    char *print_prefix = NULL;
+    const char *print_prefix = NULL;
     ZmqGetFrame(obj);
     rb_scan_args(argc, argv, "01", &prefix);
     print_prefix = NIL_P(prefix) ? "" : RSTRING_PTR(prefix);
