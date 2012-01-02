@@ -111,8 +111,9 @@ static VALUE rb_czmq_ctx_s_new(int argc, VALUE *argv, VALUE context)
  *  call-seq:
  *     ctx.destroy    =>  nil
  *
- *  Destroy a ZMQ context and all sockets in it. This also happens when a ZMQ::Context instance is garbage collected or
- *  finalized on process termination.
+ *  Destroy a ZMQ context and all sockets in it. Useful for manual memory management, otherwise the GC
+ *  will take the same action if a context object is not reachable anymore on the next GC cycle. This is
+ *  a lower level API.
  *
  * === Examples
  *     ctx = ZMQ::Context.new
@@ -220,6 +221,7 @@ static inline VALUE rb_czmq_ctx_socket_klass(int socket_type) {
  * === Examples
  *     ctx = ZMQ::Context.new
  *     ctx.socket(:PUSH)    =>   ZMQ::Socket
+ *     ctx.socket(ZMQ::PUSH)    =>  ZMQ::Socket
  *
 */
 

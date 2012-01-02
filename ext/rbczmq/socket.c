@@ -88,7 +88,8 @@ void rb_czmq_free_sock_gc(void *ptr)
  *  call-seq:
  *     sock.close   =>  nil
  *
- *  Closes a socket.
+ *  Closes a socket. The GC will take the same action if a socket object is not reachable anymore on the next GC cycle.
+ *  This is a lower level API.
  *
  * === Examples
  *     sock.close    =>  nil
@@ -105,9 +106,9 @@ static VALUE rb_czmq_socket_close(VALUE obj)
 
 /*
  *  call-seq:
- *     sock.endpoint   =>  String
+ *     sock.endpoint   =>  String or nil
  *
- *  Closes a socket.
+ *  Returns the endpoint this socket is currently connected to, if any.
  *
  * === Examples
  *     ctx = ZMQ::Context.new
@@ -128,7 +129,7 @@ static VALUE rb_czmq_socket_endpoint(VALUE obj)
  *  call-seq:
  *     sock.state   =>  String
  *
- *  Closes a socket.
+ *  Returns the current socket state, one of ZMQ::Socket::PENDING, ZMQ::Socket::BOUND or ZMQ::Socket::CONNECTED
  *
  * === Examples
  *     ctx = ZMQ::Context.new
@@ -149,7 +150,8 @@ static VALUE rb_czmq_socket_state(VALUE obj)
  *  call-seq:
  *     sock.fd   =>  Fixnum
  *
- *  Closes a socket.
+ *  Returns a file descriptor reference for integrating this socket with an externel event loop or multiplexor.
+ *  Edge-triggered notification of I/O state changes.
  *
  * === Examples
  *     ctx = ZMQ::Context.new
@@ -197,7 +199,8 @@ VALUE rb_czmq_nogvl_socket_connect(void *ptr) {
  *  call-seq:
  *     sock.bind("inproc://test")   =>  Fixnum
  *
- *  Closes a socket.
+ *  Binds to a given endpoint. When the port number is '*', attempts to bind to a free port. Always returns the port
+ *  number on success.
  *
  * === Examples
  *     ctx = ZMQ::Context.new
@@ -220,15 +223,15 @@ static VALUE rb_czmq_socket_bind(VALUE obj, VALUE endpoint)
     if (sock->verbose)
         zclock_log ("I: %s socket %p: bound \"%s\"", zsocket_type_str(sock->socket), obj, StringValueCStr(endpoint));
     sock->state = ZMQ_SOCKET_BOUND;
-    sock->endpoint = rb_str_dup(endpoint);
-    return INT2FIX(rc);
+    sock->endpoint = rb_str_new4(endpoint);
+    return INT2NUM(rc);
 }
 
 /*
  *  call-seq:
  *     sock.connect("tcp://localhost:3456")   =>  boolean
  *
- *  Closes a socket.
+ *  Attempts to connect to a given endpoint.
  *
  * === Examples
  *     ctx = ZMQ::Context.new
@@ -253,7 +256,7 @@ static VALUE rb_czmq_socket_connect(VALUE obj, VALUE endpoint)
     if (sock->verbose)
         zclock_log ("I: %s socket %p: connected \"%s\"", zsocket_type_str(sock->socket), obj, StringValueCStr(endpoint));
     sock->state = ZMQ_SOCKET_CONNECTED;
-    sock->endpoint = rb_str_dup(endpoint);
+    sock->endpoint = rb_str_new4(endpoint);
     return Qtrue;
 }
 
@@ -261,7 +264,7 @@ static VALUE rb_czmq_socket_connect(VALUE obj, VALUE endpoint)
  *  call-seq:
  *     sock.verbose = true   =>  nil
  *
- *  Closes a socket.
+ *  Let this socket be verbose - dumps a lot of data to stdout for debugging.
  *
  * === Examples
  *     ctx = ZMQ::Context.new
@@ -860,7 +863,7 @@ static VALUE rb_czmq_socket_send_timeout(VALUE obj)
 static VALUE rb_czmq_socket_opt_hwm(VALUE obj)
 {
     GetZmqSocket(obj);
-    return INT2FIX(zsockopt_hwm(sock->socket));
+    return INT2NUM(zsockopt_hwm(sock->socket));
 }
 
 /*
@@ -898,7 +901,7 @@ static VALUE rb_czmq_socket_set_opt_hwm(VALUE obj, VALUE value)
 static VALUE rb_czmq_socket_opt_swap(VALUE obj)
 {
     GetZmqSocket(obj);
-    return INT2FIX(zsockopt_swap(sock->socket));
+    return INT2NUM(zsockopt_swap(sock->socket));
 }
 
 /*
@@ -935,7 +938,7 @@ static VALUE rb_czmq_socket_set_opt_swap(VALUE obj, VALUE value)
 static VALUE rb_czmq_socket_opt_affinity(VALUE obj)
 {
     GetZmqSocket(obj);
-    return INT2FIX(zsockopt_affinity(sock->socket));
+    return INT2NUM(zsockopt_affinity(sock->socket));
 }
 
 /*
@@ -972,7 +975,7 @@ static VALUE rb_czmq_socket_set_opt_affinity(VALUE obj, VALUE value)
 static VALUE rb_czmq_socket_opt_rate(VALUE obj)
 {
     GetZmqSocket(obj);
-    return INT2FIX(zsockopt_rate(sock->socket));
+    return INT2NUM(zsockopt_rate(sock->socket));
 }
 
 /*
@@ -1009,7 +1012,7 @@ static VALUE rb_czmq_socket_set_opt_rate(VALUE obj, VALUE value)
 static VALUE rb_czmq_socket_opt_recovery_ivl(VALUE obj)
 {
     GetZmqSocket(obj);
-    return INT2FIX(zsockopt_recovery_ivl(sock->socket));
+    return INT2NUM(zsockopt_recovery_ivl(sock->socket));
 }
 
 /*
@@ -1046,7 +1049,7 @@ static VALUE rb_czmq_socket_set_opt_recovery_ivl(VALUE obj, VALUE value)
 static VALUE rb_czmq_socket_opt_recovery_ivl_msec(VALUE obj)
 {
     GetZmqSocket(obj);
-    return INT2FIX(zsockopt_recovery_ivl_msec(sock->socket));
+    return INT2NUM(zsockopt_recovery_ivl_msec(sock->socket));
 }
 
 /*
@@ -1120,7 +1123,7 @@ static VALUE rb_czmq_socket_set_opt_mcast_loop(VALUE obj, VALUE value)
 static VALUE rb_czmq_socket_opt_sndbuf(VALUE obj)
 {
     GetZmqSocket(obj);
-    return INT2FIX(zsockopt_sndbuf(sock->socket));
+    return INT2NUM(zsockopt_sndbuf(sock->socket));
 }
 
 /*
@@ -1157,7 +1160,7 @@ static VALUE rb_czmq_socket_set_opt_sndbuf(VALUE obj, VALUE value)
 static VALUE rb_czmq_socket_opt_rcvbuf(VALUE obj)
 {
     GetZmqSocket(obj);
-    return INT2FIX(zsockopt_rcvbuf(sock->socket));
+    return INT2NUM(zsockopt_rcvbuf(sock->socket));
 }
 
 /*
@@ -1194,7 +1197,7 @@ static VALUE rb_czmq_socket_set_opt_rcvbuf(VALUE obj, VALUE value)
 static VALUE rb_czmq_socket_opt_linger(VALUE obj)
 {
     GetZmqSocket(obj);
-    return INT2FIX(zsockopt_linger(sock->socket));
+    return INT2NUM(zsockopt_linger(sock->socket));
 }
 
 /*
@@ -1231,7 +1234,7 @@ static VALUE rb_czmq_socket_set_opt_linger(VALUE obj, VALUE value)
 static VALUE rb_czmq_socket_opt_backlog(VALUE obj)
 {
     GetZmqSocket(obj);
-    return INT2FIX(zsockopt_backlog(sock->socket));
+    return INT2NUM(zsockopt_backlog(sock->socket));
 }
 
 /*
@@ -1268,7 +1271,7 @@ static VALUE rb_czmq_socket_set_opt_backlog(VALUE obj, VALUE value)
 static VALUE rb_czmq_socket_opt_reconnect_ivl(VALUE obj)
 {
     GetZmqSocket(obj);
-    return INT2FIX(zsockopt_reconnect_ivl(sock->socket));
+    return INT2NUM(zsockopt_reconnect_ivl(sock->socket));
 }
 
 /*
@@ -1305,7 +1308,7 @@ static VALUE rb_czmq_socket_set_opt_reconnect_ivl(VALUE obj, VALUE value)
 static VALUE rb_czmq_socket_opt_reconnect_ivl_max(VALUE obj)
 {
     GetZmqSocket(obj);
-    return INT2FIX(zsockopt_reconnect_ivl_max(sock->socket));
+    return INT2NUM(zsockopt_reconnect_ivl_max(sock->socket));
 }
 
 /*
@@ -1429,7 +1432,7 @@ static VALUE rb_czmq_socket_opt_rcvmore(VALUE obj)
 static VALUE rb_czmq_socket_opt_events(VALUE obj)
 {
     GetZmqSocket(obj);
-    return INT2FIX(zsockopt_events(sock->socket));
+    return INT2NUM(zsockopt_events(sock->socket));
 }
 
 void _init_rb_czmq_socket() {

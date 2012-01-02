@@ -36,4 +36,3 @@
 * Restrict pair sockets to inproc transport only
 * Add basic GC stats for some objects
 * Revisit JRuby C API support
-* rb_str_new4

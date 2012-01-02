@@ -246,8 +246,9 @@ static VALUE rb_czmq_loop_stop(VALUE obj)
  *  call-seq:
  *     loop.destroy    =>  nil
  *
- *  Explicitly destroys a reactor instance. This is a lower level API, also invoked during garbage collection if the reactor
- *  instance is unreachable.
+ *  Explicitly destroys a reactor instance. Useful for manual memory management, otherwise the GC
+ *  will take the same action if a message object is not reachable anymore on the next GC cycle. This is
+ *  a lower level API.
  *
  * === Examples
  *     loop = ZMQ::Loop.new    =>   ZMQ::Loop

@@ -66,6 +66,17 @@ VALUE rb_czmq_alloc_message(zmsg_t *message)
     return message_obj;
 }
 
+/*
+ *  call-seq:
+ *     ZMQ::Message.new    =>  ZMQ::Message
+ *
+ *  Creates an empty ZMQ::Message instance.
+ *
+ * === Examples
+ *     ZMQ::Message.new    =>  ZMQ::Message
+ *
+*/
+
 static VALUE rb_czmq_message_new(VALUE message)
 {
     zmq_message_wrapper *msg = NULL;
@@ -78,17 +89,59 @@ static VALUE rb_czmq_message_new(VALUE message)
     return message;
 }
 
+/*
+ *  call-seq:
+ *     msg.size    =>  Fixnum
+ *
+ *  Returns the size of a given ZMQ::Message instance - the number of frames.
+ *
+ * === Examples
+ *     msg = ZMQ::Message.new    =>  ZMQ::Message
+ *     msg.size    =>   0
+ *     msg.pushstr "frame"  =>  true
+ *     msg.size    =>   1
+ *
+*/
+
 static VALUE rb_czmq_message_size(VALUE obj)
 {
     ZmqGetMessage(obj);
     return INT2NUM(zmsg_size(message->message));
 }
 
+/*
+ *  call-seq:
+ *     msg.content_size    =>  Fixnum
+ *
+ *  Returns the content size of a given ZMQ::Message instance - the sum of each frame's length.
+ *
+ * === Examples
+ *     msg = ZMQ::Message.new    =>  ZMQ::Message
+ *     msg.content_size    =>   0
+ *     msg.pushstr "frame"  =>  true
+ *     msg.content_size    =>   5
+ *
+*/
+
 static VALUE rb_czmq_message_content_size(VALUE obj)
 {
     ZmqGetMessage(obj);
     return INT2NUM(zmsg_content_size(message->message));
 }
+
+/*
+ *  call-seq:
+ *     msg.push(frame)    =>  Boolean
+ *
+ *  Push frame to the front of the message, before all other frames. Message takes ownership of the frame and will
+ *  destroy it when message is sent.
+ *
+ * === Examples
+ *     msg = ZMQ::Message.new    =>  ZMQ::Message
+ *     msg.push ZMQ::Frame(test)    =>   true
+ *     msg.size     =>   1
+ *
+*/
 
 static VALUE rb_czmq_message_push(VALUE obj, VALUE frame_obj)
 {
@@ -101,6 +154,20 @@ static VALUE rb_czmq_message_push(VALUE obj, VALUE frame_obj)
     return Qtrue;
 }
 
+/*
+ *  call-seq:
+ *     msg.add(frame)    =>  Boolean
+ *
+ *  Add frame to the end of the message, after all other frames. Message takes ownership of the frame and will
+ *  destroy it when message is sent.
+ *
+ * === Examples
+ *     msg = ZMQ::Message.new    =>  ZMQ::Message
+ *     msg.add ZMQ::Frame(test)    =>   true
+ *     msg.size     =>   1
+ *
+*/
+
 static VALUE rb_czmq_message_add(VALUE obj, VALUE frame_obj)
 {
     int rc = 0;
@@ -112,6 +179,21 @@ static VALUE rb_czmq_message_add(VALUE obj, VALUE frame_obj)
     return Qtrue;
 }
 
+/*
+ *  call-seq:
+ *     msg.pop    =>  ZMQ::Frame or nil
+ *
+ *  Remove first frame from message, if any. Returns a ZMQ::Frame instance or nil. Caller now owns the frame.
+ *
+ * === Examples
+ *     msg = ZMQ::Message.new    =>  ZMQ::Message
+ *     msg.pushstr "test"    =>   true
+ *     msg.pop    =>   ZMQ::Frame
+ *     msg.size    =>   1
+ *     msg.pop    =>   nil
+ *
+*/
+
 static VALUE rb_czmq_message_pop(VALUE obj)
 {
     zframe_t *frame = NULL;
@@ -121,12 +203,39 @@ static VALUE rb_czmq_message_pop(VALUE obj)
     return rb_czmq_alloc_frame(frame);
 }
 
+/*
+ *  call-seq:
+ *     msg.print    =>  nil
+ *
+ *  Dumps the first 10 frames of the message to stderr for debugging.
+ *
+ * === Examples
+ *     msg = ZMQ::Message.new    =>  ZMQ::Message
+ *     msg.pushstr "test"    =>   true
+ *     msg.print    =>   nil
+ *
+*/
+
 static VALUE rb_czmq_message_print(VALUE obj)
 {
     ZmqGetMessage(obj);
     zmsg_dump(message->message);
     return Qnil;
 }
+
+/*
+ *  call-seq:
+ *     msg.first    =>  ZMQ::Frame or nil
+ *
+ *  Resets the cursor to the first message frame, if any.
+ *
+ * === Examples
+ *     msg = ZMQ::Message.new    =>  ZMQ::Message
+ *     msg.pushstr "test"    =>   true
+ *     msg.first    =>   ZMQ::Frame
+ *     msg.first    =>   nil
+ *
+*/
 
 static VALUE rb_czmq_message_first(VALUE obj)
 {
@@ -137,6 +246,21 @@ static VALUE rb_czmq_message_first(VALUE obj)
     return rb_czmq_alloc_frame(frame);
 }
 
+/*
+ *  call-seq:
+ *     msg.next    =>  ZMQ::Frame or nil
+ *
+ *  Returns the next message frame or nil if there aren't anymore. Advances the frames cursor and can thus be used for
+ *  iteration.
+ *
+ * === Examples
+ *     msg = ZMQ::Message.new    =>  ZMQ::Message
+ *     msg.pushstr "test"    =>   true
+ *     msg.next    =>   ZMQ::Frame
+ *     msg.next    =>   nil
+ *
+*/
+
 static VALUE rb_czmq_message_next(VALUE obj)
 {
     zframe_t *frame = NULL;
@@ -145,6 +269,20 @@ static VALUE rb_czmq_message_next(VALUE obj)
     if (frame == NULL) return Qnil;
     return rb_czmq_alloc_frame(frame);
 }
+
+/*
+ *  call-seq:
+ *     msg.last    =>  ZMQ::Frame or nil
+ *
+ *  Resets the cursor to the last message frame, if any.
+ *
+ * === Examples
+ *     msg = ZMQ::Message.new    =>  ZMQ::Message
+ *     msg.pushstr "test"    =>   true
+ *     msg.last    =>   ZMQ::Frame
+ *     msg.last    =>   nil
+ *
+*/
 
 static VALUE rb_czmq_message_last(VALUE obj)
 {
@@ -155,6 +293,22 @@ static VALUE rb_czmq_message_last(VALUE obj)
     return rb_czmq_alloc_frame(frame);
 }
 
+/*
+ *  call-seq:
+ *     msg.remove(frame)    =>  nil
+ *
+ *  Removes the given frame from the message's frame list if present. Does not destroy the frame itself.
+ *
+ * === Examples
+ *     msg = ZMQ::Message.new    =>  ZMQ::Message
+ *     frame = ZMQ::Frame("test")    =>  ZMQ::Frame
+ *     msg.push(frame)    =>   true
+ *     msg.size     =>   1
+ *     msg.remove(frame)    =>   nil
+ *     msg.size     =>   0
+ *
+*/
+
 static VALUE rb_czmq_message_remove(VALUE obj, VALUE frame_obj)
 {
     ZmqGetMessage(obj);
@@ -162,6 +316,18 @@ static VALUE rb_czmq_message_remove(VALUE obj, VALUE frame_obj)
     zmsg_remove(message->message, frame);
     return Qnil;
 }
+
+/*
+ *  call-seq:
+ *     msg.pushstr(frame)    =>  Boolean
+ *
+ *  Push a string as a new frame to the front of the message, before all other frames.
+ *
+ * === Examples
+ *     msg = ZMQ::Message.new    =>  ZMQ::Message
+ *     msg.pushstr "test"    =>   true
+ *
+*/
 
 static VALUE rb_czmq_message_pushstr(VALUE obj, VALUE str)
 {
@@ -174,6 +340,18 @@ static VALUE rb_czmq_message_pushstr(VALUE obj, VALUE str)
     return Qtrue;
 }
 
+/*
+ *  call-seq:
+ *     msg.addstr(frame)    =>  Boolean
+ *
+ *  Push a string as a new frame to the end of the message, after all other frames.
+ *
+ * === Examples
+ *     msg = ZMQ::Message.new    =>  ZMQ::Message
+ *     msg.addstr "test"    =>   true
+ *
+*/
+
 static VALUE rb_czmq_message_addstr(VALUE obj, VALUE str)
 {
     int rc = 0;
@@ -185,6 +363,19 @@ static VALUE rb_czmq_message_addstr(VALUE obj, VALUE str)
     return Qtrue;
 }
 
+/*
+ *  call-seq:
+ *     msg.popstr    =>  String or nil
+ *
+ *  Pop frame off front of message, return as a new string.
+ *
+ * === Examples
+ *     msg = ZMQ::Message.new    =>  ZMQ::Message
+ *     msg.addstr "test"    =>   true
+ *     msg.popstr    =>   "test"
+ *
+*/
+
 static VALUE rb_czmq_message_popstr(VALUE obj)
 {
     char *str = NULL;
@@ -193,6 +384,20 @@ static VALUE rb_czmq_message_popstr(VALUE obj)
     if (str == NULL) return Qnil;
     return rb_str_new2(str);
 }
+
+/*
+ *  call-seq:
+ *     msg.wrap(frame)    =>  nil
+ *
+ *  Push frame plus empty frame to front of message, before the first frame. Message takes ownership of frame, will
+ *  destroy it when message is sent.
+ *
+ * === Examples
+ *     msg = ZMQ::Message.new    =>  ZMQ::Message
+ *     msg.wrap ZMQ::Frame("test")    =>   nil
+ *     msg.size     =>   2
+ *
+*/
 
 static VALUE rb_czmq_message_wrap(VALUE obj, VALUE frame_obj)
 {
@@ -204,6 +409,22 @@ static VALUE rb_czmq_message_wrap(VALUE obj, VALUE frame_obj)
     return Qnil;
 }
 
+/*
+ *  call-seq:
+ *     msg.unwrap   =>  ZMQ::Frame or nil
+ *
+ *  Pop frame off front of message, caller now owns frame. If next frame is empty, pops and destroys that empty frame.
+ *
+ * === Examples
+ *     msg = ZMQ::Message.new    =>  ZMQ::Message
+ *     frame = ZMQ::Frame("test")     =>   ZMQ::Frame
+ *     msg.wrap ZMQ::Frame("test")    =>   nil
+ *     msg.size     =>   2
+ *     msg.unwrap     =>   frame
+ *     msg.size     =>   0
+ *
+*/
+
 static VALUE rb_czmq_message_unwrap(VALUE obj)
 {
     zframe_t *frame = NULL;
@@ -212,6 +433,18 @@ static VALUE rb_czmq_message_unwrap(VALUE obj)
     if (frame == NULL) return Qnil;
     return rb_czmq_alloc_frame(frame);
 }
+
+/*
+ *  call-seq:
+ *     msg.dup    =>  ZMQ::Message
+ *
+ *  Creates a copy of this message
+ *
+ * === Examples
+ *     msg = ZMQ::Message.new    =>  ZMQ::Message
+ *     msg.dup    =>   ZMQ::Message
+ *
+*/
 
 static VALUE rb_czmq_message_dup(VALUE obj)
 {
@@ -227,12 +460,40 @@ static VALUE rb_czmq_message_dup(VALUE obj)
     return dup;
 }
 
+/*
+ *  call-seq:
+ *     msg.destroy    =>  nil
+ *
+ *  Destroys a ZMQ::Message instance and all the frames it contains. Useful for manual memory management, otherwise the GC
+ *  will take the same action if a message object is not reachable anymore on the next GC cycle. This is
+ *  a lower level API.
+ *
+ * === Examples
+ *     msg = ZMQ::Message.new    =>  ZMQ::Message
+ *     msg.destroy    =>   nil
+ *
+*/
+
 static VALUE rb_czmq_message_destroy(VALUE obj)
 {
     ZmqGetMessage(obj);
     rb_czmq_free_message(message);
     return Qnil;
 }
+
+/*
+ *  call-seq:
+ *     msg.encode    =>  string
+ *
+ *  Encodes the message to a new buffer.
+ *
+ * === Examples
+ *     msg = ZMQ::Message.new    =>  ZMQ::Message
+ *     msg.pushstr "body"
+ *     msg.pushstr "header"
+ *     msg.encode     =>   "\006header\004body"
+ *
+*/
 
 static VALUE rb_czmq_message_encode(VALUE obj)
 {
@@ -243,6 +504,19 @@ static VALUE rb_czmq_message_encode(VALUE obj)
     return rb_str_new((char *)buff, buff_size);
 }
 
+/*
+ *  call-seq:
+ *     ZMQ::Message.decode("\006header\004body")    =>  ZMQ::Message
+ *
+ *  Decode a buffer into a new message. Returns nil if the buffer is not properly formatted.
+ *
+ * === Examples
+ *     msg = ZMQ::Message.decode("\006header\004body")
+ *     msg.popstr     =>   "header"
+ *     msg.popstr     =>   "body"
+ *
+*/
+
 static VALUE rb_czmq_message_s_decode(ZMQ_UNUSED VALUE obj, VALUE buffer)
 {
     zmsg_t * m = NULL;
@@ -250,6 +524,19 @@ static VALUE rb_czmq_message_s_decode(ZMQ_UNUSED VALUE obj, VALUE buffer)
     if (m == NULL) return Qnil;
     return rb_czmq_alloc_message(m);
 }
+
+/*
+ *  call-seq:
+ *     msg.eql?(other)    =>  boolean
+ *
+ *  Determines if a message equals another. True if size, content size and serialized representation is equal.
+ *
+ * === Examples
+ *     msg = ZMQ::Message("header", "body")
+ *     other = ZMQ::Message("header", "body")
+ *     msg.eql?(other)    =>   true
+ *
+*/
 
 static VALUE rb_czmq_message_eql_p(VALUE obj, VALUE other_message)
 {
@@ -272,6 +559,19 @@ static VALUE rb_czmq_message_eql_p(VALUE obj, VALUE other_message)
     if (strncmp((const char*)buff, (const char*)other_buff, buff_size) != 0) return Qfalse;
     return Qtrue;
 }
+
+/*
+ *  call-seq:
+ *     msg == other    =>  boolean
+ *
+ *  Determines if a message equals another. True if size, content size and serialized representation is equal.
+ *
+ * === Examples
+ *     msg = ZMQ::Message("header", "body")
+ *     other = ZMQ::Message("header", "body")
+ *     msg == other    =>   true
+ *
+*/
 
 static VALUE rb_czmq_message_equals(VALUE obj, VALUE other_message)
 {

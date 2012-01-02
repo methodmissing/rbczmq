@@ -27,11 +27,15 @@ class TestZmqMessage < ZmqTestCase
   def test_size
     msg = ZMQ::Message.new
     assert_equal 0, msg.size
+    msg.pushstr "test"
+    assert_equal 1, msg.size
   end
 
   def test_content_size
     msg = ZMQ::Message.new
     assert_equal 0, msg.content_size
+    msg.pushstr "test"
+    assert_equal 4, msg.content_size
   end
 
   def test_push_pop

@@ -102,11 +102,13 @@ static VALUE rb_czmq_frame_s_new(int argc, VALUE *argv, VALUE frame)
  *  call-seq:
  *     frame.destroy    =>  nil
  *
- *  Explicitly destroys an allocated ZMQ::Frame instance. Also called automatically during GC if the object is unreachable.
+ *  Explicitly destroys an allocated ZMQ::Frame instance. Useful for manual memory management, otherwise the GC
+ *  will take the same action if a frame object is not reachable anymore on the next GC cycle. This is
+ *  a lower level API.
  *
  * === Examples
- *     f = ZMQ::Frame.new("data")    =>  ZMQ::Frame
- *     f.destroy     =>  nil
+ *     frame = ZMQ::Frame.new("data")    =>  ZMQ::Frame
+ *     frame.destroy     =>  nil
  *
 */
 
@@ -124,8 +126,8 @@ static VALUE rb_czmq_frame_destroy(VALUE obj)
  *  Returns the size of the frame.
  *
  * === Examples
- *     f = ZMQ::Frame.new("data")    =>  ZMQ::Frame
- *     f.size     =>  4
+ *     frame = ZMQ::Frame.new("data")    =>  ZMQ::Frame
+ *     frame.size     =>  4
  *
 */
 
@@ -141,11 +143,11 @@ static VALUE rb_czmq_frame_size(VALUE obj)
  *  call-seq:
  *     frame.data    =>  String
  *
- *  Returns the data represented by the frame.
+ *  Returns the data represented by the frame as a string.
  *
  * === Examples
- *     f = ZMQ::Frame.new("data")    =>  ZMQ::Frame
- *     f.data     =>  "data"
+ *     frame = ZMQ::Frame.new("data")    =>  ZMQ::Frame
+ *     frame.data     =>  "data"
  *
 */
 
@@ -164,8 +166,8 @@ static VALUE rb_czmq_frame_data(VALUE obj)
  *  Returns a String representation of this frame.
  *
  * === Examples
- *     f = ZMQ::Frame.new("data")    =>  ZMQ::Frame
- *     f.to_s     =>  "data"
+ *     frame = ZMQ::Frame.new("data")    =>  ZMQ::Frame
+ *     frame.to_s     =>  "data"
  *
 */
 
@@ -181,8 +183,8 @@ static VALUE rb_czmq_frame_to_s(VALUE obj)
  *  Returns a printable hex representation of this frame
  *
  * === Examples
- *     f = ZMQ::Frame.new("message")    =>  ZMQ::Frame
- *     f.strhex     =>  "6D657373616765"
+ *     frame = ZMQ::Frame.new("message")    =>  ZMQ::Frame
+ *     frame.strhex     =>  "6D657373616765"
  *
 */
 
@@ -199,8 +201,8 @@ static VALUE rb_czmq_frame_strhex(VALUE obj)
  *  Returns a copy of the current frame
  *
  * === Examples
- *     f = ZMQ::Frame.new("message")    =>  ZMQ::Frame
- *     f.dup     =>  ZMQ::Frame
+ *     frame = ZMQ::Frame.new("message")    =>  ZMQ::Frame
+ *     frame.dup     =>  ZMQ::Frame
  *
 */
 
@@ -228,8 +230,8 @@ static VALUE rb_czmq_frame_dup(VALUE obj)
  *  Determines if the current frame's payload matches a given string
  *
  * === Examples
- *     f = ZMQ::Frame.new("message")    =>  ZMQ::Frame
- *     f.data_matches?("message")     =>  true
+ *     frame = ZMQ::Frame.new("message")    =>  ZMQ::Frame
+ *     frame.data_equals?("message")     =>  true
  *
 */
 
@@ -247,8 +249,8 @@ static VALUE rb_czmq_frame_data_equals_p(VALUE obj, VALUE data)
  *  Determines if the current frame is part of a multipart message.
  *
  * === Examples
- *     f = ZMQ::Frame.new("message")    =>  ZMQ::Frame
- *     f.more?     =>  false
+ *     frame = ZMQ::Frame.new("message")    =>  ZMQ::Frame
+ *     frame.more?     =>  false
  *
 */
 
@@ -260,14 +262,14 @@ static VALUE rb_czmq_frame_more_p(VALUE obj)
 
 /*
  *  call-seq:
- *     frame.eq?(other)    =>  boolean
+ *     frame.eql?(other)    =>  boolean
  *
  *  Determines if the current frame is equal to another (identical size and data).
  *
  * === Examples
- *     f = ZMQ::Frame.new("message")    =>  ZMQ::Frame
- *     of = ZMQ::Frame.new("other")
- *     f.eql?(of)     =>  false
+ *     frame = ZMQ::Frame.new("message")    =>  ZMQ::Frame
+ *     other_frame = ZMQ::Frame.new("other")
+ *     frame.eql?(other_frame)     =>  false
  *
 */
 
@@ -289,10 +291,10 @@ static VALUE rb_czmq_frame_eql_p(VALUE obj, VALUE other_frame)
  *  Determines if the current frame is equal to another (identical size and data).
  *
  * === Examples
- *     f = ZMQ::Frame.new("message")    =>  ZMQ::Frame
- *     of = ZMQ::Frame.new("other")
- *     f == of     =>  false
- *     f == f      =>  true
+ *     frame = ZMQ::Frame.new("message")    =>  ZMQ::Frame
+ *     other_frame = ZMQ::Frame.new("other")
+ *     frame == other_frame     =>  false
+ *     frame == frame      =>  true
  *
 */
 
@@ -309,9 +311,9 @@ static VALUE rb_czmq_frame_equals(VALUE obj, VALUE other_frame)
  *  Comparable support for ZMQ::Frame instances.
  *
  * === Examples
- *     f = ZMQ::Frame.new("message")    =>  ZMQ::Frame
- *     of = ZMQ::Frame.new("other")
- *     f > of     =>  true
+ *     frame = ZMQ::Frame.new("message")    =>  ZMQ::Frame
+ *     other_frame = ZMQ::Frame.new("other")
+ *     frame > other_frame     =>  true
  *
 */
 
@@ -319,16 +321,16 @@ static VALUE rb_czmq_frame_cmp(VALUE obj, VALUE other_frame)
 {
     long diff;
     zframe_t *other = NULL;
-    if (obj == other_frame) return INT2FIX(0);
+    if (obj == other_frame) return INT2NUM(0);
     ZmqGetFrame(obj);
     ZmqAssertFrame(other_frame);
     Data_Get_Struct(other_frame, zframe_t, other);
     if (!other) rb_raise(rb_eTypeError, "uninitialized ZMQ frame!"); \
     if (!(st_lookup(frames_map, (st_data_t)other, 0))) rb_raise(rb_eZmqError, "object %p has been destroyed by the ZMQ framework", (void *)other_frame);
     diff = (zframe_size(frame) - zframe_size(other));
-    if (diff == 0) return INT2FIX(0);
-    if (diff > 0) return INT2FIX(1);
-    return INT2FIX(-1);
+    if (diff == 0) return INT2NUM(0);
+    if (diff > 0) return INT2NUM(1);
+    return INT2NUM(-1);
 }
 
 /*
@@ -338,8 +340,8 @@ static VALUE rb_czmq_frame_cmp(VALUE obj, VALUE other_frame)
  *  Dumps out frame contents to stderr
  *
  * === Examples
- *     f = ZMQ::Frame.new("message")    =>  ZMQ::Frame
- *     f.print  =>  nil
+ *     frame = ZMQ::Frame.new("message")    =>  ZMQ::Frame
+ *     frame.print  =>  nil
  *
 */
 
@@ -361,9 +363,9 @@ static VALUE rb_czmq_frame_print(int argc, VALUE *argv, VALUE obj)
  *  Sets new content for this frame
  *
  * === Examples
- *     f = ZMQ::Frame.new("message")    =>  ZMQ::Frame
- *     f.reset("new")   =>  nil
- *     f.data   =>   "new"
+ *     frame = ZMQ::Frame.new("message")    =>  ZMQ::Frame
+ *     frame.reset("new")   =>  nil
+ *     frame.data   =>   "new"
  *
 */
 
