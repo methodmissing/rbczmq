@@ -46,7 +46,7 @@ static void rb_czmq_mark_timer(void *ptr)
 
 static void rb_czmq_free_timer_gc(void *ptr)
 {
-    zmq_timer_wrapper *timer = ptr;
+    zmq_timer_wrapper *timer = (zmq_timer_wrapper *)ptr;
     if (timer) xfree(timer);
 }
 
@@ -87,7 +87,7 @@ VALUE rb_czmq_timer_s_new(int argc, VALUE *argv, VALUE timer)
 
 /*
  *  call-seq:
- *     timer.fire   =>  ??
+ *     timer.fire   =>  Object
  *
  *  Fires a timer.
  *

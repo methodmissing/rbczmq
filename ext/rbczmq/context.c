@@ -66,7 +66,7 @@ static void rb_czmq_free_ctx(zmq_ctx_wrapper *ctx)
 
 static void rb_czmq_free_ctx_gc(void *ptr)
 {
-    zmq_ctx_wrapper *ctx = ptr;
+    zmq_ctx_wrapper *ctx = (zmq_ctx_wrapper *)ptr;
     if (ctx) {
         if (ctx->ctx != NULL && !(ctx->flags & ZMQ_CONTEXT_DESTROYED)) rb_czmq_free_ctx(ctx);
         xfree(ctx);

@@ -1,15 +1,6 @@
 ## TODO
 
-* String encoding ?? (1.9 && Rubinius)
-* Verify GC on all implementations / platforms
-* Documentation - basic pass
-                - arguments
-                - examples
-                - augment
-                - github pages for docs
-                - link to other content (socket options)
 * Ensure test cases for all ruby code in /lib as well (Loop, Handler, )
-* Cross compile for Windows
 * Assert gem builds and installs as expected against all implementations with the vendor'ed dependences in /ext
 * ZMQ::Message#save && ZMQ::Message.load
 * ZMQ::Socket#handler = x. Assert handler interface here instead ???
@@ -23,5 +14,4 @@
 * Look into handling signals properly
 * ZMQ.poll implementation
 * Restrict pair sockets to inproc transport only
-* Add basic GC stats for some objects
 * Revisit JRuby C API support

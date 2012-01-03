@@ -56,7 +56,7 @@ void rb_czmq_free_sock(zmq_sock_wrapper *sock)
 
 void rb_czmq_mark_sock(void *ptr)
 {
-    zmq_sock_wrapper *sock = ptr;
+    zmq_sock_wrapper *sock = (zmq_sock_wrapper *)ptr;
     if (sock){
         if (sock->verbose)
             zclock_log ("I: %s socket %p, context %p: GC mark", zsocket_type_str(sock->socket), sock, sock->ctx);

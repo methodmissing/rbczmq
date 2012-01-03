@@ -46,7 +46,7 @@ void rb_czmq_free_message(zmq_message_wrapper *message)
 
 static void rb_czmq_free_message_gc(void *ptr)
 {
-    zmq_message_wrapper *msg = ptr;
+    zmq_message_wrapper *msg = (zmq_message_wrapper *)ptr;
     if (msg) {
         if (msg->message != NULL && !(msg->flags & ZMQ_MESSAGE_DESTROYED)) rb_czmq_free_message(msg);
         xfree(msg);
@@ -519,6 +519,7 @@ static VALUE rb_czmq_message_encode(VALUE obj)
 static VALUE rb_czmq_message_s_decode(ZMQ_UNUSED VALUE obj, VALUE buffer)
 {
     zmsg_t * m = NULL;
+    Check_Type(buffer, T_STRING);
     m = zmsg_decode((byte *)StringValueCStr(buffer), RSTRING_LEN(buffer));
     if (m == NULL) return Qnil;
     return rb_czmq_alloc_message(m);

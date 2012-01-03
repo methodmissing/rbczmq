@@ -134,7 +134,7 @@ static void rb_czmq_free_loop(zmq_loop_wrapper *loop)
 
 static void rb_czmq_free_loop_gc(void *ptr)
 {
-    zmq_loop_wrapper *loop = ptr;
+    zmq_loop_wrapper *loop = (zmq_loop_wrapper *)ptr;
     if (loop) {
         if (loop->loop != NULL && !(loop->flags & ZMQ_LOOP_DESTROYED)) rb_czmq_free_loop(loop);
         xfree(loop);
@@ -388,12 +388,13 @@ static VALUE rb_czmq_loop_register_timer(VALUE obj, VALUE tm)
  *
 */
 
-static VALUE rb_czmq_loop_cancel_timer(VALUE obj, VALUE timer)
+static VALUE rb_czmq_loop_cancel_timer(VALUE obj, VALUE tm)
 {
     int rc;
     errno = 0;
     ZmqGetLoop(obj);
-    rc = zloop_timer_end(loop->loop, (void *)timer);
+    ZmqGetTimer(tm);
+    rc = zloop_timer_end(loop->loop, (void *)tm);
     ZmqAssert(rc);
     return Qtrue;
 }

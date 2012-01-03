@@ -351,7 +351,12 @@ static VALUE rb_czmq_frame_print(int argc, VALUE *argv, VALUE obj)
     const char *print_prefix = NULL;
     ZmqGetFrame(obj);
     rb_scan_args(argc, argv, "01", &prefix);
-    print_prefix = NIL_P(prefix) ? "" : RSTRING_PTR(prefix);
+    if (NIL_P(prefix)) {
+        print_prefix = "";
+    } else {
+        Check_Type(prefix, T_STRING);
+        print_prefix = RSTRING_PTR(prefix);
+    }
     zframe_print(frame, (char *)print_prefix);
     return Qnil;
 }
