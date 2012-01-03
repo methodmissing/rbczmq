@@ -16,11 +16,7 @@
 * Callback handler for ZMQ::Socket useful beyond just ZMQ::Loop ?
 * Optimize zloop handler callbacks (perftools)
 * OS X leaks utility - http://developer.apple.com/library/mac/#documentation/Darwin/Reference/ManPages/man1/leaks.1.html
-* zeromq git ref: https://github.com/zeromq/zeromq2-1/commit/35df57cda6861cac31710ad2a10fae4c97c0e63c
-* czmq git ref: https://github.com/zeromq/czmq/commit/18c8b8daf3013632f2a444a0127f4fa80dbd866e
-* Distribute vendor'ed libs (czmq && zeromq) in tar.gz format instead
 * Handle GC issue with timers in loop callbacks
-* Sync up libzmq && czmq ( vendor tarballs direct )
 * czmq send methods aren't non-blocking by default
 * Catch EFSM for REQ/REP pairs and raise in a format better suited for the user
 * Enforce socket timeouts

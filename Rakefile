@@ -17,8 +17,8 @@ gemspec = eval(IO.read('rbczmq.gemspec'))
 LIBEXT = RbConfig::CONFIG['LIBEXT'] || 'a'
 DLEXT = RbConfig::CONFIG['DLEXT'] || 'bundle'
 
-task :compile => [:build_zeromq, :build_czmq]
-#task :clobber => [:clobber_zeromq, :clobber_czmq]
+task :compile => [:extract_deps, :build_zeromq, :build_czmq]
+task :clobber => [:clobber_zeromq, :clobber_czmq]
 
 Rake::ExtensionTask.new('rbczmq', gemspec) do |ext|
   ext.name = 'rbczmq_ext'
@@ -30,10 +30,23 @@ Rake::ExtensionTask.new('rbczmq', gemspec) do |ext|
   CLEAN.include "#{ext.lib_dir}/*.#{DLEXT}"
 end
 
+task :extract_deps do
+  unless File.directory?("ext/zeromq") && File.directory?("ext/czmq")
+    if `which tar`.strip.empty?
+      puts "The 'tar' (creates and manipulates streaming archive files) utility is required to extract dependencies"
+      exit(1)
+    end
+    Dir.chdir("ext") do
+      sh "tar xvzf zeromq.tar.gz"
+      sh "tar xvzf czmq.tar.gz"
+    end
+  end
+end
+
 task :clobber_zeromq do
   Dir.chdir "ext/zeromq" do
     sh "make clean"
-  end
+  end if File.directory?("ext/zeromq")
 end
 
 task :build_zeromq do
@@ -48,7 +61,7 @@ end
 task :clobber_czmq do
   Dir.chdir "ext/czmq" do
     sh "make clean"
-  end
+  end if File.directory?("ext/czmq")
 end
 
 task :build_czmq do
