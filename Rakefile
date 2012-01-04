@@ -1,5 +1,8 @@
 # encoding: utf-8
 
+require 'rubygems' unless defined?(Gem)
+require 'rake' unless defined?(Rake)
+
 # Prefer compiled Rubinius bytecode in .rbx/
 ENV["RBXOPT"] = "-Xrbc.db"
 
@@ -13,12 +16,14 @@ end
 
 gemspec = eval(IO.read('rbczmq.gemspec'))
 
+task :clobber => [:clobber_zeromq, :clobber_czmq]
+
+Gem::PackageTask.new(gemspec) do |pkg|
+end
+
 # XXX fallbacks specific to Darwin for JRuby (does not set these values in RbConfig::CONFIG)
 LIBEXT = RbConfig::CONFIG['LIBEXT'] || 'a'
 DLEXT = RbConfig::CONFIG['DLEXT'] || 'bundle'
-
-task :compile => [:extract_deps, :build_zeromq, :build_czmq]
-task :clobber => [:clobber_zeromq, :clobber_czmq]
 
 Rake::ExtensionTask.new('rbczmq', gemspec) do |ext|
   ext.name = 'rbczmq_ext'
@@ -30,48 +35,12 @@ Rake::ExtensionTask.new('rbczmq', gemspec) do |ext|
   CLEAN.include "#{ext.lib_dir}/*.#{DLEXT}"
 end
 
-task :extract_deps do
-  unless File.directory?("ext/zeromq") && File.directory?("ext/czmq")
-    if `which tar`.strip.empty?
-      puts "The 'tar' (creates and manipulates streaming archive files) utility is required to extract dependencies"
-      exit(1)
-    end
-    Dir.chdir("ext") do
-      sh "tar xvzf zeromq.tar.gz"
-      sh "tar xvzf czmq.tar.gz"
-    end
-  end
-end
-
 task :clobber_zeromq do
-  Dir.chdir "ext/zeromq" do
-    sh "make clean"
-  end if File.directory?("ext/zeromq")
-end
-
-task :build_zeromq do
-  lib = "ext/zeromq/src/.libs/libzmq.#{LIBEXT}"
-  Dir.chdir "ext/zeromq" do
-    sh "./autogen.sh" unless File.exist?("ext/zeromq/configure")
-    sh "./configure && make"
-  end unless File.exist?(lib)
-  cp lib, "ext/rbczmq"
+  sh "rm -Rf ext/zeromq" if File.directory?("ext/zeromq")
 end
 
 task :clobber_czmq do
-  Dir.chdir "ext/czmq" do
-    sh "make clean"
-  end if File.directory?("ext/czmq")
-end
-
-task :build_czmq do
-  lib = "ext/czmq/src/.libs/libczmq.#{LIBEXT}"
-  Dir.chdir "ext/czmq" do
-    sh "./autogen.sh" unless File.exist?("ext/czmq/configure")
-    libzmq = File.join(File.dirname(__FILE__), 'ext', 'zeromq')
-    sh "./configure --with-libzmq=#{libzmq} && make all"
-  end unless File.exist?(lib)
-  cp lib, "ext/rbczmq"
+  sh "rm -Rf ext/czmq" if File.directory?("ext/czmq")
 end
 
 RDOC_FILES = FileList["README.rdoc", "ext/rbczmq/*.c", "lib/**/*.rb"]

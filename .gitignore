@@ -17,3 +17,4 @@ doc/*
 .DS_Store
 ext/zeromq
 ext/czmq
+pkg

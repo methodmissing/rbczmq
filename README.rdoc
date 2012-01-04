@@ -1,7 +1,5 @@
 ## TODO
 
-* Ensure test cases for all ruby code in /lib as well (Loop, Handler, )
-* Assert gem builds and installs as expected against all implementations with the vendor'ed dependences in /ext
 * ZMQ::Message#save && ZMQ::Message.load
 * ZMQ::Socket#handler = x. Assert handler interface here instead ???
 * Callback handler for ZMQ::Socket useful beyond just ZMQ::Loop ?

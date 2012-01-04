@@ -18,5 +18,5 @@ Gem::Specification.new do |s|
   s.test_files = `git ls-files test`.split("\n")
   s.rdoc_options = ["--charset=UTF-8"]
   s.require_paths = ["lib"]
-  s.add_development_dependency('rake-compiler', '~> 0.7.7')
+  s.add_dependency('rake-compiler', '~> 0.7.9')
 end
