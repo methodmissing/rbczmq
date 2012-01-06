@@ -39,7 +39,12 @@
 # Prefer compiled Rubinius bytecode in .rbx/
 ENV["RBXOPT"] = "-Xrbc.db"
 
+begin
 require "zmq/rbczmq_ext"
+rescue LoadError
+  require "rbczmq_ext"
+end
+
 require 'zmq/version' unless defined? ZMQ::VERSION
 
 module ZMQ

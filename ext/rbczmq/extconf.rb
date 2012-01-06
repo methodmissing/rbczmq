@@ -5,6 +5,11 @@ require 'fileutils'
 require 'pathname'
 include FileUtils
 
+def fail(msg)
+  STDERR.puts msg
+  exit(1)
+end
+
 RbConfig::MAKEFILE_CONFIG['CC'] = ENV['CC'] if ENV['CC']
 
 # XXX fallbacks specific to Darwin for JRuby (does not set these values in RbConfig::CONFIG)
@@ -53,9 +58,14 @@ have_func('rb_thread_blocking_region')
 $INCFLAGS << " -I#{zmq_include_path}" if find_header("zmq.h", zmq_include_path)
 $INCFLAGS << " -I#{czmq_include_path}" if find_header("czmq.h", czmq_include_path)
 
-find_library("zmq", "zmq_init", libs_path.to_s)
-find_library("czmq", "zctx_new", libs_path.to_s)
-$LDFLAGS = "-L. -L#{libs_path}"
+if RUBY_VERSION =~ /1.9.\d/
+  $LDFLAGS = "-L. -L#{libs_path}"
+else
+  $LDFLAGS << " -L#{libs_path}"
+end
+
+fail "Error compiling and linking libzmq" unless have_library("zmq")
+fail "Error compiling and linking libczmq" unless have_library("czmq")
 
 $defs << "-pedantic"
 
