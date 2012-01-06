@@ -1,0 +1,386 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <meta content="text/html; charset=UTF-8" http-equiv="Content-Type" />
+
+  <title>File: README.rdoc [rbczmq - binding for the high level ZeroMQ C API]</title>
+
+  <link type="text/css" media="screen" href="./rdoc.css" rel="stylesheet" />
+
+  <script src="./js/jquery.js" type="text/javascript"
+    charset="utf-8"></script>
+  <script src="./js/thickbox-compressed.js" type="text/javascript"
+    charset="utf-8"></script>
+  <script src="./js/quicksearch.js" type="text/javascript"
+    charset="utf-8"></script>
+  <script src="./js/darkfish.js" type="text/javascript"
+    charset="utf-8"></script>
+</head>
+
+<body class="file">
+  <div id="metadata">
+    <div id="home-metadata">
+      <div id="home-section" class="section">
+        <h3 class="section-header">
+          <a href="./index.html">Home</a>
+          <a href="./index.html#classes">Classes</a>
+          <a href="./index.html#methods">Methods</a>
+        </h3>
+      </div>
+    </div>
+
+    <div id="project-metadata">
+      
+      
+      <div id="fileindex-section" class="section project-section">
+        <h3 class="section-header">Files</h3>
+        <ul>
+        
+          <li class="file"><a href="./README_rdoc.html">README.rdoc</a></li>
+        
+        </ul>
+      </div>
+      
+
+      <div id="classindex-section" class="section project-section">
+        <h3 class="section-header">Class Index
+          <span class="search-toggle"><img src="./images/find.png"
+            height="16" width="16" alt="[+]"
+            title="show/hide quicksearch" /></span></h3>
+        <form action="#" method="get" accept-charset="utf-8" class="initially-hidden">
+        <fieldset>
+          <legend>Quicksearch</legend>
+          <input type="text" name="quicksearch" value=""
+            class="quicksearch-field" />
+        </fieldset>
+        </form>
+
+        <ul class="link-list">
+        
+          <li><a href="./ZMQ.html">ZMQ</a></li>
+        
+          <li><a href="./ZMQ/Context.html">ZMQ::Context</a></li>
+        
+          <li><a href="./ZMQ/DefaultHandler.html">ZMQ::DefaultHandler</a></li>
+        
+          <li><a href="./ZMQ/DownstreamSocket.html">ZMQ::DownstreamSocket</a></li>
+        
+          <li><a href="./ZMQ/Error.html">ZMQ::Error</a></li>
+        
+          <li><a href="./ZMQ/Frame.html">ZMQ::Frame</a></li>
+        
+          <li><a href="./ZMQ/Handler.html">ZMQ::Handler</a></li>
+        
+          <li><a href="./ZMQ/Loop.html">ZMQ::Loop</a></li>
+        
+          <li><a href="./ZMQ/Loop.html">ZMQ::Loop</a></li>
+        
+          <li><a href="./ZMQ/Message.html">ZMQ::Message</a></li>
+        
+          <li><a href="./ZMQ/Socket.html">ZMQ::Socket</a></li>
+        
+          <li><a href="./ZMQ/Socket/Dealer.html">ZMQ::Socket::Dealer</a></li>
+        
+          <li><a href="./ZMQ/Socket/Pair.html">ZMQ::Socket::Pair</a></li>
+        
+          <li><a href="./ZMQ/Socket/Pub.html">ZMQ::Socket::Pub</a></li>
+        
+          <li><a href="./ZMQ/Socket/Pull.html">ZMQ::Socket::Pull</a></li>
+        
+          <li><a href="./ZMQ/Socket/Push.html">ZMQ::Socket::Push</a></li>
+        
+          <li><a href="./ZMQ/Socket/Rep.html">ZMQ::Socket::Rep</a></li>
+        
+          <li><a href="./ZMQ/Socket/Req.html">ZMQ::Socket::Req</a></li>
+        
+          <li><a href="./ZMQ/Socket/Router.html">ZMQ::Socket::Router</a></li>
+        
+          <li><a href="./ZMQ/Socket/Sub.html">ZMQ::Socket::Sub</a></li>
+        
+          <li><a href="./ZMQ/Timer.html">ZMQ::Timer</a></li>
+        
+          <li><a href="./ZMQ/UpstreamSocket.html">ZMQ::UpstreamSocket</a></li>
+        
+          <li><a href="./Object.html">Object</a></li>
+        
+          <li><a href="./ZMQ/Loop.html">Object::ZL</a></li>
+        
+        </ul>
+        <div id="no-class-search-results" style="display: none;">No matching classes.</div>
+      </div>
+
+      
+    </div>
+  </div>
+
+  <div id="documentation">
+    
+<h1>rbczmq - Ruby extension that wraps the official high level ZeroMQ C API ( <a href="http://czmq.zeromq.org/">czmq.zeromq.org/</a> ) </h1>
+
+<p>© 2011 Lourens Naudé (methodmissing), with API guidance from the czmq (<a
+href="http://czmq.zeromq.org/">czmq.zeromq.org/</a>) project.</p>
+
+<pre>http://github.com/methodmissing/rbczmq</pre>
+
+<h2>About ZeroMQ</h2>
+
+<p>In a nutshell, ZeroMQ is a hybrid networking library / concurrency
+framework. I quote the ØMQ Guide (<a
+href="http://zguide.zeromq.org/page:all">zguide.zeromq.org/page:all</a>) :</p>
+
+<p>“ØMQ (ZeroMQ, 0MQ, zmq) looks like an embeddable networking library but
+acts like a concurrency framework. It gives you sockets that carry whole
+messages across various transports like in-process, inter-process, TCP, and
+multicast. You can connect sockets N-to-N with patterns like fanout,
+pub-sub, task distribution, and request-reply. It’s fast enough to be the
+fabric for clustered products. Its asynchronous I/O model gives you
+scalable multicore applications, built as asynchronous message-processing
+tasks. It has a score of language APIs and runs on most operating systems.
+ØMQ is from iMatix and is LGPL open source.”</p>
+
+<h2>Another ZeroMQ extension ?</h2>
+
+<p>This extension bundles both ZeroMQ (libzmq, <a
+href="http://www.zeromq.org/">www.zeromq.org/</a>) and CZMQ (libczmq, <a
+href="http://czmq.zeromq.org/">czmq.zeromq.org/</a>) and as such have no
+third party dependencies other than a Ruby distribution and a C compiler.
+My goals for this project were :</p>
+<ul><li>
+<p>Access to a powerful messaging technology without having to install a bunch
+of dependencies</p>
+</li><li>
+<p>A stable and mostly version agnostic (2.x and 3.x series) API</p>
+</li><li>
+<p>Leverage and build upon a mature and maintained client (CZMQ)</p>
+</li><li>
+<p>Target Ruby distributions with a stable and comprehensive C API (MRI,
+Rubinius, JRuby is work in progress)</p>
+</li><li>
+<p>Support for running sockets in Threads - both green and native threads
+should be supported and preempt properly with edge-triggered multiplexing
+from libzmq.</p>
+</li><li>
+<p>Integrate with the Garbage Collector in a predictable way. CZMQ and the
+ZeroMQ framework is very fast and can allocate an enormous amount of
+objects in no time when using the Frame, Message and String wrappers.
+Resources such as socket connections should be cleaned up when objects are
+finalized as well.</p>
+</li><li>
+<p>Expose Message envelopes and Frames to developers as well to allow for
+higher level protocols and constructs.</p>
+</li><li>
+<p>Enforce well known best practices such as restricting socket interactions
+to within the thread the socket was created in etc.</p>
+</li></ul>
+
+<h2>Usage</h2>
+
+<p>As a first step I’d highly recommend you read (and reread) through the
+zguide (<a
+href="http://zguide.zeromq.org/page:all">zguide.zeromq.org/page:all</a>) as
+understanding the supported messaging patterns and topologies is
+fundamental to getting the most from this binding.  Here’s a few basic
+examples. Please refer to documentation (<a
+href="http://methodmissing.github.com/rbczmq/">methodmissing.github.com/rbczmq/</a>)
+and test cases (<a
+href="https://github.com/methodmissing/rbczmq/tree/master/test">github.com/methodmissing/rbczmq/tree/master/test</a>)
+for detailed usage information.</p>
+
+<h3>Basic send / receive, in process transport</h3>
+
+<pre>ctx = ZMQ::Context.new
+rep = ctx.socket(:PAIR)
+port = rep.bind(&quot;inproc://send.receive&quot;)
+req = ctx.socket(:PAIR)
+req.connect(&quot;inproc://send.receive&quot;)
+req.send(&quot;ping&quot;) # true
+rep.recv # &quot;ping&quot;
+
+ctx.destroy</pre>
+
+<h3>Fair-queued work distribution to a set of worker threads</h3>
+
+<pre>ctx = ZMQ::Context.new
+push = ctx.bind(:PUSH, &quot;inproc://push-pull-distribution.test&quot;)
+threads = []
+5.times do
+  threads &lt;&lt; Thread.new do
+    pull = ctx.connect(:PULL, &quot;inproc://push-pull-distribution.test&quot;)
+    msg = pull.recv
+    pull.close
+    msg
+  end
+end
+
+sleep 0.5 # avoid &quot;slow joiner&quot; syndrome
+messages = %w(a b c d e f)
+messages.each do |m|
+  push.send m
+end
+
+threads.each{|t| t.join }
+threads.all?{|t| messages.include?(t.value) } # true
+
+ctx.destroy</pre>
+
+<h3>Async request / reply routing</h3>
+
+<pre>ctx = ZMQ::Context.new
+router = ctx.bind(:ROUTER, &quot;inproc://routing-flow.test&quot;)
+dealer = ctx.socket(:DEALER)
+dealer.identity = &quot;xyz&quot;
+dealer.connect(&quot;inproc://routing-flow.test&quot;)
+
+router.sendm(&quot;xyz&quot;)
+router.send(&quot;request&quot;)
+dealer.recv # &quot;request&quot;
+
+dealer.send(&quot;reply&quot;)
+router.recv # &quot;xyz&quot;
+router.recv # &quot;reply&quot;
+
+ctx.destroy</pre>
+
+<h3>Send / receive frames</h3>
+
+<pre>ctx = ZMQ::Context.new
+rep = ctx.socket(:PAIR)
+rep.bind(&quot;inproc://frames.test&quot;)
+req = ctx.socket(:PAIR)
+req.connect(&quot;inproc://frames.test&quot;)
+ping = ZMQ::Frame(&quot;ping&quot;)
+req.send_frame(ping) # true
+rep.recv_frame # ZMQ::Frame(&quot;ping&quot;)
+rep.send_frame(ZMQ::Frame(&quot;pong&quot;)) # true
+req.recv_frame # ZMQ::Frame(&quot;pong&quot;)
+rep.send_frame(ZMQ::Frame(&quot;pong&quot;)) # true
+req.recv_frame_nonblock # nil
+sleep 0.3
+req.recv_frame_nonblock # ZMQ::Frame(&quot;pong&quot;)
+
+ctx.destroy</pre>
+
+<h3>Send / receive messages</h3>
+
+<pre>ctx = ZMQ::Context.new
+rep = ctx.socket(:PAIR)
+rep.bind(&quot;inproc://messages.test&quot;)
+req = ctx.socket(:PAIR)
+req.connect(&quot;inproc://messages.test&quot;)
+
+msg = ZMQ::Message.new
+msg.push ZMQ::Frame(&quot;header&quot;)
+msg.push ZMQ::Frame(&quot;body&quot;)
+
+req.send_message(msg) # nil
+
+recvd_msg = rep.recv_message
+recvd_msg.class # ZMQ::Message
+recvd_msg.pop # ZMQ::Frame(&quot;header&quot;)
+recvd_msg.pop # ZMQ::Frame(&quot;body&quot;)
+
+ctx.destroy</pre>
+
+<h2>Resources</h2>
+<ul><li>
+<p>ZeroMQ - <a
+href="http://www.zeromq.org/community">www.zeromq.org/community</a></p>
+</li><li>
+<p>The ØMQ Reference Manual - <a
+href="http://api.zeromq.org/">api.zeromq.org/</a></p>
+</li><li>
+<p>The ØMQ FAQ - <a
+href="http://www.zeromq.org/area:faq">www.zeromq.org/area:faq</a></p>
+</li><li>
+<p>Whitepapers - <a
+href="http://www.zeromq.org/area:whitepapers">www.zeromq.org/area:whitepapers</a></p>
+</li><li>
+<p>The ØMQ Guide - <a
+href="http://zguide.zeromq.org/page:all">zguide.zeromq.org/page:all</a></p>
+</li><li>
+<p>CZMQ - <a href="http://czmq.zeromq.org/">czmq.zeromq.org/</a></p>
+</li><li>
+<p>Recent presentation on data transfer by the author of this binding - <a
+href="http://www.slideshare.net/methodmissing/sapo-codebits-2011">www.slideshare.net/methodmissing/sapo-codebits-2011</a></p>
+</li></ul>
+
+<h2>Requirements</h2>
+<ul><li>
+<p>A POSIX compliant OS, known to work well on Linux, BSD variants and Mac OS
+X</p>
+</li><li>
+<p>Ruby MRI 1.8, 1.9 or Rubinius (JRuby capi support forthcoming)</p>
+</li><li>
+<p>A C compiler</p>
+</li></ul>
+
+<h2>Installation</h2>
+
+<p>Rubygems installation</p>
+
+<pre>gem install rbczmq</pre>
+
+<p>Building from source</p>
+
+<pre>git clone git@github.com:methodmissing/rbczmq.git
+rake</pre>
+
+<p>Running tests</p>
+
+<pre>rake test</pre>
+
+<h2>TODO</h2>
+<ul><li>
+<p>ZMQ::Message#save &amp;&amp; ZMQ::Message.load</p>
+</li><li>
+<p><a href="ZMQ/Socket.html#method-i-handler">ZMQ::Socket#handler</a> = x.
+Assert handler interface here instead ???</p>
+</li><li>
+<p>Callback handler for <a href="ZMQ/Socket.html">ZMQ::Socket</a> useful
+beyond just <a href="ZMQ/Loop.html">ZMQ::Loop</a> ?</p>
+</li><li>
+<p>Optimize zloop handler callbacks (perftools)</p>
+</li><li>
+<p>OS X leaks utility - <a
+href="http://developer.apple.com/library/mac/#documentation/Darwin/Reference/ManPages/man1/leaks.1.html">developer.apple.com/library/mac/#documentation/Darwin/Reference/ManPages/man1/leaks.1.html</a></p>
+</li><li>
+<p>Handle GC issue with timers in loop callbacks</p>
+</li><li>
+<p>czmq send methods aren’t non-blocking by default</p>
+</li><li>
+<p>Catch EFSM for REQ/REP pairs and raise in a format better suited for the
+user</p>
+</li><li>
+<p>Enforce socket timeouts</p>
+</li><li>
+<p>Look into handling signals properly</p>
+</li><li>
+<p>ZMQ.poll implementation</p>
+</li><li>
+<p>Revisit the <a href="ZMQ/Loop.html">ZMQ::Loop</a> API</p>
+</li><li>
+<p>Restrict pair sockets to inproc transport only</p>
+</li><li>
+<p>Revisit JRuby C API support</p>
+</li></ul>
+
+<h2>Contact, feedback and bugs</h2>
+
+<p>This project is still work in progress and I’m looking for guidance on API
+design, use cases and any outlier experiences. Please log bugs and
+suggestions at <a
+href="https://github.com/methodmissing/rbczmq/issues">github.com/methodmissing/rbczmq/issues</a></p>
+
+  </div>
+
+  <div id="validator-badges">
+    <p><small><a href="http://validator.w3.org/check/referer">[Validate]</a></small></p>
+    <p><small>Generated with the <a href="http://deveiate.org/projects/Darkfish-Rdoc/">Darkfish
+      Rdoc Generator</a> 2</small>.</p>
+  </div>
+</body>
+</html>
+

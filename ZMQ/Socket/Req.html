@@ -1,0 +1,322 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <meta content="text/html; charset=UTF-8" http-equiv="Content-Type" />
+
+  <title>Class: ZMQ::Socket::Req</title>
+
+  <link rel="stylesheet" href="../../rdoc.css" type="text/css" media="screen" />
+
+  <script src="../../js/jquery.js" type="text/javascript" charset="utf-8"></script>
+  <script src="../../js/thickbox-compressed.js" type="text/javascript" charset="utf-8"></script>
+  <script src="../../js/quicksearch.js" type="text/javascript" charset="utf-8"></script>
+  <script src="../../js/darkfish.js" type="text/javascript" charset="utf-8"></script>
+
+</head>
+<body id="top" class="class">
+
+  <div id="metadata">
+    <div id="home-metadata">
+      <div id="home-section" class="section">
+        <h3 class="section-header">
+          <a href="../../index.html">Home</a>
+          <a href="../../index.html#classes">Classes</a>
+          <a href="../../index.html#methods">Methods</a>
+        </h3>
+      </div>
+    </div>
+
+    <div id="file-metadata">
+      <div id="file-list-section" class="section">
+        <h3 class="section-header">In Files</h3>
+        <div class="section-body">
+          <ul>
+          
+            <li><a href="../../lib/zmq/socket/req_rb.html?TB_iframe=true&amp;height=550&amp;width=785"
+              class="thickbox" title="lib/zmq/socket/req.rb">lib/zmq/socket/req.rb</a></li>
+          
+            <li><a href="../../ext/rbczmq/rbczmq_ext_c.html?TB_iframe=true&amp;height=550&amp;width=785"
+              class="thickbox" title="ext/rbczmq/rbczmq_ext.c">ext/rbczmq/rbczmq_ext.c</a></li>
+          
+          </ul>
+        </div>
+      </div>
+
+      
+    </div>
+
+    <div id="class-metadata">
+      
+      <!-- Parent Class -->
+      <div id="parent-class-section" class="section">
+        <h3 class="section-header">Parent</h3>
+        
+        <p class="link"><a href="../Socket.html">ZMQ::Socket</a></p>
+        
+      </div>
+      
+
+      
+
+      
+
+      
+      <!-- Method Quickref -->
+      <div id="method-list-section" class="section">
+        <h3 class="section-header">Methods</h3>
+        <ul class="link-list">
+          
+          <li><a href="#method-i-send_frame">#send_frame</a></li>
+          
+          <li><a href="#method-i-type">#type</a></li>
+          
+        </ul>
+      </div>
+      
+
+      
+    </div>
+
+    <div id="project-metadata">
+      
+      
+      <div id="fileindex-section" class="section project-section">
+        <h3 class="section-header">Files</h3>
+        <ul>
+        
+          <li class="file"><a href="../../README_rdoc.html">README.rdoc</a></li>
+        
+        </ul>
+      </div>
+      
+
+      <div id="classindex-section" class="section project-section">
+        <h3 class="section-header">Class/Module Index
+          <span class="search-toggle"><img src="../../images/find.png"
+            height="16" width="16" alt="[+]"
+            title="show/hide quicksearch" /></span></h3>
+        <form action="#" method="get" accept-charset="utf-8" class="initially-hidden">
+        <fieldset>
+          <legend>Quicksearch</legend>
+          <input type="text" name="quicksearch" value=""
+            class="quicksearch-field" />
+        </fieldset>
+        </form>
+
+        <ul class="link-list">
+        
+          <li><a href="../../ZMQ.html">ZMQ</a></li>
+        
+          <li><a href="../../ZMQ/Context.html">ZMQ::Context</a></li>
+        
+          <li><a href="../../ZMQ/DefaultHandler.html">ZMQ::DefaultHandler</a></li>
+        
+          <li><a href="../../ZMQ/DownstreamSocket.html">ZMQ::DownstreamSocket</a></li>
+        
+          <li><a href="../../ZMQ/Error.html">ZMQ::Error</a></li>
+        
+          <li><a href="../../ZMQ/Frame.html">ZMQ::Frame</a></li>
+        
+          <li><a href="../../ZMQ/Handler.html">ZMQ::Handler</a></li>
+        
+          <li><a href="../../ZMQ/Loop.html">ZMQ::Loop</a></li>
+        
+          <li><a href="../../ZMQ/Loop.html">ZMQ::Loop</a></li>
+        
+          <li><a href="../../ZMQ/Message.html">ZMQ::Message</a></li>
+        
+          <li><a href="../../ZMQ/Socket.html">ZMQ::Socket</a></li>
+        
+          <li><a href="../../ZMQ/Socket/Dealer.html">ZMQ::Socket::Dealer</a></li>
+        
+          <li><a href="../../ZMQ/Socket/Pair.html">ZMQ::Socket::Pair</a></li>
+        
+          <li><a href="../../ZMQ/Socket/Pub.html">ZMQ::Socket::Pub</a></li>
+        
+          <li><a href="../../ZMQ/Socket/Pull.html">ZMQ::Socket::Pull</a></li>
+        
+          <li><a href="../../ZMQ/Socket/Push.html">ZMQ::Socket::Push</a></li>
+        
+          <li><a href="../../ZMQ/Socket/Rep.html">ZMQ::Socket::Rep</a></li>
+        
+          <li><a href="../../ZMQ/Socket/Req.html">ZMQ::Socket::Req</a></li>
+        
+          <li><a href="../../ZMQ/Socket/Router.html">ZMQ::Socket::Router</a></li>
+        
+          <li><a href="../../ZMQ/Socket/Sub.html">ZMQ::Socket::Sub</a></li>
+        
+          <li><a href="../../ZMQ/Timer.html">ZMQ::Timer</a></li>
+        
+          <li><a href="../../ZMQ/UpstreamSocket.html">ZMQ::UpstreamSocket</a></li>
+        
+          <li><a href="../../Object.html">Object</a></li>
+        
+          <li><a href="../../ZMQ/Loop.html">Object::ZL</a></li>
+        
+        </ul>
+        <div id="no-class-search-results" style="display: none;">No matching classes.</div>
+      </div>
+
+      
+    </div>
+  </div>
+
+  <div id="documentation">
+    <h1 class="class">ZMQ::Socket::Req</h1>
+
+    <div id="description" class="description">
+      
+    </div><!-- description -->
+
+    
+    
+    
+    <div id="5Buntitled-5D" class="documentation-section">
+      
+
+      
+
+      
+      <!-- Constants -->
+      <div id="constants-list" class="section">
+        <h3 class="section-header">Constants</h3>
+        <dl>
+        
+          <dt><a name="TYPE_STR">TYPE_STR</a></dt>
+          
+          <dd class="description"><h2><a href="Req.html">ZMQ::Socket::Req</a></h2>
+
+<p>A socket of type <a href="Req.html">ZMQ::Socket::Req</a> is used by a
+client to send requests to and receive replies from a service. This socket
+type allows only an alternating sequence of <a
+href="../Socket.html#method-i-send">ZMQ::Socket#send</a> and subsequent <a
+href="../Socket.html#method-i-recv">ZMQ::Socket#recv</a> calls. Each
+request sent is load-balanced among all services, and each reply received
+is matched with the last issued request.</p>
+
+<p>When a <a href="Req.html">ZMQ::Socket::Req</a> socket enters an exceptional
+state due to having reached the high water mark for all services, or if
+there are no services at all, then any <a
+href="../Socket.html#method-i-send">ZMQ::Socket#send</a> operations on the
+socket shall block until the exceptional state ends or at least one service
+becomes available for sending; messages are not discarded.</p>
+
+<h3>Summary of <a href="Req.html">ZMQ::Socket::Req</a> characteristics</h3>
+<dl class="rdoc-list"><dt>Compatible peer sockets</dt>
+<dd>
+<p><a href="Rep.html">ZMQ::Socket::Rep</a></p>
+</dd><dt>Direction</dt>
+<dd>
+<p>Bidirectional</p>
+</dd><dt>Send/receive pattern</dt>
+<dd>
+<p>Send, Receive, Send, Receive, …</p>
+</dd><dt>Outgoing routing strategy</dt>
+<dd>
+<p>Load-balanced</p>
+</dd><dt>Incoming routing strategy</dt>
+<dd>
+<p>Last peer</p>
+</dd><dt><a href="../Socket.html#method-i-hwm">ZMQ::Socket#hwm</a> option action</dt>
+<dd>
+<p>Block</p>
+</dd></dl></dd>
+          
+        
+        </dl>
+      </div>
+      
+
+      
+
+      <!-- Methods -->
+      
+      <div id="public-instance-method-details" class="method-section section">
+        <h3 class="section-header">Public Instance Methods</h3>
+
+      
+        <div id="send_frame-method" class="method-detail ">
+          <a name="method-i-send_frame"></a>
+
+          
+          <div class="method-heading">
+            <span class="method-name">send_frame</span><span
+              class="method-args">(frame, flags = 0)</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          
+
+          <div class="method-description">
+            
+            
+            
+
+            
+            <div class="method-source-code" id="send_frame-source">
+<pre>
+<span class="ruby-comment"># File lib/zmq/socket/req.rb, line 65</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">send_frame</span>(<span class="ruby-identifier">frame</span>, <span class="ruby-identifier">flags</span> = <span class="ruby-value">0</span>)
+  <span class="ruby-identifier">raise</span> <span class="ruby-constant">ZMQ</span><span class="ruby-operator">::</span><span class="ruby-constant">Error</span>, <span class="ruby-string">&quot;cannot send multiple frames on REQ sockets&quot;</span> <span class="ruby-keyword">if</span> (<span class="ruby-identifier">flags</span> &amp; <span class="ruby-constant">ZMQ</span><span class="ruby-operator">::</span><span class="ruby-constant">Frame</span><span class="ruby-operator">::</span><span class="ruby-constant">MORE</span>) <span class="ruby-operator">==</span> <span class="ruby-constant">ZMQ</span><span class="ruby-operator">::</span><span class="ruby-constant">Frame</span><span class="ruby-operator">::</span><span class="ruby-constant">MORE</span>
+  <span class="ruby-keyword">super</span>
+<span class="ruby-keyword">end</span></pre>
+            </div><!-- send_frame-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- send_frame-method -->
+
+      
+        <div id="type-method" class="method-detail ">
+          <a name="method-i-type"></a>
+
+          
+          <div class="method-heading">
+            <span class="method-name">type</span><span
+              class="method-args">()</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          
+
+          <div class="method-description">
+            
+            
+            
+
+            
+            <div class="method-source-code" id="type-source">
+<pre>
+<span class="ruby-comment"># File lib/zmq/socket/req.rb, line 61</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">type</span>
+  <span class="ruby-constant">ZMQ</span><span class="ruby-operator">::</span><span class="ruby-constant">REQ</span>
+<span class="ruby-keyword">end</span></pre>
+            </div><!-- type-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- type-method -->
+
+      
+      </div><!-- public-instance-method-details -->
+    
+    </div><!-- 5Buntitled-5D -->
+  
+
+  </div><!-- documentation -->
+
+  <div id="validator-badges">
+    <p><small><a href="http://validator.w3.org/check/referer">[Validate]</a></small></p>
+    <p><small>Generated with the <a href="http://deveiate.org/projects/Darkfish-Rdoc/">Darkfish
+      Rdoc Generator</a> 2</small>.</p>
+  </div>
+
+</body>
+</html>
+

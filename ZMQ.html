@@ -1,0 +1,666 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <meta content="text/html; charset=UTF-8" http-equiv="Content-Type" />
+
+  <title>Module: ZMQ</title>
+
+  <link rel="stylesheet" href="./rdoc.css" type="text/css" media="screen" />
+
+  <script src="./js/jquery.js" type="text/javascript" charset="utf-8"></script>
+  <script src="./js/thickbox-compressed.js" type="text/javascript" charset="utf-8"></script>
+  <script src="./js/quicksearch.js" type="text/javascript" charset="utf-8"></script>
+  <script src="./js/darkfish.js" type="text/javascript" charset="utf-8"></script>
+
+</head>
+<body id="top" class="module">
+
+  <div id="metadata">
+    <div id="home-metadata">
+      <div id="home-section" class="section">
+        <h3 class="section-header">
+          <a href="./index.html">Home</a>
+          <a href="./index.html#classes">Classes</a>
+          <a href="./index.html#methods">Methods</a>
+        </h3>
+      </div>
+    </div>
+
+    <div id="file-metadata">
+      <div id="file-list-section" class="section">
+        <h3 class="section-header">In Files</h3>
+        <div class="section-body">
+          <ul>
+          
+            <li><a href="./lib/zmq/version_rb.html?TB_iframe=true&amp;height=550&amp;width=785"
+              class="thickbox" title="lib/zmq/version.rb">lib/zmq/version.rb</a></li>
+          
+            <li><a href="./lib/zmq_rb.html?TB_iframe=true&amp;height=550&amp;width=785"
+              class="thickbox" title="lib/zmq.rb">lib/zmq.rb</a></li>
+          
+            <li><a href="./ext/rbczmq/rbczmq_ext_c.html?TB_iframe=true&amp;height=550&amp;width=785"
+              class="thickbox" title="ext/rbczmq/rbczmq_ext.c">ext/rbczmq/rbczmq_ext.c</a></li>
+          
+          </ul>
+        </div>
+      </div>
+
+      
+    </div>
+
+    <div id="class-metadata">
+      
+
+      
+
+      
+      <!-- Namespace Contents -->
+      <div id="namespace-list-section" class="section">
+        <h3 class="section-header">Namespace</h3>
+        <ul class="link-list">
+          
+          <li><span class="type">MODULE</span> <a href="ZMQ/DownstreamSocket.html">ZMQ::DownstreamSocket</a></li>
+          
+          <li><span class="type">MODULE</span> <a href="ZMQ/UpstreamSocket.html">ZMQ::UpstreamSocket</a></li>
+          
+          <li><span class="type">CLASS</span> <a href="ZMQ/Context.html">ZMQ::Context</a></li>
+          
+          <li><span class="type">CLASS</span> <a href="ZMQ/DefaultHandler.html">ZMQ::DefaultHandler</a></li>
+          
+          <li><span class="type">CLASS</span> <a href="ZMQ/Error.html">ZMQ::Error</a></li>
+          
+          <li><span class="type">CLASS</span> <a href="ZMQ/Frame.html">ZMQ::Frame</a></li>
+          
+          <li><span class="type">CLASS</span> <a href="ZMQ/Handler.html">ZMQ::Handler</a></li>
+          
+          <li><span class="type">CLASS</span> <a href="ZMQ/Loop.html">ZMQ::Loop</a></li>
+          
+          <li><span class="type">CLASS</span> <a href="ZMQ/Message.html">ZMQ::Message</a></li>
+          
+          <li><span class="type">CLASS</span> <a href="ZMQ/Socket.html">ZMQ::Socket</a></li>
+          
+          <li><span class="type">CLASS</span> <a href="ZMQ/Timer.html">ZMQ::Timer</a></li>
+          
+        </ul>
+      </div>
+      
+
+      
+      <!-- Method Quickref -->
+      <div id="method-list-section" class="section">
+        <h3 class="section-header">Methods</h3>
+        <ul class="link-list">
+          
+          <li><a href="#method-c-Frame">::Frame</a></li>
+          
+          <li><a href="#method-c-Message">::Message</a></li>
+          
+          <li><a href="#method-c-context">::context</a></li>
+          
+          <li><a href="#method-c-error">::error</a></li>
+          
+          <li><a href="#method-c-interrupted-3F">::interrupted?</a></li>
+          
+          <li><a href="#method-c-log">::log</a></li>
+          
+          <li><a href="#method-c-loop">::loop</a></li>
+          
+          <li><a href="#method-c-now">::now</a></li>
+          
+          <li><a href="#method-c-version">::version</a></li>
+          
+        </ul>
+      </div>
+      
+
+      
+    </div>
+
+    <div id="project-metadata">
+      
+      
+      <div id="fileindex-section" class="section project-section">
+        <h3 class="section-header">Files</h3>
+        <ul>
+        
+          <li class="file"><a href="./README_rdoc.html">README.rdoc</a></li>
+        
+        </ul>
+      </div>
+      
+
+      <div id="classindex-section" class="section project-section">
+        <h3 class="section-header">Class/Module Index
+          <span class="search-toggle"><img src="./images/find.png"
+            height="16" width="16" alt="[+]"
+            title="show/hide quicksearch" /></span></h3>
+        <form action="#" method="get" accept-charset="utf-8" class="initially-hidden">
+        <fieldset>
+          <legend>Quicksearch</legend>
+          <input type="text" name="quicksearch" value=""
+            class="quicksearch-field" />
+        </fieldset>
+        </form>
+
+        <ul class="link-list">
+        
+          <li><a href="./ZMQ.html">ZMQ</a></li>
+        
+          <li><a href="./ZMQ/Context.html">ZMQ::Context</a></li>
+        
+          <li><a href="./ZMQ/DefaultHandler.html">ZMQ::DefaultHandler</a></li>
+        
+          <li><a href="./ZMQ/DownstreamSocket.html">ZMQ::DownstreamSocket</a></li>
+        
+          <li><a href="./ZMQ/Error.html">ZMQ::Error</a></li>
+        
+          <li><a href="./ZMQ/Frame.html">ZMQ::Frame</a></li>
+        
+          <li><a href="./ZMQ/Handler.html">ZMQ::Handler</a></li>
+        
+          <li><a href="./ZMQ/Loop.html">ZMQ::Loop</a></li>
+        
+          <li><a href="./ZMQ/Loop.html">ZMQ::Loop</a></li>
+        
+          <li><a href="./ZMQ/Message.html">ZMQ::Message</a></li>
+        
+          <li><a href="./ZMQ/Socket.html">ZMQ::Socket</a></li>
+        
+          <li><a href="./ZMQ/Socket/Dealer.html">ZMQ::Socket::Dealer</a></li>
+        
+          <li><a href="./ZMQ/Socket/Pair.html">ZMQ::Socket::Pair</a></li>
+        
+          <li><a href="./ZMQ/Socket/Pub.html">ZMQ::Socket::Pub</a></li>
+        
+          <li><a href="./ZMQ/Socket/Pull.html">ZMQ::Socket::Pull</a></li>
+        
+          <li><a href="./ZMQ/Socket/Push.html">ZMQ::Socket::Push</a></li>
+        
+          <li><a href="./ZMQ/Socket/Rep.html">ZMQ::Socket::Rep</a></li>
+        
+          <li><a href="./ZMQ/Socket/Req.html">ZMQ::Socket::Req</a></li>
+        
+          <li><a href="./ZMQ/Socket/Router.html">ZMQ::Socket::Router</a></li>
+        
+          <li><a href="./ZMQ/Socket/Sub.html">ZMQ::Socket::Sub</a></li>
+        
+          <li><a href="./ZMQ/Timer.html">ZMQ::Timer</a></li>
+        
+          <li><a href="./ZMQ/UpstreamSocket.html">ZMQ::UpstreamSocket</a></li>
+        
+          <li><a href="./Object.html">Object</a></li>
+        
+          <li><a href="./ZMQ/Loop.html">Object::ZL</a></li>
+        
+        </ul>
+        <div id="no-class-search-results" style="display: none;">No matching classes.</div>
+      </div>
+
+      
+    </div>
+  </div>
+
+  <div id="documentation">
+    <h1 class="module">ZMQ</h1>
+
+    <div id="description" class="description">
+      
+    </div><!-- description -->
+
+    
+    
+    
+    <div id="5Buntitled-5D" class="documentation-section">
+      
+
+      
+
+      
+      <!-- Constants -->
+      <div id="constants-list" class="section">
+        <h3 class="section-header">Constants</h3>
+        <dl>
+        
+          <dt><a name="DEALER">DEALER</a></dt>
+          
+          <dd class="description"></dd>
+          
+        
+          <dt><a name="PAIR">PAIR</a></dt>
+          
+          <dd class="description"></dd>
+          
+        
+          <dt><a name="POLLERR">POLLERR</a></dt>
+          
+          <dd class="description"></dd>
+          
+        
+          <dt><a name="POLLIN">POLLIN</a></dt>
+          
+          <dd class="description"></dd>
+          
+        
+          <dt><a name="POLLOUT">POLLOUT</a></dt>
+          
+          <dd class="description"></dd>
+          
+        
+          <dt><a name="PUB">PUB</a></dt>
+          
+          <dd class="description"></dd>
+          
+        
+          <dt><a name="PULL">PULL</a></dt>
+          
+          <dd class="description"></dd>
+          
+        
+          <dt><a name="PUSH">PUSH</a></dt>
+          
+          <dd class="description"></dd>
+          
+        
+          <dt><a name="REP">REP</a></dt>
+          
+          <dd class="description"></dd>
+          
+        
+          <dt><a name="REQ">REQ</a></dt>
+          
+          <dd class="description"></dd>
+          
+        
+          <dt><a name="ROUTER">ROUTER</a></dt>
+          
+          <dd class="description"></dd>
+          
+        
+          <dt><a name="SUB">SUB</a></dt>
+          
+          <dd class="description"></dd>
+          
+        
+          <dt><a name="VERSION">VERSION</a></dt>
+          
+          <dd class="description"></dd>
+          
+        
+        </dl>
+      </div>
+      
+
+      
+
+      <!-- Methods -->
+      
+      <div id="public-class-method-details" class="method-section section">
+        <h3 class="section-header">Public Class Methods</h3>
+
+      
+        <div id="Frame-method" class="method-detail ">
+          <a name="method-c-Frame"></a>
+
+          
+          <div class="method-heading">
+            <span class="method-name">Frame</span><span
+              class="method-args">(data = nil)</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          
+
+          <div class="method-description">
+            
+            <p>Sugaring for creating new <a href="ZMQ.html">ZMQ</a> frames</p>
+
+<p>ZMQ::Frame(“frame”)  =&gt;  <a href="ZMQ/Frame.html">ZMQ::Frame</a></p>
+            
+
+            
+            <div class="method-source-code" id="Frame-source">
+<pre>
+<span class="ruby-comment"># File lib/zmq.rb, line 49</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-constant">Frame</span>(<span class="ruby-identifier">data</span> = <span class="ruby-keyword">nil</span>)
+  <span class="ruby-constant">ZMQ</span><span class="ruby-operator">::</span><span class="ruby-constant">Frame</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">data</span>)
+<span class="ruby-keyword">end</span></pre>
+            </div><!-- Frame-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- Frame-method -->
+
+      
+        <div id="Message-method" class="method-detail ">
+          <a name="method-c-Message"></a>
+
+          
+          <div class="method-heading">
+            <span class="method-name">Message</span><span
+              class="method-args">(*parts)</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          
+
+          <div class="method-description">
+            
+            <p>Sugaring for creating new <a href="ZMQ.html">ZMQ</a> messages</p>
+
+<p>ZMQ::Message(“one”, “two”, “three”)  =&gt;  <a
+href="ZMQ/Message.html">ZMQ::Message</a></p>
+            
+
+            
+            <div class="method-source-code" id="Message-source">
+<pre>
+<span class="ruby-comment"># File lib/zmq.rb, line 57</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-constant">Message</span>(*<span class="ruby-identifier">parts</span>)
+  <span class="ruby-identifier">m</span> = <span class="ruby-constant">ZMQ</span><span class="ruby-operator">::</span><span class="ruby-constant">Message</span>.<span class="ruby-identifier">new</span>
+  <span class="ruby-identifier">parts</span>.<span class="ruby-identifier">each</span>{<span class="ruby-operator">|</span><span class="ruby-identifier">p</span><span class="ruby-operator">|</span> <span class="ruby-identifier">m</span>.<span class="ruby-identifier">addstr</span>(<span class="ruby-identifier">p</span>) }
+  <span class="ruby-identifier">m</span>
+<span class="ruby-keyword">end</span></pre>
+            </div><!-- Message-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- Message-method -->
+
+      
+        <div id="context-method" class="method-detail ">
+          <a name="method-c-context"></a>
+
+          
+          <div class="method-heading">
+            <span class="method-name">context</span><span
+              class="method-args">()</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          
+
+          <div class="method-description">
+            
+            <p>Returns the <a href="ZMQ.html">ZMQ</a> context for this process, if any</p>
+            
+
+            
+            <div class="method-source-code" id="context-source">
+<pre>
+<span class="ruby-comment"># File lib/zmq.rb, line 65</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">context</span>
+  <span class="ruby-ivar">@__zmq_ctx_process</span>[<span class="ruby-constant">Process</span>.<span class="ruby-identifier">pid</span>]
+<span class="ruby-keyword">end</span></pre>
+            </div><!-- context-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- context-method -->
+
+      
+        <div id="error-method" class="method-detail ">
+          <a name="method-c-error"></a>
+
+          
+          
+          <div class="method-heading">
+            <span class="method-callseq">error    =>  ZMQ::Error</span>
+            
+            <span class="method-click-advice">click to toggle source</span>
+            
+          </div>
+          
+          
+
+          <div class="method-description">
+            
+            <pre>Returns the last known ZMQ error (if any) as a ZMQ::Error instance.</pre>
+
+<h3>Examples</h3>
+
+<pre>ZMQ.error    =&gt;  ZMQ::Error or nil</pre>
+            
+
+            
+            <div class="method-source-code" id="error-source">
+<pre>
+static VALUE rb_czmq_m_error(ZMQ_UNUSED VALUE obj)
+{
+    int err;
+    err = zmq_errno();
+    if (err == 0) return Qnil;
+    return rb_exc_new2(rb_eZmqError, zmq_strerror(zmq_errno()));
+}</pre>
+            </div><!-- error-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- error-method -->
+
+      
+        <div id="interrupted-3F-method" class="method-detail ">
+          <a name="method-c-interrupted-3F"></a>
+
+          
+          
+          <div class="method-heading">
+            <span class="method-callseq">interrupted?    =>  boolean</span>
+            
+            <span class="method-click-advice">click to toggle source</span>
+            
+          </div>
+          
+          
+
+          <div class="method-description">
+            
+            <pre>Returns true if the process was interrupted by signal.</pre>
+
+<h3>Examples</h3>
+
+<pre>ZMQ.interrupted?    =&gt;  boolean</pre>
+            
+
+            
+            <div class="method-source-code" id="interrupted-3F-source">
+<pre>
+static VALUE rb_czmq_m_interrupted_p(ZMQ_UNUSED VALUE obj)
+{
+    return (zctx_interrupted == TRUE) ? Qtrue : Qfalse;
+}</pre>
+            </div><!-- interrupted-3F-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- interrupted-3F-method -->
+
+      
+        <div id="log-method" class="method-detail ">
+          <a name="method-c-log"></a>
+
+          
+          
+          <div class="method-heading">
+            <span class="method-callseq">log("msg")    =>  nil</span>
+            
+            <span class="method-click-advice">click to toggle source</span>
+            
+          </div>
+          
+          
+
+          <div class="method-description">
+            
+            <pre>Logs a timestamped message to stdout.</pre>
+
+<h3>Examples</h3>
+
+<pre>ZMQ.log(&quot;msg&quot;)    =&gt;  nil # 11-12-06 21:20:55 msg</pre>
+            
+
+            
+            <div class="method-source-code" id="log-source">
+<pre>
+static VALUE rb_czmq_m_log(ZMQ_UNUSED VALUE obj, VALUE msg)
+{
+    Check_Type(msg, T_STRING);
+    zclock_log(StringValueCStr(msg));
+    return Qnil;
+}</pre>
+            </div><!-- log-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- log-method -->
+
+      
+        <div id="loop-method" class="method-detail ">
+          <a name="method-c-loop"></a>
+
+          
+          <div class="method-heading">
+            <span class="method-name">loop</span><span
+              class="method-args">()</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          
+
+          <div class="method-description">
+            
+            <p>Higher level loop API.</p>
+
+<p>XXX: Handle cases where context is nil</p>
+            
+
+            
+            <div class="method-source-code" id="loop-source">
+<pre>
+<span class="ruby-comment"># File lib/zmq.rb, line 73</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">loop</span>
+  <span class="ruby-ivar">@loop</span> <span class="ruby-operator">||=</span> <span class="ruby-constant">ZMQ</span><span class="ruby-operator">::</span><span class="ruby-constant">Loop</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">context</span>)
+<span class="ruby-keyword">end</span></pre>
+            </div><!-- loop-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- loop-method -->
+
+      
+        <div id="now-method" class="method-detail ">
+          <a name="method-c-now"></a>
+
+          
+          
+          <div class="method-heading">
+            <span class="method-callseq">now    =>  Fixnum</span>
+            
+            <span class="method-click-advice">click to toggle source</span>
+            
+          </div>
+          
+          
+
+          <div class="method-description">
+            
+            <pre>Returns a current timestamp as a Fixnum</pre>
+
+<h3>Examples</h3>
+
+<pre>ZMQ.now    =&gt;  1323206405148</pre>
+            
+
+            
+            <div class="method-source-code" id="now-source">
+<pre>
+static VALUE rb_czmq_m_now(ZMQ_UNUSED VALUE obj)
+{
+    return INT2NUM(zclock_time());
+}</pre>
+            </div><!-- now-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- now-method -->
+
+      
+        <div id="version-method" class="method-detail ">
+          <a name="method-c-version"></a>
+
+          
+          
+          <div class="method-heading">
+            <span class="method-callseq">version    =>  Array</span>
+            
+            <span class="method-click-advice">click to toggle source</span>
+            
+          </div>
+          
+          
+
+          <div class="method-description">
+            
+            <pre>Returns the libzmq version linked against.</pre>
+
+<h3>Examples</h3>
+
+<pre>ZMQ.version    =&gt;  [2,1,11]</pre>
+            
+
+            
+            <div class="method-source-code" id="version-source">
+<pre>
+static VALUE rb_czmq_m_version(ZMQ_UNUSED VALUE obj)
+{
+    int major, minor, patch;
+    zmq_version(&amp;major, &amp;minor, &amp;patch);
+    return rb_ary_new3(3, INT2NUM(major), INT2NUM(minor), INT2NUM(patch));
+}</pre>
+            </div><!-- version-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- version-method -->
+
+      
+      </div><!-- public-class-method-details -->
+    
+    </div><!-- 5Buntitled-5D -->
+  
+
+  </div><!-- documentation -->
+
+  <div id="validator-badges">
+    <p><small><a href="http://validator.w3.org/check/referer">[Validate]</a></small></p>
+    <p><small>Generated with the <a href="http://deveiate.org/projects/Darkfish-Rdoc/">Darkfish
+      Rdoc Generator</a> 2</small>.</p>
+  </div>
+
+</body>
+</html>
+

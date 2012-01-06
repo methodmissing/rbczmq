@@ -1,0 +1,3096 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <meta content="text/html; charset=UTF-8" http-equiv="Content-Type" />
+
+  <title>Class: ZMQ::Socket</title>
+
+  <link rel="stylesheet" href="../rdoc.css" type="text/css" media="screen" />
+
+  <script src="../js/jquery.js" type="text/javascript" charset="utf-8"></script>
+  <script src="../js/thickbox-compressed.js" type="text/javascript" charset="utf-8"></script>
+  <script src="../js/quicksearch.js" type="text/javascript" charset="utf-8"></script>
+  <script src="../js/darkfish.js" type="text/javascript" charset="utf-8"></script>
+
+</head>
+<body id="top" class="class">
+
+  <div id="metadata">
+    <div id="home-metadata">
+      <div id="home-section" class="section">
+        <h3 class="section-header">
+          <a href="../index.html">Home</a>
+          <a href="../index.html#classes">Classes</a>
+          <a href="../index.html#methods">Methods</a>
+        </h3>
+      </div>
+    </div>
+
+    <div id="file-metadata">
+      <div id="file-list-section" class="section">
+        <h3 class="section-header">In Files</h3>
+        <div class="section-body">
+          <ul>
+          
+            <li><a href="../lib/zmq/socket_rb.html?TB_iframe=true&amp;height=550&amp;width=785"
+              class="thickbox" title="lib/zmq/socket.rb">lib/zmq/socket.rb</a></li>
+          
+            <li><a href="../ext/rbczmq/rbczmq_ext_c.html?TB_iframe=true&amp;height=550&amp;width=785"
+              class="thickbox" title="ext/rbczmq/rbczmq_ext.c">ext/rbczmq/rbczmq_ext.c</a></li>
+          
+          </ul>
+        </div>
+      </div>
+
+      
+    </div>
+
+    <div id="class-metadata">
+      
+      <!-- Parent Class -->
+      <div id="parent-class-section" class="section">
+        <h3 class="section-header">Parent</h3>
+        
+        <p class="link"><a href="../Object.html">Object</a></p>
+        
+      </div>
+      
+
+      
+
+      
+      <!-- Namespace Contents -->
+      <div id="namespace-list-section" class="section">
+        <h3 class="section-header">Namespace</h3>
+        <ul class="link-list">
+          
+          <li><span class="type">CLASS</span> <a href="Socket/Dealer.html">ZMQ::Socket::Dealer</a></li>
+          
+          <li><span class="type">CLASS</span> <a href="Socket/Pair.html">ZMQ::Socket::Pair</a></li>
+          
+          <li><span class="type">CLASS</span> <a href="Socket/Pub.html">ZMQ::Socket::Pub</a></li>
+          
+          <li><span class="type">CLASS</span> <a href="Socket/Pull.html">ZMQ::Socket::Pull</a></li>
+          
+          <li><span class="type">CLASS</span> <a href="Socket/Push.html">ZMQ::Socket::Push</a></li>
+          
+          <li><span class="type">CLASS</span> <a href="Socket/Rep.html">ZMQ::Socket::Rep</a></li>
+          
+          <li><span class="type">CLASS</span> <a href="Socket/Req.html">ZMQ::Socket::Req</a></li>
+          
+          <li><span class="type">CLASS</span> <a href="Socket/Router.html">ZMQ::Socket::Router</a></li>
+          
+          <li><span class="type">CLASS</span> <a href="Socket/Sub.html">ZMQ::Socket::Sub</a></li>
+          
+        </ul>
+      </div>
+      
+
+      
+      <!-- Method Quickref -->
+      <div id="method-list-section" class="section">
+        <h3 class="section-header">Methods</h3>
+        <ul class="link-list">
+          
+          <li><a href="#method-c-unsupported_api">::unsupported_api</a></li>
+          
+          <li><a href="#method-i-affinity">#affinity</a></li>
+          
+          <li><a href="#method-i-affinity-3D">#affinity=</a></li>
+          
+          <li><a href="#method-i-backlog">#backlog</a></li>
+          
+          <li><a href="#method-i-backlog-3D">#backlog=</a></li>
+          
+          <li><a href="#method-i-bind">#bind</a></li>
+          
+          <li><a href="#method-i-close">#close</a></li>
+          
+          <li><a href="#method-i-connect">#connect</a></li>
+          
+          <li><a href="#method-i-endpoint">#endpoint</a></li>
+          
+          <li><a href="#method-i-events">#events</a></li>
+          
+          <li><a href="#method-i-fd">#fd</a></li>
+          
+          <li><a href="#method-i-handler">#handler</a></li>
+          
+          <li><a href="#method-i-handler-3D">#handler=</a></li>
+          
+          <li><a href="#method-i-hwm">#hwm</a></li>
+          
+          <li><a href="#method-i-hwm-3D">#hwm=</a></li>
+          
+          <li><a href="#method-i-identity-3D">#identity=</a></li>
+          
+          <li><a href="#method-i-linger">#linger</a></li>
+          
+          <li><a href="#method-i-linger-3D">#linger=</a></li>
+          
+          <li><a href="#method-i-mcast_loop-3D">#mcast_loop=</a></li>
+          
+          <li><a href="#method-i-mcast_loop-3F">#mcast_loop?</a></li>
+          
+          <li><a href="#method-i-poll_readable-3F">#poll_readable?</a></li>
+          
+          <li><a href="#method-i-poll_writable-3F">#poll_writable?</a></li>
+          
+          <li><a href="#method-i-rate">#rate</a></li>
+          
+          <li><a href="#method-i-rate-3D">#rate=</a></li>
+          
+          <li><a href="#method-i-rcvbuf">#rcvbuf</a></li>
+          
+          <li><a href="#method-i-rcvbuf-3D">#rcvbuf=</a></li>
+          
+          <li><a href="#method-i-rcvmore-3F">#rcvmore?</a></li>
+          
+          <li><a href="#method-i-readable-3F">#readable?</a></li>
+          
+          <li><a href="#method-i-reconnect_ivl">#reconnect_ivl</a></li>
+          
+          <li><a href="#method-i-reconnect_ivl-3D">#reconnect_ivl=</a></li>
+          
+          <li><a href="#method-i-reconnect_ivl_max">#reconnect_ivl_max</a></li>
+          
+          <li><a href="#method-i-reconnect_ivl_max-3D">#reconnect_ivl_max=</a></li>
+          
+          <li><a href="#method-i-recovery_ivl">#recovery_ivl</a></li>
+          
+          <li><a href="#method-i-recovery_ivl-3D">#recovery_ivl=</a></li>
+          
+          <li><a href="#method-i-recovery_ivl_msec">#recovery_ivl_msec</a></li>
+          
+          <li><a href="#method-i-recovery_ivl_msec-3D">#recovery_ivl_msec=</a></li>
+          
+          <li><a href="#method-i-recv">#recv</a></li>
+          
+          <li><a href="#method-i-recv_frame">#recv_frame</a></li>
+          
+          <li><a href="#method-i-recv_frame_nonblock">#recv_frame_nonblock</a></li>
+          
+          <li><a href="#method-i-recv_message">#recv_message</a></li>
+          
+          <li><a href="#method-i-recv_nonblock">#recv_nonblock</a></li>
+          
+          <li><a href="#method-i-recv_timeout">#recv_timeout</a></li>
+          
+          <li><a href="#method-i-recv_timeout-3D">#recv_timeout=</a></li>
+          
+          <li><a href="#method-i-send">#send</a></li>
+          
+          <li><a href="#method-i-send_frame">#send_frame</a></li>
+          
+          <li><a href="#method-i-send_message">#send_message</a></li>
+          
+          <li><a href="#method-i-send_timeout">#send_timeout</a></li>
+          
+          <li><a href="#method-i-send_timeout-3D">#send_timeout=</a></li>
+          
+          <li><a href="#method-i-sendm">#sendm</a></li>
+          
+          <li><a href="#method-i-sndbuf">#sndbuf</a></li>
+          
+          <li><a href="#method-i-sndbuf-3D">#sndbuf=</a></li>
+          
+          <li><a href="#method-i-state">#state</a></li>
+          
+          <li><a href="#method-i-subscribe">#subscribe</a></li>
+          
+          <li><a href="#method-i-swap">#swap</a></li>
+          
+          <li><a href="#method-i-swap-3D">#swap=</a></li>
+          
+          <li><a href="#method-i-to_i">#to_i</a></li>
+          
+          <li><a href="#method-i-to_s">#to_s</a></li>
+          
+          <li><a href="#method-i-type_str">#type_str</a></li>
+          
+          <li><a href="#method-i-unsubscribe">#unsubscribe</a></li>
+          
+          <li><a href="#method-i-verbose-3D">#verbose=</a></li>
+          
+          <li><a href="#method-i-writable-3F">#writable?</a></li>
+          
+        </ul>
+      </div>
+      
+
+      
+    </div>
+
+    <div id="project-metadata">
+      
+      
+      <div id="fileindex-section" class="section project-section">
+        <h3 class="section-header">Files</h3>
+        <ul>
+        
+          <li class="file"><a href="../README_rdoc.html">README.rdoc</a></li>
+        
+        </ul>
+      </div>
+      
+
+      <div id="classindex-section" class="section project-section">
+        <h3 class="section-header">Class/Module Index
+          <span class="search-toggle"><img src="../images/find.png"
+            height="16" width="16" alt="[+]"
+            title="show/hide quicksearch" /></span></h3>
+        <form action="#" method="get" accept-charset="utf-8" class="initially-hidden">
+        <fieldset>
+          <legend>Quicksearch</legend>
+          <input type="text" name="quicksearch" value=""
+            class="quicksearch-field" />
+        </fieldset>
+        </form>
+
+        <ul class="link-list">
+        
+          <li><a href="../ZMQ.html">ZMQ</a></li>
+        
+          <li><a href="../ZMQ/Context.html">ZMQ::Context</a></li>
+        
+          <li><a href="../ZMQ/DefaultHandler.html">ZMQ::DefaultHandler</a></li>
+        
+          <li><a href="../ZMQ/DownstreamSocket.html">ZMQ::DownstreamSocket</a></li>
+        
+          <li><a href="../ZMQ/Error.html">ZMQ::Error</a></li>
+        
+          <li><a href="../ZMQ/Frame.html">ZMQ::Frame</a></li>
+        
+          <li><a href="../ZMQ/Handler.html">ZMQ::Handler</a></li>
+        
+          <li><a href="../ZMQ/Loop.html">ZMQ::Loop</a></li>
+        
+          <li><a href="../ZMQ/Loop.html">ZMQ::Loop</a></li>
+        
+          <li><a href="../ZMQ/Message.html">ZMQ::Message</a></li>
+        
+          <li><a href="../ZMQ/Socket.html">ZMQ::Socket</a></li>
+        
+          <li><a href="../ZMQ/Socket/Dealer.html">ZMQ::Socket::Dealer</a></li>
+        
+          <li><a href="../ZMQ/Socket/Pair.html">ZMQ::Socket::Pair</a></li>
+        
+          <li><a href="../ZMQ/Socket/Pub.html">ZMQ::Socket::Pub</a></li>
+        
+          <li><a href="../ZMQ/Socket/Pull.html">ZMQ::Socket::Pull</a></li>
+        
+          <li><a href="../ZMQ/Socket/Push.html">ZMQ::Socket::Push</a></li>
+        
+          <li><a href="../ZMQ/Socket/Rep.html">ZMQ::Socket::Rep</a></li>
+        
+          <li><a href="../ZMQ/Socket/Req.html">ZMQ::Socket::Req</a></li>
+        
+          <li><a href="../ZMQ/Socket/Router.html">ZMQ::Socket::Router</a></li>
+        
+          <li><a href="../ZMQ/Socket/Sub.html">ZMQ::Socket::Sub</a></li>
+        
+          <li><a href="../ZMQ/Timer.html">ZMQ::Timer</a></li>
+        
+          <li><a href="../ZMQ/UpstreamSocket.html">ZMQ::UpstreamSocket</a></li>
+        
+          <li><a href="../Object.html">Object</a></li>
+        
+          <li><a href="../ZMQ/Loop.html">Object::ZL</a></li>
+        
+        </ul>
+        <div id="no-class-search-results" style="display: none;">No matching classes.</div>
+      </div>
+
+      
+    </div>
+  </div>
+
+  <div id="documentation">
+    <h1 class="class">ZMQ::Socket</h1>
+
+    <div id="description" class="description">
+      
+    </div><!-- description -->
+
+    
+    
+    
+    <div id="5Buntitled-5D" class="documentation-section">
+      
+
+      
+
+      
+
+      
+
+      <!-- Methods -->
+      
+      <div id="public-class-method-details" class="method-section section">
+        <h3 class="section-header">Public Class Methods</h3>
+
+      
+        <div id="unsupported_api-method" class="method-detail ">
+          <a name="method-c-unsupported_api"></a>
+
+          
+          <div class="method-heading">
+            <span class="method-name">unsupported_api</span><span
+              class="method-args">(*methods)</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          
+
+          <div class="method-description">
+            
+            
+            
+
+            
+            <div class="method-source-code" id="unsupported_api-source">
+<pre>
+<span class="ruby-comment"># File lib/zmq/socket.rb, line 39</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">unsupported_api</span>(*<span class="ruby-identifier">methods</span>)
+  <span class="ruby-identifier">methods</span>.<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">m</span><span class="ruby-operator">|</span>
+    <span class="ruby-identifier">class_eval</span> <span class="ruby-string">        def #{m}(*args); raise(ZMQ::Error, &quot;API #{m} not supported for #{const_get(:TYPE_STR)} sockets!&quot;);  end</span>, <span class="ruby-keyword">__FILE__</span>, <span class="ruby-keyword">__LINE__</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+            </div><!-- unsupported_api-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- unsupported_api-method -->
+
+      
+      </div><!-- public-class-method-details -->
+    
+      <div id="public-instance-method-details" class="method-section section">
+        <h3 class="section-header">Public Instance Methods</h3>
+
+      
+        <div id="affinity-method" class="method-detail ">
+          <a name="method-i-affinity"></a>
+
+          
+          
+          <div class="method-heading">
+            <span class="method-callseq">affinity =>  Fixnum</span>
+            
+            <span class="method-click-advice">click to toggle source</span>
+            
+          </div>
+          
+          
+
+          <div class="method-description">
+            
+            <pre>Returns the socket AFFINITY value.</pre>
+
+<h3>Examples</h3>
+
+<pre>ctx = ZMQ::Context.new
+sock = ctx.socket(:REP)
+sock.affinity  =&gt;  0</pre>
+            
+
+            
+            <div class="method-source-code" id="affinity-source">
+<pre>
+static VALUE rb_czmq_socket_opt_affinity(VALUE obj)
+{
+    GetZmqSocket(obj);
+    return INT2NUM(zsockopt_affinity(sock-&gt;socket));
+}</pre>
+            </div><!-- affinity-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- affinity-method -->
+
+      
+        <div id="affinity-3D-method" class="method-detail ">
+          <a name="method-i-affinity-3D"></a>
+
+          
+          
+          <div class="method-heading">
+            <span class="method-callseq">affinity = 1 =>  nil</span>
+            
+            <span class="method-click-advice">click to toggle source</span>
+            
+          </div>
+          
+          
+
+          <div class="method-description">
+            
+            <pre>Sets the socket AFFINITY value.</pre>
+
+<h3>Examples</h3>
+
+<pre>ctx = ZMQ::Context.new
+sock = ctx.socket(:REP)
+sock.affinity = 1  =&gt;  nil</pre>
+            
+
+            
+            <div class="method-source-code" id="affinity-3D-source">
+<pre>
+static VALUE rb_czmq_socket_set_opt_affinity(VALUE obj, VALUE value)
+{
+    ZmqSetSockOpt(obj, zsockopt_set_affinity, &quot;AFFINITY&quot;, value);
+}</pre>
+            </div><!-- affinity-3D-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- affinity-3D-method -->
+
+      
+        <div id="backlog-method" class="method-detail ">
+          <a name="method-i-backlog"></a>
+
+          
+          
+          <div class="method-heading">
+            <span class="method-callseq">backlog =>  Fixnum</span>
+            
+            <span class="method-click-advice">click to toggle source</span>
+            
+          </div>
+          
+          
+
+          <div class="method-description">
+            
+            <pre>Returns the socket BACKLOG value.</pre>
+
+<h3>Examples</h3>
+
+<pre>ctx = ZMQ::Context.new
+sock = ctx.socket(:REP)
+sock.backlog  =&gt;  100</pre>
+            
+
+            
+            <div class="method-source-code" id="backlog-source">
+<pre>
+static VALUE rb_czmq_socket_opt_backlog(VALUE obj)
+{
+    GetZmqSocket(obj);
+    return INT2NUM(zsockopt_backlog(sock-&gt;socket));
+}</pre>
+            </div><!-- backlog-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- backlog-method -->
+
+      
+        <div id="backlog-3D-method" class="method-detail ">
+          <a name="method-i-backlog-3D"></a>
+
+          
+          
+          <div class="method-heading">
+            <span class="method-callseq">backlog = 200 =>  nil</span>
+            
+            <span class="method-click-advice">click to toggle source</span>
+            
+          </div>
+          
+          
+
+          <div class="method-description">
+            
+            <pre>Sets the socket BACKLOG value.</pre>
+
+<h3>Examples</h3>
+
+<pre>ctx = ZMQ::Context.new
+sock = ctx.socket(:REP)
+sock.backlog = 200  =&gt;  nil</pre>
+            
+
+            
+            <div class="method-source-code" id="backlog-3D-source">
+<pre>
+static VALUE rb_czmq_socket_set_opt_backlog(VALUE obj, VALUE value)
+{
+    ZmqSetSockOpt(obj, zsockopt_set_backlog, &quot;BACKLOG&quot;, value);
+}</pre>
+            </div><!-- backlog-3D-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- backlog-3D-method -->
+
+      
+        <div id="bind-method" class="method-detail ">
+          <a name="method-i-bind"></a>
+
+          
+          
+          <div class="method-heading">
+            <span class="method-callseq">bind("inproc://test")   =>  Fixnum</span>
+            
+            <span class="method-click-advice">click to toggle source</span>
+            
+          </div>
+          
+          
+
+          <div class="method-description">
+            
+            <pre>Binds to a given endpoint. When the port number is '*', attempts to bind to a free port. Always returns the port
+number on success.</pre>
+
+<h3>Examples</h3>
+
+<pre>ctx = ZMQ::Context.new
+sock = ctx.socket(:PUSH)
+sock.bind(&quot;tcp://localhost:*&quot;)    =&gt;  5432</pre>
+            
+
+            
+            <div class="method-source-code" id="bind-source">
+<pre>
+static VALUE rb_czmq_socket_bind(VALUE obj, VALUE endpoint)
+{
+    struct nogvl_conn_args args;
+    int rc;
+    GetZmqSocket(obj);
+    ZmqSockGuardCrossThread(sock);
+    Check_Type(endpoint, T_STRING);
+    args.socket = sock;
+    args.endpoint = StringValueCStr(endpoint);
+    rc = (int)rb_thread_blocking_region(rb_czmq_nogvl_socket_bind, (void *)&amp;args, RUBY_UBF_IO, 0);
+    if (rc == -1) ZmqRaiseSysError();
+    if (sock-&gt;verbose)
+        zclock_log (&quot;I: %s socket %p: bound \&quot;%s\&quot;&quot;, zsocket_type_str(sock-&gt;socket), obj, StringValueCStr(endpoint));
+    sock-&gt;state = ZMQ_SOCKET_BOUND;
+    sock-&gt;endpoint = rb_str_new4(endpoint);
+    return INT2NUM(rc);
+}</pre>
+            </div><!-- bind-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- bind-method -->
+
+      
+        <div id="close-method" class="method-detail ">
+          <a name="method-i-close"></a>
+
+          
+          
+          <div class="method-heading">
+            <span class="method-callseq">close   =>  nil</span>
+            
+            <span class="method-click-advice">click to toggle source</span>
+            
+          </div>
+          
+          
+
+          <div class="method-description">
+            
+            <pre>Closes a socket. The GC will take the same action if a socket object is not reachable anymore on the next GC cycle.
+This is a lower level API.</pre>
+
+<h3>Examples</h3>
+
+<pre>sock.close    =&gt;  nil</pre>
+            
+
+            
+            <div class="method-source-code" id="close-source">
+<pre>
+static VALUE rb_czmq_socket_close(VALUE obj)
+{
+    GetZmqSocket(obj);
+    ZmqSockGuardCrossThread(sock);
+    rb_czmq_free_sock(sock);
+    return Qnil;
+}</pre>
+            </div><!-- close-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- close-method -->
+
+      
+        <div id="connect-method" class="method-detail ">
+          <a name="method-i-connect"></a>
+
+          
+          
+          <div class="method-heading">
+            <span class="method-callseq">connect("tcp://localhost:3456")   =>  boolean</span>
+            
+            <span class="method-click-advice">click to toggle source</span>
+            
+          </div>
+          
+          
+
+          <div class="method-description">
+            
+            <pre>Attempts to connect to a given endpoint.</pre>
+
+<h3>Examples</h3>
+
+<pre>ctx = ZMQ::Context.new
+rep = ctx.socket(:REP)
+port = rep.bind(&quot;tcp://localhost:*&quot;)    =&gt;  5432
+req = ctx.socket(:REQ)
+req.connect(&quot;tcp://localhost:#{port}&quot;)   =&gt; true</pre>
+            
+
+            
+            <div class="method-source-code" id="connect-source">
+<pre>
+static VALUE rb_czmq_socket_connect(VALUE obj, VALUE endpoint)
+{
+    struct nogvl_conn_args args;
+    int rc;
+    GetZmqSocket(obj);
+    ZmqSockGuardCrossThread(sock);
+    Check_Type(endpoint, T_STRING);
+    args.socket = sock;
+    args.endpoint = StringValueCStr(endpoint);
+    rc = (int)rb_thread_blocking_region(rb_czmq_nogvl_socket_connect, (void *)&amp;args, RUBY_UBF_IO, 0);
+    ZmqAssert(rc);
+    if (sock-&gt;verbose)
+        zclock_log (&quot;I: %s socket %p: connected \&quot;%s\&quot;&quot;, zsocket_type_str(sock-&gt;socket), obj, StringValueCStr(endpoint));
+    sock-&gt;state = ZMQ_SOCKET_CONNECTED;
+    sock-&gt;endpoint = rb_str_new4(endpoint);
+    return Qtrue;
+}</pre>
+            </div><!-- connect-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- connect-method -->
+
+      
+        <div id="endpoint-method" class="method-detail ">
+          <a name="method-i-endpoint"></a>
+
+          
+          
+          <div class="method-heading">
+            <span class="method-callseq">endpoint   =>  String or nil</span>
+            
+            <span class="method-click-advice">click to toggle source</span>
+            
+          </div>
+          
+          
+
+          <div class="method-description">
+            
+            <pre>Returns the endpoint this socket is currently connected to, if any.</pre>
+
+<h3>Examples</h3>
+
+<pre>ctx = ZMQ::Context.new
+sock = ctx.socket(:PUSH)
+sock.endpoint    =&gt;   nil
+sock.bind(&quot;inproc://test&quot;)
+sock.endpoint    =&gt;  &quot;inproc://test&quot;</pre>
+            
+
+            
+            <div class="method-source-code" id="endpoint-source">
+<pre>
+static VALUE rb_czmq_socket_endpoint(VALUE obj)
+{
+    GetZmqSocket(obj);
+    return sock-&gt;endpoint;
+}</pre>
+            </div><!-- endpoint-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- endpoint-method -->
+
+      
+        <div id="events-method" class="method-detail ">
+          <a name="method-i-events"></a>
+
+          
+          
+          <div class="method-heading">
+            <span class="method-callseq">events =>  Fixnum</span>
+            
+            <span class="method-click-advice">click to toggle source</span>
+            
+          </div>
+          
+          
+
+          <div class="method-description">
+            
+            <pre>Query if this socket is in a readable or writable state.</pre>
+
+<h3>Examples</h3>
+
+<pre>ctx = ZMQ::Context.new
+sock = ctx.socket(:SUB)
+sock.events =&gt; ZMQ::POLLIN</pre>
+            
+
+            
+            <div class="method-source-code" id="events-source">
+<pre>
+static VALUE rb_czmq_socket_opt_events(VALUE obj)
+{
+    GetZmqSocket(obj);
+    return INT2NUM(zsockopt_events(sock-&gt;socket));
+}</pre>
+            </div><!-- events-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- events-method -->
+
+      
+        <div id="fd-method" class="method-detail ">
+          <a name="method-i-fd"></a>
+
+          
+          
+          <div class="method-heading">
+            <span class="method-callseq">fd   =>  Fixnum</span>
+            
+            <span class="method-click-advice">click to toggle source</span>
+            
+          </div>
+          
+          
+
+          <div class="method-description">
+            
+            <pre>Returns a file descriptor reference for integrating this socket with an externel event loop or multiplexor.
+Edge-triggered notification of I/O state changes.</pre>
+
+<h3>Examples</h3>
+
+<pre>ctx = ZMQ::Context.new
+sock = ctx.socket(:PUSH)
+sock.fd       =&gt;   -1
+sock.bind(&quot;inproc://test&quot;)
+sock.fd       =&gt;   4</pre>
+            
+
+            
+            <div class="method-source-code" id="fd-source">
+<pre>
+static VALUE rb_czmq_socket_fd(VALUE obj)
+{
+    GetZmqSocket(obj);
+    if (sock-&gt;state == ZMQ_SOCKET_PENDING) return INT2NUM(-1);
+    return INT2NUM(zsockopt_fd(sock-&gt;socket));
+}</pre>
+            </div><!-- fd-source -->
+            
+          </div>
+
+          
+          <div class="aliases">
+            Also aliased as: <a href="Socket.html#method-i-to_i">to_i</a>
+          </div>
+          
+
+          
+        </div><!-- fd-method -->
+
+      
+        <div id="handler-method" class="method-detail ">
+          <a name="method-i-handler"></a>
+
+          
+          
+          <div class="method-heading">
+            <span class="method-callseq">handler =>  Object or nil</span>
+            
+            <span class="method-click-advice">click to toggle source</span>
+            
+          </div>
+          
+          
+
+          <div class="method-description">
+            
+            <pre>Returns the callback handler currently associated with this socket.</pre>
+
+<h3>Examples</h3>
+
+<pre>ctx = ZMQ::Context.new
+sock = ctx.socket(:REP)
+sock.handler = MyFrameHandler
+sock.handler   =&gt;   MyFrameHandler</pre>
+            
+
+            
+            <div class="method-source-code" id="handler-source">
+<pre>
+static VALUE rb_czmq_socket_handler(VALUE obj)
+{
+    GetZmqSocket(obj);
+    return sock-&gt;handler;
+}</pre>
+            </div><!-- handler-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- handler-method -->
+
+      
+        <div id="handler-3D-method" class="method-detail ">
+          <a name="method-i-handler-3D"></a>
+
+          
+          
+          <div class="method-heading">
+            <span class="method-callseq">handler = MyFrameHandler =>  nil</span>
+            
+            <span class="method-click-advice">click to toggle source</span>
+            
+          </div>
+          
+          
+
+          <div class="method-description">
+            
+            <pre>Associates a callback handler with this socket.</pre>
+
+<h3>Examples</h3>
+
+<pre>ctx = ZMQ::Context.new
+sock = ctx.socket(:REP)
+sock.handler = MyFrameHandler =&gt; nil</pre>
+            
+
+            
+            <div class="method-source-code" id="handler-3D-source">
+<pre>
+static VALUE rb_czmq_socket_set_handler(VALUE obj, VALUE handler)
+{
+    GetZmqSocket(obj);
+    sock-&gt;handler = handler;
+    return Qnil;
+}</pre>
+            </div><!-- handler-3D-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- handler-3D-method -->
+
+      
+        <div id="hwm-method" class="method-detail ">
+          <a name="method-i-hwm"></a>
+
+          
+          
+          <div class="method-heading">
+            <span class="method-callseq">hwm =>  Fixnum</span>
+            
+            <span class="method-click-advice">click to toggle source</span>
+            
+          </div>
+          
+          
+
+          <div class="method-description">
+            
+            <pre>Returns the socket HWM (High Water Mark) value.</pre>
+
+<h3>Examples</h3>
+
+<pre>ctx = ZMQ::Context.new
+sock = ctx.socket(:REP)
+sock.hwm  =&gt;  0</pre>
+            
+
+            
+            <div class="method-source-code" id="hwm-source">
+<pre>
+static VALUE rb_czmq_socket_opt_hwm(VALUE obj)
+{
+    GetZmqSocket(obj);
+    return INT2NUM(zsockopt_hwm(sock-&gt;socket));
+}</pre>
+            </div><!-- hwm-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- hwm-method -->
+
+      
+        <div id="hwm-3D-method" class="method-detail ">
+          <a name="method-i-hwm-3D"></a>
+
+          
+          
+          <div class="method-heading">
+            <span class="method-callseq">hwm = 100 =>  nil</span>
+            
+            <span class="method-click-advice">click to toggle source</span>
+            
+          </div>
+          
+          
+
+          <div class="method-description">
+            
+            <pre>Sets the socket HWM (High Water Mark() value.</pre>
+
+<h3>Examples</h3>
+
+<pre>ctx = ZMQ::Context.new
+sock = ctx.socket(:REP)
+sock.hwm = 100  =&gt;  nil
+sock.hwm  =&gt;  100</pre>
+            
+
+            
+            <div class="method-source-code" id="hwm-3D-source">
+<pre>
+static VALUE rb_czmq_socket_set_opt_hwm(VALUE obj, VALUE value)
+{
+    ZmqSetSockOpt(obj, zsockopt_set_hwm, &quot;HWM&quot;, value);
+}</pre>
+            </div><!-- hwm-3D-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- hwm-3D-method -->
+
+      
+        <div id="identity-3D-method" class="method-detail ">
+          <a name="method-i-identity-3D"></a>
+
+          
+          
+          <div class="method-heading">
+            <span class="method-callseq">identity = "anonymous" =>  nil</span>
+            
+            <span class="method-click-advice">click to toggle source</span>
+            
+          </div>
+          
+          
+
+          <div class="method-description">
+            
+            <pre>Sets the socket IDENTITY value.</pre>
+
+<h3>Examples</h3>
+
+<pre>ctx = ZMQ::Context.new
+sock = ctx.socket(:REP)
+sock.identity = &quot;anonymous&quot;  =&gt;  nil</pre>
+            
+
+            
+            <div class="method-source-code" id="identity-3D-source">
+<pre>
+static VALUE rb_czmq_socket_set_opt_identity(VALUE obj, VALUE value)
+{
+    char *val;
+    GetZmqSocket(obj);
+    ZmqSockGuardCrossThread(sock);
+    Check_Type(value, T_STRING);
+    if (RSTRING_LEN(value) == 0) rb_raise(rb_eZmqError, &quot;socket identity cannot be empty.&quot;);
+    if (RSTRING_LEN(value) &gt; 255) rb_raise(rb_eZmqError, &quot;maximum socket identity is 255 chars.&quot;);
+    val = StringValueCStr(value);
+    zsockopt_set_identity(sock-&gt;socket, val);
+    if (sock-&gt;verbose)
+        zclock_log (&quot;I: %s socket %p: set option \&quot;IDENTITY\&quot; \&quot;%s\&quot;&quot;, zsocket_type_str(sock-&gt;socket), obj, val);
+    return Qnil;
+}</pre>
+            </div><!-- identity-3D-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- identity-3D-method -->
+
+      
+        <div id="linger-method" class="method-detail ">
+          <a name="method-i-linger"></a>
+
+          
+          
+          <div class="method-heading">
+            <span class="method-callseq">linger =>  Fixnum</span>
+            
+            <span class="method-click-advice">click to toggle source</span>
+            
+          </div>
+          
+          
+
+          <div class="method-description">
+            
+            <pre>Returns the socket LINGER value.</pre>
+
+<h3>Examples</h3>
+
+<pre>ctx = ZMQ::Context.new
+sock = ctx.socket(:REP)
+sock.linger  =&gt;  -1</pre>
+            
+
+            
+            <div class="method-source-code" id="linger-source">
+<pre>
+static VALUE rb_czmq_socket_opt_linger(VALUE obj)
+{
+    GetZmqSocket(obj);
+    return INT2NUM(zsockopt_linger(sock-&gt;socket));
+}</pre>
+            </div><!-- linger-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- linger-method -->
+
+      
+        <div id="linger-3D-method" class="method-detail ">
+          <a name="method-i-linger-3D"></a>
+
+          
+          
+          <div class="method-heading">
+            <span class="method-callseq">linger = 1000 =>  nil</span>
+            
+            <span class="method-click-advice">click to toggle source</span>
+            
+          </div>
+          
+          
+
+          <div class="method-description">
+            
+            <pre>Sets the socket LINGER value in ms.</pre>
+
+<h3>Examples</h3>
+
+<pre>ctx = ZMQ::Context.new
+sock = ctx.socket(:REP)
+sock.linger = 1000  =&gt;  nil</pre>
+            
+
+            
+            <div class="method-source-code" id="linger-3D-source">
+<pre>
+static VALUE rb_czmq_socket_set_opt_linger(VALUE obj, VALUE value)
+{
+    ZmqSetSockOpt(obj, zsockopt_set_linger, &quot;LINGER&quot;, value);
+}</pre>
+            </div><!-- linger-3D-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- linger-3D-method -->
+
+      
+        <div id="mcast_loop-3D-method" class="method-detail ">
+          <a name="method-i-mcast_loop-3D"></a>
+
+          
+          
+          <div class="method-heading">
+            <span class="method-callseq">mcast_loop = false =>  nil</span>
+            
+            <span class="method-click-advice">click to toggle source</span>
+            
+          </div>
+          
+          
+
+          <div class="method-description">
+            
+            <pre>Sets the socket MCAST_LOOP value.</pre>
+
+<h3>Examples</h3>
+
+<pre>ctx = ZMQ::Context.new
+sock = ctx.socket(:REP)
+sock.mcast_loop = false  =&gt;  nil</pre>
+            
+
+            
+            <div class="method-source-code" id="mcast_loop-3D-source">
+<pre>
+static VALUE rb_czmq_socket_set_opt_mcast_loop(VALUE obj, VALUE value)
+{
+    ZmqSetBooleanSockOpt(obj, zsockopt_set_mcast_loop, &quot;MCAST_LOOP&quot;, value);
+}</pre>
+            </div><!-- mcast_loop-3D-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- mcast_loop-3D-method -->
+
+      
+        <div id="mcast_loop-3F-method" class="method-detail ">
+          <a name="method-i-mcast_loop-3F"></a>
+
+          
+          
+          <div class="method-heading">
+            <span class="method-callseq">mcast_loop? =>  boolean</span>
+            
+            <span class="method-click-advice">click to toggle source</span>
+            
+          </div>
+          
+          
+
+          <div class="method-description">
+            
+            <pre>Returns the socket MCAST_LOOP status.</pre>
+
+<h3>Examples</h3>
+
+<pre>ctx = ZMQ::Context.new
+sock = ctx.socket(:REP)
+sock.mcast_loop?  =&gt;  true</pre>
+            
+
+            
+            <div class="method-source-code" id="mcast_loop-3F-source">
+<pre>
+static VALUE rb_czmq_socket_opt_mcast_loop(VALUE obj)
+{
+    GetZmqSocket(obj);
+    return (zsockopt_mcast_loop(sock-&gt;socket) == 1) ? Qtrue : Qfalse;
+}</pre>
+            </div><!-- mcast_loop-3F-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- mcast_loop-3F-method -->
+
+      
+        <div id="poll_readable-3F-method" class="method-detail ">
+          <a name="method-i-poll_readable-3F"></a>
+
+          
+          <div class="method-heading">
+            <span class="method-name">poll_readable?</span><span
+              class="method-args">()</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          
+
+          <div class="method-description">
+            
+            <p>Poll all sockets for readbable states by default</p>
+            
+
+            
+            <div class="method-source-code" id="poll_readable-3F-source">
+<pre>
+<span class="ruby-comment"># File lib/zmq/socket.rb, line 91</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">poll_readable?</span>
+  <span class="ruby-keyword">true</span>
+<span class="ruby-keyword">end</span></pre>
+            </div><!-- poll_readable-3F-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- poll_readable-3F-method -->
+
+      
+        <div id="poll_writable-3F-method" class="method-detail ">
+          <a name="method-i-poll_writable-3F"></a>
+
+          
+          <div class="method-heading">
+            <span class="method-name">poll_writable?</span><span
+              class="method-args">()</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          
+
+          <div class="method-description">
+            
+            <p>Poll all sockets for writable states by default</p>
+            
+
+            
+            <div class="method-source-code" id="poll_writable-3F-source">
+<pre>
+<span class="ruby-comment"># File lib/zmq/socket.rb, line 96</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">poll_writable?</span>
+  <span class="ruby-keyword">true</span>
+<span class="ruby-keyword">end</span></pre>
+            </div><!-- poll_writable-3F-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- poll_writable-3F-method -->
+
+      
+        <div id="rate-method" class="method-detail ">
+          <a name="method-i-rate"></a>
+
+          
+          
+          <div class="method-heading">
+            <span class="method-callseq">rate =>  Fixnum</span>
+            
+            <span class="method-click-advice">click to toggle source</span>
+            
+          </div>
+          
+          
+
+          <div class="method-description">
+            
+            <pre>Returns the socket RATE value.</pre>
+
+<h3>Examples</h3>
+
+<pre>ctx = ZMQ::Context.new
+sock = ctx.socket(:REP)
+sock.rate  =&gt;  40000</pre>
+            
+
+            
+            <div class="method-source-code" id="rate-source">
+<pre>
+static VALUE rb_czmq_socket_opt_rate(VALUE obj)
+{
+    GetZmqSocket(obj);
+    return INT2NUM(zsockopt_rate(sock-&gt;socket));
+}</pre>
+            </div><!-- rate-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- rate-method -->
+
+      
+        <div id="rate-3D-method" class="method-detail ">
+          <a name="method-i-rate-3D"></a>
+
+          
+          
+          <div class="method-heading">
+            <span class="method-callseq">rate = 50000 =>  nil</span>
+            
+            <span class="method-click-advice">click to toggle source</span>
+            
+          </div>
+          
+          
+
+          <div class="method-description">
+            
+            <pre>Sets the socket RATE value.</pre>
+
+<h3>Examples</h3>
+
+<pre>ctx = ZMQ::Context.new
+sock = ctx.socket(:REP)
+sock.rate = 50000  =&gt;  nil</pre>
+            
+
+            
+            <div class="method-source-code" id="rate-3D-source">
+<pre>
+static VALUE rb_czmq_socket_set_opt_rate(VALUE obj, VALUE value)
+{
+    ZmqSetSockOpt(obj, zsockopt_set_rate, &quot;RATE&quot;, value);
+}</pre>
+            </div><!-- rate-3D-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- rate-3D-method -->
+
+      
+        <div id="rcvbuf-method" class="method-detail ">
+          <a name="method-i-rcvbuf"></a>
+
+          
+          
+          <div class="method-heading">
+            <span class="method-callseq">rcvbuf =>  Fixnum</span>
+            
+            <span class="method-click-advice">click to toggle source</span>
+            
+          </div>
+          
+          
+
+          <div class="method-description">
+            
+            <pre>Returns the socket RCVBUF value.</pre>
+
+<h3>Examples</h3>
+
+<pre>ctx = ZMQ::Context.new
+sock = ctx.socket(:REP)
+sock.rcvbuf  =&gt;  0</pre>
+            
+
+            
+            <div class="method-source-code" id="rcvbuf-source">
+<pre>
+static VALUE rb_czmq_socket_opt_rcvbuf(VALUE obj)
+{
+    GetZmqSocket(obj);
+    return INT2NUM(zsockopt_rcvbuf(sock-&gt;socket));
+}</pre>
+            </div><!-- rcvbuf-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- rcvbuf-method -->
+
+      
+        <div id="rcvbuf-3D-method" class="method-detail ">
+          <a name="method-i-rcvbuf-3D"></a>
+
+          
+          
+          <div class="method-heading">
+            <span class="method-callseq">rcvbuf = 1000 =>  nil</span>
+            
+            <span class="method-click-advice">click to toggle source</span>
+            
+          </div>
+          
+          
+
+          <div class="method-description">
+            
+            <pre>Sets the socket RCVBUF value.</pre>
+
+<h3>Examples</h3>
+
+<pre>ctx = ZMQ::Context.new
+sock = ctx.socket(:REP)
+sock.rcvbuf = 1000  =&gt;  nil</pre>
+            
+
+            
+            <div class="method-source-code" id="rcvbuf-3D-source">
+<pre>
+static VALUE rb_czmq_socket_set_opt_rcvbuf(VALUE obj, VALUE value)
+{
+    ZmqSetSockOpt(obj, zsockopt_set_rcvbuf, &quot;RCVBUF&quot;, value);
+}</pre>
+            </div><!-- rcvbuf-3D-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- rcvbuf-3D-method -->
+
+      
+        <div id="rcvmore-3F-method" class="method-detail ">
+          <a name="method-i-rcvmore-3F"></a>
+
+          
+          
+          <div class="method-heading">
+            <span class="method-callseq">rcvmore =>  boolean</span>
+            
+            <span class="method-click-advice">click to toggle source</span>
+            
+          </div>
+          
+          
+
+          <div class="method-description">
+            
+            <pre>Query if there's more messages to receive.</pre>
+
+<h3>Examples</h3>
+
+<pre>ctx = ZMQ::Context.new
+sock = ctx.socket(:SUB)
+sock.rcvmore =&gt;  true</pre>
+            
+
+            
+            <div class="method-source-code" id="rcvmore-3F-source">
+<pre>
+static VALUE rb_czmq_socket_opt_rcvmore(VALUE obj)
+{
+    GetZmqSocket(obj);
+    return (zsockopt_rcvmore(sock-&gt;socket) == 1) ? Qtrue : Qfalse;
+}</pre>
+            </div><!-- rcvmore-3F-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- rcvmore-3F-method -->
+
+      
+        <div id="readable-3F-method" class="method-detail ">
+          <a name="method-i-readable-3F"></a>
+
+          
+          <div class="method-heading">
+            <span class="method-name">readable?</span><span
+              class="method-args">()</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          
+
+          <div class="method-description">
+            
+            <p>Determines if there are one or more messages to read from this socket.
+Should be used in conjunction with the ZMQ_FD socket option for
+edge-triggered notifications.</p>
+
+<p>socket.readable? =&gt; true</p>
+            
+
+            
+            <div class="method-source-code" id="readable-3F-source">
+<pre>
+<span class="ruby-comment"># File lib/zmq/socket.rb, line 52</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">readable?</span>
+  (<span class="ruby-identifier">events</span> &amp; <span class="ruby-constant">ZMQ</span><span class="ruby-operator">::</span><span class="ruby-constant">POLLIN</span>) <span class="ruby-operator">==</span> <span class="ruby-constant">ZMQ</span><span class="ruby-operator">::</span><span class="ruby-constant">POLLIN</span>
+<span class="ruby-keyword">end</span></pre>
+            </div><!-- readable-3F-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- readable-3F-method -->
+
+      
+        <div id="reconnect_ivl-method" class="method-detail ">
+          <a name="method-i-reconnect_ivl"></a>
+
+          
+          
+          <div class="method-heading">
+            <span class="method-callseq">reconnect_ivl =>  Fixnum</span>
+            
+            <span class="method-click-advice">click to toggle source</span>
+            
+          </div>
+          
+          
+
+          <div class="method-description">
+            
+            <pre>Returns the socket RECONNECT_IVL value.</pre>
+
+<h3>Examples</h3>
+
+<pre>ctx = ZMQ::Context.new
+sock = ctx.socket(:REP)
+sock.reconnect_ivl  =&gt;  100</pre>
+            
+
+            
+            <div class="method-source-code" id="reconnect_ivl-source">
+<pre>
+static VALUE rb_czmq_socket_opt_reconnect_ivl(VALUE obj)
+{
+    GetZmqSocket(obj);
+    return INT2NUM(zsockopt_reconnect_ivl(sock-&gt;socket));
+}</pre>
+            </div><!-- reconnect_ivl-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- reconnect_ivl-method -->
+
+      
+        <div id="reconnect_ivl-3D-method" class="method-detail ">
+          <a name="method-i-reconnect_ivl-3D"></a>
+
+          
+          
+          <div class="method-heading">
+            <span class="method-callseq">reconnect_ivl = 200 =>  nil</span>
+            
+            <span class="method-click-advice">click to toggle source</span>
+            
+          </div>
+          
+          
+
+          <div class="method-description">
+            
+            <pre>Sets the socket RECONNECT_IVL value.</pre>
+
+<h3>Examples</h3>
+
+<pre>ctx = ZMQ::Context.new
+sock = ctx.socket(:REP)
+sock.reconnect_ivl = 200  =&gt;  nil</pre>
+            
+
+            
+            <div class="method-source-code" id="reconnect_ivl-3D-source">
+<pre>
+static VALUE rb_czmq_socket_set_opt_reconnect_ivl(VALUE obj, VALUE value)
+{
+    ZmqSetSockOpt(obj, zsockopt_set_reconnect_ivl, &quot;RECONNECT_IVL&quot;, value);
+}</pre>
+            </div><!-- reconnect_ivl-3D-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- reconnect_ivl-3D-method -->
+
+      
+        <div id="reconnect_ivl_max-method" class="method-detail ">
+          <a name="method-i-reconnect_ivl_max"></a>
+
+          
+          
+          <div class="method-heading">
+            <span class="method-callseq">reconnect_ivl_max =>  Fixnum</span>
+            
+            <span class="method-click-advice">click to toggle source</span>
+            
+          </div>
+          
+          
+
+          <div class="method-description">
+            
+            <pre>Returns the socket RECONNECT_IVL_MAX value.</pre>
+
+<h3>Examples</h3>
+
+<pre>ctx = ZMQ::Context.new
+sock = ctx.socket(:REP)
+sock.reconnect_ivl_max  =&gt;  0</pre>
+            
+
+            
+            <div class="method-source-code" id="reconnect_ivl_max-source">
+<pre>
+static VALUE rb_czmq_socket_opt_reconnect_ivl_max(VALUE obj)
+{
+    GetZmqSocket(obj);
+    return INT2NUM(zsockopt_reconnect_ivl_max(sock-&gt;socket));
+}</pre>
+            </div><!-- reconnect_ivl_max-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- reconnect_ivl_max-method -->
+
+      
+        <div id="reconnect_ivl_max-3D-method" class="method-detail ">
+          <a name="method-i-reconnect_ivl_max-3D"></a>
+
+          
+          
+          <div class="method-heading">
+            <span class="method-callseq">reconnect_ivl_max = 5 =>  nil</span>
+            
+            <span class="method-click-advice">click to toggle source</span>
+            
+          </div>
+          
+          
+
+          <div class="method-description">
+            
+            <pre>Sets the socket RECONNECT_IVL_MAX value.</pre>
+
+<h3>Examples</h3>
+
+<pre>ctx = ZMQ::Context.new
+sock = ctx.socket(:REP)
+sock.reconnect_ivl_max = 5  =&gt;  nil</pre>
+            
+
+            
+            <div class="method-source-code" id="reconnect_ivl_max-3D-source">
+<pre>
+static VALUE rb_czmq_socket_set_opt_reconnect_ivl_max(VALUE obj, VALUE value)
+{
+    ZmqSetSockOpt(obj, zsockopt_set_reconnect_ivl_max, &quot;RECONNECT_IVL_MAX&quot;, value);
+}</pre>
+            </div><!-- reconnect_ivl_max-3D-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- reconnect_ivl_max-3D-method -->
+
+      
+        <div id="recovery_ivl-method" class="method-detail ">
+          <a name="method-i-recovery_ivl"></a>
+
+          
+          
+          <div class="method-heading">
+            <span class="method-callseq">recovery_ivl =>  Fixnum</span>
+            
+            <span class="method-click-advice">click to toggle source</span>
+            
+          </div>
+          
+          
+
+          <div class="method-description">
+            
+            <pre>Returns the socket RECOVERY_IVL value.</pre>
+
+<h3>Examples</h3>
+
+<pre>ctx = ZMQ::Context.new
+sock = ctx.socket(:REP)
+sock.recovery_ivl  =&gt;  10</pre>
+            
+
+            
+            <div class="method-source-code" id="recovery_ivl-source">
+<pre>
+static VALUE rb_czmq_socket_opt_recovery_ivl(VALUE obj)
+{
+    GetZmqSocket(obj);
+    return INT2NUM(zsockopt_recovery_ivl(sock-&gt;socket));
+}</pre>
+            </div><!-- recovery_ivl-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- recovery_ivl-method -->
+
+      
+        <div id="recovery_ivl-3D-method" class="method-detail ">
+          <a name="method-i-recovery_ivl-3D"></a>
+
+          
+          
+          <div class="method-heading">
+            <span class="method-callseq">recovery_ivl = 20 =>  nil</span>
+            
+            <span class="method-click-advice">click to toggle source</span>
+            
+          </div>
+          
+          
+
+          <div class="method-description">
+            
+            <pre>Sets the socket RECOVERY_IVL value.</pre>
+
+<h3>Examples</h3>
+
+<pre>ctx = ZMQ::Context.new
+sock = ctx.socket(:REP)
+sock.recovery_ivl = 20  =&gt;  nil</pre>
+            
+
+            
+            <div class="method-source-code" id="recovery_ivl-3D-source">
+<pre>
+static VALUE rb_czmq_socket_set_opt_recovery_ivl(VALUE obj, VALUE value)
+{
+    ZmqSetSockOpt(obj, zsockopt_set_recovery_ivl, &quot;RECOVERY_IVL&quot;, value);
+}</pre>
+            </div><!-- recovery_ivl-3D-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- recovery_ivl-3D-method -->
+
+      
+        <div id="recovery_ivl_msec-method" class="method-detail ">
+          <a name="method-i-recovery_ivl_msec"></a>
+
+          
+          
+          <div class="method-heading">
+            <span class="method-callseq">recovery_ivl_msec =>  Fixnum</span>
+            
+            <span class="method-click-advice">click to toggle source</span>
+            
+          </div>
+          
+          
+
+          <div class="method-description">
+            
+            <pre>Returns the socket RECOVERY_IVL_MSEC value.</pre>
+
+<h3>Examples</h3>
+
+<pre>ctx = ZMQ::Context.new
+sock = ctx.socket(:REP)
+sock.recovery_ivl_msec  =&gt;  -1</pre>
+            
+
+            
+            <div class="method-source-code" id="recovery_ivl_msec-source">
+<pre>
+static VALUE rb_czmq_socket_opt_recovery_ivl_msec(VALUE obj)
+{
+    GetZmqSocket(obj);
+    return INT2NUM(zsockopt_recovery_ivl_msec(sock-&gt;socket));
+}</pre>
+            </div><!-- recovery_ivl_msec-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- recovery_ivl_msec-method -->
+
+      
+        <div id="recovery_ivl_msec-3D-method" class="method-detail ">
+          <a name="method-i-recovery_ivl_msec-3D"></a>
+
+          
+          
+          <div class="method-heading">
+            <span class="method-callseq">recovery_ivl_msec = 20 =>  nil</span>
+            
+            <span class="method-click-advice">click to toggle source</span>
+            
+          </div>
+          
+          
+
+          <div class="method-description">
+            
+            <pre>Sets the socket RECOVERY_IVL_MSEC value.</pre>
+
+<h3>Examples</h3>
+
+<pre>ctx = ZMQ::Context.new
+sock = ctx.socket(:REP)
+sock.recovery_ivl_msec = 20  =&gt;  nil</pre>
+            
+
+            
+            <div class="method-source-code" id="recovery_ivl_msec-3D-source">
+<pre>
+static VALUE rb_czmq_socket_set_opt_recovery_ivl_msec(VALUE obj, VALUE value)
+{
+    ZmqSetSockOpt(obj, zsockopt_set_recovery_ivl_msec, &quot;RECOVERY_IVL_MSEC&quot;, value);
+}</pre>
+            </div><!-- recovery_ivl_msec-3D-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- recovery_ivl_msec-3D-method -->
+
+      
+        <div id="recv-method" class="method-detail ">
+          <a name="method-i-recv"></a>
+
+          
+          
+          <div class="method-heading">
+            <span class="method-callseq">recv =>  String or nil</span>
+            
+            <span class="method-click-advice">click to toggle source</span>
+            
+          </div>
+          
+          
+
+          <div class="method-description">
+            
+            <pre>Receive a string from this ZMQ socket. May block depending on the socket type.</pre>
+
+<h3>Examples</h3>
+
+<pre>ctx = ZMQ::Context.new
+sock = ctx.socket(:REP)
+sock.bind(&quot;inproc://test&quot;)
+sock.recv    =&gt;  &quot;message&quot;</pre>
+            
+
+            
+            <div class="method-source-code" id="recv-source">
+<pre>
+static VALUE rb_czmq_socket_recv(VALUE obj)
+{
+    char *str = NULL;
+    struct nogvl_recv_args args;
+    GetZmqSocket(obj);
+    ZmqAssertSocketNotPending(sock, &quot;can only receive on a bound or connected socket!&quot;);
+    ZmqSockGuardCrossThread(sock);
+    args.socket = sock;
+    str = (char *)rb_thread_blocking_region(rb_czmq_nogvl_recv, (void *)&amp;args, RUBY_UBF_IO, 0);
+    if (str == NULL) return Qnil;
+    ZmqAssertSysError();
+    if (sock-&gt;verbose)
+        zclock_log (&quot;I: %s socket %p: recv \&quot;%s\&quot;&quot;, zsocket_type_str(sock-&gt;socket), sock-&gt;socket, str);
+    return ZmqEncode(rb_str_new2(str));
+}</pre>
+            </div><!-- recv-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- recv-method -->
+
+      
+        <div id="recv_frame-method" class="method-detail ">
+          <a name="method-i-recv_frame"></a>
+
+          
+          
+          <div class="method-heading">
+            <span class="method-callseq">recv_frame =>  ZMQ::Frame or nil</span>
+            
+            <span class="method-click-advice">click to toggle source</span>
+            
+          </div>
+          
+          
+
+          <div class="method-description">
+            
+            <pre>Receives a ZMQ frame from this socket.</pre>
+
+<h3>Examples</h3>
+
+<pre>ctx = ZMQ::Context.new
+sock = ctx.socket(:REP)
+sock.bind(&quot;inproc://test&quot;)
+sock.recv_frame  =&gt;  ZMQ::Frame or nil</pre>
+            
+
+            
+            <div class="method-source-code" id="recv_frame-source">
+<pre>
+static VALUE rb_czmq_socket_recv_frame(VALUE obj)
+{
+    zframe_t *frame = NULL;
+    struct nogvl_recv_args args;
+    char print_prefix[255];
+    char *cur_time = NULL;
+    GetZmqSocket(obj);
+    ZmqAssertSocketNotPending(sock, &quot;can only receive on a bound or connected socket!&quot;);
+    ZmqSockGuardCrossThread(sock);
+    args.socket = sock;
+    frame = (zframe_t *)rb_thread_blocking_region(rb_czmq_nogvl_recv_frame, (void *)&amp;args, RUBY_UBF_IO, 0);
+    if (frame == NULL) return Qnil;
+    if (sock-&gt;verbose) {
+        cur_time = rb_czmq_formatted_current_time();
+        ZmqDumpFrame(&quot;recv_frame&quot;, frame);
+    }
+    return rb_czmq_alloc_frame(frame);
+}</pre>
+            </div><!-- recv_frame-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- recv_frame-method -->
+
+      
+        <div id="recv_frame_nonblock-method" class="method-detail ">
+          <a name="method-i-recv_frame_nonblock"></a>
+
+          
+          
+          <div class="method-heading">
+            <span class="method-callseq">recv_frame_nonblock =>  ZMQ::Frame or nil</span>
+            
+            <span class="method-click-advice">click to toggle source</span>
+            
+          </div>
+          
+          
+
+          <div class="method-description">
+            
+            <pre>Receives a ZMQ frame from this socket. Does not block</pre>
+
+<h3>Examples</h3>
+
+<pre>ctx = ZMQ::Context.new
+sock = ctx.socket(:REP)
+sock.bind(&quot;inproc://test&quot;)
+sock.recv_frame_nonblock  =&gt;  ZMQ::Frame or nil</pre>
+            
+
+            
+            <div class="method-source-code" id="recv_frame_nonblock-source">
+<pre>
+static VALUE rb_czmq_socket_recv_frame_nonblock(VALUE obj)
+{
+    zframe_t *frame = NULL;
+    char print_prefix[255];
+    char *cur_time = NULL;
+    errno = 0;
+    GetZmqSocket(obj);
+    ZmqAssertSocketNotPending(sock, &quot;can only receive on a bound or connected socket!&quot;);
+    ZmqSockGuardCrossThread(sock);
+    frame = zframe_recv_nowait(sock-&gt;socket);
+    if (frame == NULL) return Qnil;
+    if (sock-&gt;verbose) {
+        cur_time = rb_czmq_formatted_current_time();
+        ZmqDumpFrame(&quot;recv_frame_nonblock&quot;, frame);
+    }
+    return rb_czmq_alloc_frame(frame);
+}</pre>
+            </div><!-- recv_frame_nonblock-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- recv_frame_nonblock-method -->
+
+      
+        <div id="recv_message-method" class="method-detail ">
+          <a name="method-i-recv_message"></a>
+
+          
+          
+          <div class="method-heading">
+            <span class="method-callseq">recv_message =>  ZMQ::Message or nil</span>
+            
+            <span class="method-click-advice">click to toggle source</span>
+            
+          </div>
+          
+          
+
+          <div class="method-description">
+            
+            <pre>Receives a ZMQ message from this socket.</pre>
+
+<h3>Examples</h3>
+
+<pre>ctx = ZMQ::Context.new
+sock = ctx.socket(:REP)
+sock.bind(&quot;inproc://test&quot;)
+sock.recv_message  =&gt;  ZMQ::Message or nil</pre>
+            
+
+            
+            <div class="method-source-code" id="recv_message-source">
+<pre>
+static VALUE rb_czmq_socket_recv_message(VALUE obj)
+{
+    zmsg_t *message = NULL;
+    struct nogvl_recv_args args;
+    GetZmqSocket(obj);
+    ZmqAssertSocketNotPending(sock, &quot;can only receive on a bound or connected socket!&quot;);
+    ZmqSockGuardCrossThread(sock);
+    args.socket = sock;
+    message = (zmsg_t *)rb_thread_blocking_region(rb_czmq_nogvl_recv_message, (void *)&amp;args, RUBY_UBF_IO, 0);
+    if (message == NULL) return Qnil;
+    if (sock-&gt;verbose) ZmqDumpMessage(&quot;recv_message&quot;, message);
+    return rb_czmq_alloc_message(message);
+}</pre>
+            </div><!-- recv_message-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- recv_message-method -->
+
+      
+        <div id="recv_nonblock-method" class="method-detail ">
+          <a name="method-i-recv_nonblock"></a>
+
+          
+          
+          <div class="method-heading">
+            <span class="method-callseq">recv_nonblock =>  String or nil</span>
+            
+            <span class="method-click-advice">click to toggle source</span>
+            
+          </div>
+          
+          
+
+          <div class="method-description">
+            
+            <pre>Receive a string from this ZMQ socket. Does not block.</pre>
+
+<h3>Examples</h3>
+
+<pre>ctx = ZMQ::Context.new
+sock = ctx.socket(:REP)
+sock.bind(&quot;inproc://test&quot;)
+sock.recv_nonblock    =&gt;  &quot;message&quot;</pre>
+            
+
+            
+            <div class="method-source-code" id="recv_nonblock-source">
+<pre>
+static VALUE rb_czmq_socket_recv_nonblock(VALUE obj)
+{
+    char *str = NULL;
+    errno = 0;
+    GetZmqSocket(obj);
+    ZmqAssertSocketNotPending(sock, &quot;can only receive on a bound or connected socket!&quot;);
+    ZmqSockGuardCrossThread(sock);
+    str = zstr_recv_nowait(sock-&gt;socket);
+    if (str == NULL) return Qnil;
+    ZmqAssertSysError();
+    if (sock-&gt;verbose)
+        zclock_log (&quot;I: %s socket %p: recv_nonblock \&quot;%s\&quot;&quot;, zsocket_type_str(sock-&gt;socket), sock-&gt;socket, str);
+    return ZmqEncode(rb_str_new2(str));
+}</pre>
+            </div><!-- recv_nonblock-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- recv_nonblock-method -->
+
+      
+        <div id="recv_timeout-method" class="method-detail ">
+          <a name="method-i-recv_timeout"></a>
+
+          
+          
+          <div class="method-heading">
+            <span class="method-callseq">recv_timeout =>  Fixnum or nil</span>
+            
+            <span class="method-click-advice">click to toggle source</span>
+            
+          </div>
+          
+          
+
+          <div class="method-description">
+            
+            <pre>Returns the recv timeout currently associated with this socket.</pre>
+
+<h3>Examples</h3>
+
+<pre>ctx = ZMQ::Context.new
+sock = ctx.socket(:REP)
+sock.recv_timeout = 5
+sock.recv_timeout   =&gt;   5</pre>
+            
+
+            
+            <div class="method-source-code" id="recv_timeout-source">
+<pre>
+static VALUE rb_czmq_socket_recv_timeout(VALUE obj)
+{
+    GetZmqSocket(obj);
+    return sock-&gt;recv_timeout;
+}</pre>
+            </div><!-- recv_timeout-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- recv_timeout-method -->
+
+      
+        <div id="recv_timeout-3D-method" class="method-detail ">
+          <a name="method-i-recv_timeout-3D"></a>
+
+          
+          
+          <div class="method-heading">
+            <span class="method-callseq">recv_timeout = 5 =>  nil</span>
+            
+            <span class="method-click-advice">click to toggle source</span>
+            
+          </div>
+          
+          
+
+          <div class="method-description">
+            
+            <pre>Sets a receive timeout for this socket.</pre>
+
+<h3>Examples</h3>
+
+<pre>ctx = ZMQ::Context.new
+sock = ctx.socket(:REP)
+sock.recv_timeout = 5 =&gt; nil</pre>
+            
+
+            
+            <div class="method-source-code" id="recv_timeout-3D-source">
+<pre>
+static VALUE rb_czmq_socket_set_recv_timeout(VALUE obj, VALUE timeout)
+{
+    GetZmqSocket(obj);
+    if (TYPE(timeout) != T_FIXNUM &amp;&amp; TYPE(timeout) != T_FLOAT) rb_raise(rb_eTypeError, &quot;wrong timeout type %s (expected Fixnum or Float)&quot;, RSTRING_PTR(rb_obj_as_string(timeout)));
+    sock-&gt;recv_timeout = timeout;
+    return Qnil;
+}</pre>
+            </div><!-- recv_timeout-3D-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- recv_timeout-3D-method -->
+
+      
+        <div id="send-method" class="method-detail ">
+          <a name="method-i-send"></a>
+
+          
+          
+          <div class="method-heading">
+            <span class="method-callseq">send("message")  =>  boolean</span>
+            
+            <span class="method-click-advice">click to toggle source</span>
+            
+          </div>
+          
+          
+
+          <div class="method-description">
+            
+            <pre>Sends a string to this ZMQ socket.</pre>
+
+<h3>Examples</h3>
+
+<pre>ctx = ZMQ::Context.new
+sock = ctx.socket(:REQ)
+sock.connect(&quot;inproc://test&quot;)
+sock.send(&quot;message&quot;)    =&gt;  true</pre>
+            
+
+            
+            <div class="method-source-code" id="send-source">
+<pre>
+static VALUE rb_czmq_socket_send(VALUE obj, VALUE msg)
+{
+    int rc;
+    struct nogvl_send_args args;
+    GetZmqSocket(obj);
+    ZmqAssertSocketNotPending(sock, &quot;can only send on a bound or connected socket!&quot;);
+    ZmqSockGuardCrossThread(sock);
+    Check_Type(msg, T_STRING);
+    args.socket = sock;
+    args.msg = StringValueCStr(msg);
+    rc = (int)rb_thread_blocking_region(rb_czmq_nogvl_zstr_send, (void *)&amp;args, RUBY_UBF_IO, 0);
+    ZmqAssert(rc);
+    if (sock-&gt;verbose)
+        zclock_log (&quot;I: %s socket %p: send \&quot;%s\&quot;&quot;, zsocket_type_str(sock-&gt;socket), obj, StringValueCStr(msg));
+    return Qtrue;
+}</pre>
+            </div><!-- send-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- send-method -->
+
+      
+        <div id="send_frame-method" class="method-detail ">
+          <a name="method-i-send_frame"></a>
+
+          
+          
+          <div class="method-heading">
+            <span class="method-callseq">send_frame(frame) =>  nil</span>
+            
+            <span class="method-click-advice">click to toggle source</span>
+            
+          </div>
+          
+          
+
+          <div class="method-description">
+            
+            <pre>Sends a ZMQ::Frame instance to this socket.</pre>
+
+<h3>Examples</h3>
+
+<pre>ctx = ZMQ::Context.new
+sock = ctx.socket(:REP)
+sock.bind(&quot;inproc://test&quot;)
+frame = ZMQ::Frame(&quot;frame&quot;)
+sock.send_frame(frame)    =&gt;  nil
+frame = ZMQ::Frame(&quot;multi&quot;)
+sock.send_frame(frame, ZMQ::Frame::MORE)</pre>
+            
+
+            
+            <div class="method-source-code" id="send_frame-source">
+<pre>
+static VALUE rb_czmq_socket_send_frame(int argc, VALUE *argv, VALUE obj)
+{
+    struct nogvl_send_frame_args args;
+    VALUE frame_obj;
+    VALUE flags;
+    char print_prefix[255];
+    char *cur_time = NULL;
+    zframe_t *print_frame = NULL;
+    int rc, flgs;
+    GetZmqSocket(obj);
+    ZmqAssertSocketNotPending(sock, &quot;can only send on a bound or connected socket!&quot;);
+    ZmqSockGuardCrossThread(sock);
+    rb_scan_args(argc, argv, &quot;11&quot;, &amp;frame_obj, &amp;flags);
+    ZmqGetFrame(frame_obj);
+
+    if (NIL_P(flags)) {
+        flgs = 0;
+    } else {
+        if (SYMBOL_P(flags)) flags = rb_const_get_at(rb_cZmqFrame, rb_to_id(flags));
+        Check_Type(flags, T_FIXNUM);
+        flgs = FIX2INT(flags);
+    }
+
+    if (sock-&gt;verbose) {
+        cur_time = rb_czmq_formatted_current_time();
+        print_frame = (flgs &amp; ZFRAME_REUSE) ? frame : zframe_dup(frame);
+    }
+    args.socket = sock;
+    args.frame = frame;
+    args.flags = flgs;
+    rc = (int)rb_thread_blocking_region(rb_czmq_nogvl_send_frame, (void *)&amp;args, RUBY_UBF_IO, 0);
+    ZmqAssert(rc);
+    if (sock-&gt;verbose) ZmqDumpFrame(&quot;send_frame&quot;, print_frame);
+    return Qtrue;
+}</pre>
+            </div><!-- send_frame-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- send_frame-method -->
+
+      
+        <div id="send_message-method" class="method-detail ">
+          <a name="method-i-send_message"></a>
+
+          
+          
+          <div class="method-heading">
+            <span class="method-callseq">send_message(msg) =>  nil</span>
+            
+            <span class="method-click-advice">click to toggle source</span>
+            
+          </div>
+          
+          
+
+          <div class="method-description">
+            
+            <pre>Sends a ZMQ::Message instance to this socket.</pre>
+
+<h3>Examples</h3>
+
+<pre>ctx = ZMQ::Context.new
+sock = ctx.socket(:REP)
+sock.bind(&quot;inproc://test&quot;)
+msg = ZMQ::Message.new
+msg.push ZMQ::Frame(&quot;header&quot;)
+sock.send_message(msg)   =&gt;  nil</pre>
+            
+
+            
+            <div class="method-source-code" id="send_message-source">
+<pre>
+static VALUE rb_czmq_socket_send_message(VALUE obj, VALUE message_obj)
+{
+    struct nogvl_send_message_args args;
+    zmsg_t *print_message = NULL;
+    GetZmqSocket(obj);
+    ZmqAssertSocketNotPending(sock, &quot;can only send on a bound or connected socket!&quot;);
+    ZmqSockGuardCrossThread(sock);
+    ZmqGetMessage(message_obj);
+    if (sock-&gt;verbose) print_message = zmsg_dup(message-&gt;message);
+    args.socket = sock;
+    args.message = message-&gt;message;
+    rb_thread_blocking_region(rb_czmq_nogvl_send_message, (void *)&amp;args, RUBY_UBF_IO, 0);
+    message-&gt;flags |= ZMQ_MESSAGE_DESTROYED;
+    if (sock-&gt;verbose) ZmqDumpMessage(&quot;send_message&quot;, print_message);
+    return Qnil;
+}</pre>
+            </div><!-- send_message-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- send_message-method -->
+
+      
+        <div id="send_timeout-method" class="method-detail ">
+          <a name="method-i-send_timeout"></a>
+
+          
+          
+          <div class="method-heading">
+            <span class="method-callseq">send_timeout =>  Fixnum or nil</span>
+            
+            <span class="method-click-advice">click to toggle source</span>
+            
+          </div>
+          
+          
+
+          <div class="method-description">
+            
+            <pre>Returns the send timeout currently associated with this socket.</pre>
+
+<h3>Examples</h3>
+
+<pre>ctx = ZMQ::Context.new
+sock = ctx.socket(:REP)
+sock.send_timeout = 5
+sock.send_timeout   =&gt;   5</pre>
+            
+
+            
+            <div class="method-source-code" id="send_timeout-source">
+<pre>
+static VALUE rb_czmq_socket_send_timeout(VALUE obj)
+{
+    GetZmqSocket(obj);
+    return sock-&gt;send_timeout;
+}</pre>
+            </div><!-- send_timeout-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- send_timeout-method -->
+
+      
+        <div id="send_timeout-3D-method" class="method-detail ">
+          <a name="method-i-send_timeout-3D"></a>
+
+          
+          
+          <div class="method-heading">
+            <span class="method-callseq">send_timeout = 5 =>  nil</span>
+            
+            <span class="method-click-advice">click to toggle source</span>
+            
+          </div>
+          
+          
+
+          <div class="method-description">
+            
+            <pre>Sets a send timeout for this socket.</pre>
+
+<h3>Examples</h3>
+
+<pre>ctx = ZMQ::Context.new
+sock = ctx.socket(:REP)
+sock.send_timeout = 5 =&gt; nil</pre>
+            
+
+            
+            <div class="method-source-code" id="send_timeout-3D-source">
+<pre>
+static VALUE rb_czmq_socket_set_send_timeout(VALUE obj, VALUE timeout)
+{
+    GetZmqSocket(obj);
+    if (TYPE(timeout) != T_FIXNUM &amp;&amp; TYPE(timeout) != T_FLOAT) rb_raise(rb_eTypeError, &quot;wrong timeout type %s (expected Fixnum or Float)&quot;, RSTRING_PTR(rb_obj_as_string(timeout)));
+    sock-&gt;send_timeout = timeout;
+    return Qnil;
+}</pre>
+            </div><!-- send_timeout-3D-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- send_timeout-3D-method -->
+
+      
+        <div id="sendm-method" class="method-detail ">
+          <a name="method-i-sendm"></a>
+
+          
+          
+          <div class="method-heading">
+            <span class="method-callseq">sendm("message")  =>  boolean</span>
+            
+            <span class="method-click-advice">click to toggle source</span>
+            
+          </div>
+          
+          
+
+          <div class="method-description">
+            
+            <pre>Sends a string to this ZMQ socket, with a more flag set.</pre>
+
+<h3>Examples</h3>
+
+<pre>ctx = ZMQ::Context.new
+sock = ctx.socket(:REQ)
+sock.connect(&quot;inproc://test&quot;)
+sock.sendm(&quot;mes&quot;)    =&gt;  true
+sock.sendm(&quot;sage&quot;)    =&gt;  true</pre>
+            
+
+            
+            <div class="method-source-code" id="sendm-source">
+<pre>
+static VALUE rb_czmq_socket_sendm(VALUE obj, VALUE msg)
+{
+    int rc;
+    struct nogvl_send_args args;
+    GetZmqSocket(obj);
+    ZmqAssertSocketNotPending(sock, &quot;can only send on a bound or connected socket!&quot;);
+    ZmqSockGuardCrossThread(sock);
+    Check_Type(msg, T_STRING);
+    args.socket = sock;
+    args.msg = StringValueCStr(msg);
+    rc = (int)rb_thread_blocking_region(rb_czmq_nogvl_zstr_sendm, (void *)&amp;args, RUBY_UBF_IO, 0);
+    ZmqAssert(rc);
+    if (sock-&gt;verbose)
+        zclock_log (&quot;I: %s socket %p: sendm \&quot;%s\&quot;&quot;, zsocket_type_str(sock-&gt;socket), sock-&gt;socket, StringValueCStr(msg));
+    return Qtrue;
+}</pre>
+            </div><!-- sendm-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- sendm-method -->
+
+      
+        <div id="sndbuf-method" class="method-detail ">
+          <a name="method-i-sndbuf"></a>
+
+          
+          
+          <div class="method-heading">
+            <span class="method-callseq">sndbuf =>  Fixnum</span>
+            
+            <span class="method-click-advice">click to toggle source</span>
+            
+          </div>
+          
+          
+
+          <div class="method-description">
+            
+            <pre>Returns the socket SNDBUF value.</pre>
+
+<h3>Examples</h3>
+
+<pre>ctx = ZMQ::Context.new
+sock = ctx.socket(:REP)
+sock.sndbuf  =&gt;  0</pre>
+            
+
+            
+            <div class="method-source-code" id="sndbuf-source">
+<pre>
+static VALUE rb_czmq_socket_opt_sndbuf(VALUE obj)
+{
+    GetZmqSocket(obj);
+    return INT2NUM(zsockopt_sndbuf(sock-&gt;socket));
+}</pre>
+            </div><!-- sndbuf-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- sndbuf-method -->
+
+      
+        <div id="sndbuf-3D-method" class="method-detail ">
+          <a name="method-i-sndbuf-3D"></a>
+
+          
+          
+          <div class="method-heading">
+            <span class="method-callseq">sndbuf = 1000 =>  nil</span>
+            
+            <span class="method-click-advice">click to toggle source</span>
+            
+          </div>
+          
+          
+
+          <div class="method-description">
+            
+            <pre>Sets the socket SNDBUF value.</pre>
+
+<h3>Examples</h3>
+
+<pre>ctx = ZMQ::Context.new
+sock = ctx.socket(:REP)
+sock.sndbuf = 1000  =&gt;  nil</pre>
+            
+
+            
+            <div class="method-source-code" id="sndbuf-3D-source">
+<pre>
+static VALUE rb_czmq_socket_set_opt_sndbuf(VALUE obj, VALUE value)
+{
+    ZmqSetSockOpt(obj, zsockopt_set_sndbuf, &quot;SNDBUF&quot;, value);
+}</pre>
+            </div><!-- sndbuf-3D-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- sndbuf-3D-method -->
+
+      
+        <div id="state-method" class="method-detail ">
+          <a name="method-i-state"></a>
+
+          
+          
+          <div class="method-heading">
+            <span class="method-callseq">state   =>  String</span>
+            
+            <span class="method-click-advice">click to toggle source</span>
+            
+          </div>
+          
+          
+
+          <div class="method-description">
+            
+            <pre>Returns the current socket state, one of ZMQ::Socket::PENDING, ZMQ::Socket::BOUND or ZMQ::Socket::CONNECTED</pre>
+
+<h3>Examples</h3>
+
+<pre>ctx = ZMQ::Context.new
+sock = ctx.socket(:PUSH)
+sock.state       =&gt;   ZMQ::Socket::PENDING
+sock.bind(&quot;inproc://test&quot;)
+sock.state       =&gt;   ZMQ::Socket::BOUND</pre>
+            
+
+            
+            <div class="method-source-code" id="state-source">
+<pre>
+static VALUE rb_czmq_socket_state(VALUE obj)
+{
+    GetZmqSocket(obj);
+    return INT2NUM(sock-&gt;state);
+}</pre>
+            </div><!-- state-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- state-method -->
+
+      
+        <div id="subscribe-method" class="method-detail ">
+          <a name="method-i-subscribe"></a>
+
+          
+          
+          <div class="method-heading">
+            <span class="method-callseq">subscribe "ruby" =>  nil</span>
+            
+            <span class="method-click-advice">click to toggle source</span>
+            
+          </div>
+          
+          
+
+          <div class="method-description">
+            
+            <pre>Subscribes this SUB socket to a topic.</pre>
+
+<h3>Examples</h3>
+
+<pre>ctx = ZMQ::Context.new
+sock = ctx.socket(:SUB)
+sock.subscribe &quot;ruby&quot;  =&gt;  nil</pre>
+            
+
+            
+            <div class="method-source-code" id="subscribe-source">
+<pre>
+static VALUE rb_czmq_socket_set_opt_subscribe(VALUE obj, VALUE value)
+{
+    ZmqSetStringSockOpt(obj, zsockopt_set_subscribe, &quot;SUBSCRIBE&quot;, value, {
+       ZmqAssertSockOptFor(ZMQ_SUB)
+    });
+}</pre>
+            </div><!-- subscribe-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- subscribe-method -->
+
+      
+        <div id="swap-method" class="method-detail ">
+          <a name="method-i-swap"></a>
+
+          
+          
+          <div class="method-heading">
+            <span class="method-callseq">swap =>  Fixnum</span>
+            
+            <span class="method-click-advice">click to toggle source</span>
+            
+          </div>
+          
+          
+
+          <div class="method-description">
+            
+            <pre>Returns the socket SWAP value.</pre>
+
+<h3>Examples</h3>
+
+<pre>ctx = ZMQ::Context.new
+sock = ctx.socket(:REP)
+sock.swap  =&gt;  0</pre>
+            
+
+            
+            <div class="method-source-code" id="swap-source">
+<pre>
+static VALUE rb_czmq_socket_opt_swap(VALUE obj)
+{
+    GetZmqSocket(obj);
+    return INT2NUM(zsockopt_swap(sock-&gt;socket));
+}</pre>
+            </div><!-- swap-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- swap-method -->
+
+      
+        <div id="swap-3D-method" class="method-detail ">
+          <a name="method-i-swap-3D"></a>
+
+          
+          
+          <div class="method-heading">
+            <span class="method-callseq">swap = 100 =>  nil</span>
+            
+            <span class="method-click-advice">click to toggle source</span>
+            
+          </div>
+          
+          
+
+          <div class="method-description">
+            
+            <pre>Sets the socket SWAP value.</pre>
+
+<h3>Examples</h3>
+
+<pre>ctx = ZMQ::Context.new
+sock = ctx.socket(:REP)
+sock.swap = 100  =&gt;  nil</pre>
+            
+
+            
+            <div class="method-source-code" id="swap-3D-source">
+<pre>
+static VALUE rb_czmq_socket_set_opt_swap(VALUE obj, VALUE value)
+{
+    ZmqSetSockOpt(obj, zsockopt_set_swap, &quot;SWAP&quot;, value);
+}</pre>
+            </div><!-- swap-3D-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- swap-3D-method -->
+
+      
+        <div id="to_i-method" class="method-detail method-alias">
+          <a name="method-i-to_i"></a>
+
+          
+          <div class="method-heading">
+            <span class="method-name">to_i</span><span
+              class="method-args">()</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          
+
+          <div class="method-description">
+            
+            
+            
+
+            
+          </div>
+
+          
+
+          
+          <div class="aliases">
+            Alias for: <a href="Socket.html#method-i-fd">fd</a>
+          </div>
+          
+        </div><!-- to_i-method -->
+
+      
+        <div id="to_s-method" class="method-detail ">
+          <a name="method-i-to_s"></a>
+
+          
+          <div class="method-heading">
+            <span class="method-name">to_s</span><span
+              class="method-args">()</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          
+
+          <div class="method-description">
+            
+            <p>Generates a string representation of the current socket state</p>
+
+<p>socket = ctx.bind(:PUB, “tcp://127.0.0.1:5000”) socket.to_s =&gt; “PUB
+socket bound to tcp://127.0.0.1:5000”</p>
+            
+
+            
+            <div class="method-source-code" id="to_s-source">
+<pre>
+<span class="ruby-comment"># File lib/zmq/socket.rb, line 79</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">to_s</span>
+  <span class="ruby-keyword">case</span> <span class="ruby-identifier">state</span>
+  <span class="ruby-keyword">when</span> <span class="ruby-constant">BOUND</span>
+    <span class="ruby-node">&quot;#{type_str} socket bound to #{endpoint}&quot;</span>
+  <span class="ruby-keyword">when</span> <span class="ruby-constant">CONNECTED</span>
+    <span class="ruby-node">&quot;#{type_str} socket connected to #{endpoint}&quot;</span>
+  <span class="ruby-keyword">else</span>
+    <span class="ruby-node">&quot;#{type_str} socket&quot;</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+            </div><!-- to_s-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- to_s-method -->
+
+      
+        <div id="type_str-method" class="method-detail ">
+          <a name="method-i-type_str"></a>
+
+          
+          <div class="method-heading">
+            <span class="method-name">type_str</span><span
+              class="method-args">()</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          
+
+          <div class="method-description">
+            
+            <p>Generates a string representation of this socket type</p>
+
+<p>socket = ctx.socket(:PUB) socket.type_str =&gt; “PUB”</p>
+            
+
+            
+            <div class="method-source-code" id="type_str-source">
+<pre>
+<span class="ruby-comment"># File lib/zmq/socket.rb, line 70</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">type_str</span>
+  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">class</span>.<span class="ruby-identifier">const_get</span>(<span class="ruby-value">:TYPE_STR</span>)
+<span class="ruby-keyword">end</span></pre>
+            </div><!-- type_str-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- type_str-method -->
+
+      
+        <div id="unsubscribe-method" class="method-detail ">
+          <a name="method-i-unsubscribe"></a>
+
+          
+          
+          <div class="method-heading">
+            <span class="method-callseq">unsubscribe "ruby" =>  nil</span>
+            
+            <span class="method-click-advice">click to toggle source</span>
+            
+          </div>
+          
+          
+
+          <div class="method-description">
+            
+            <pre>Unsubscribes this SUB socket from a topic.</pre>
+
+<h3>Examples</h3>
+
+<pre>ctx = ZMQ::Context.new
+sock = ctx.socket(:SUB)
+sock.unsubscribe &quot;ruby&quot;  =&gt;  nil</pre>
+            
+
+            
+            <div class="method-source-code" id="unsubscribe-source">
+<pre>
+static VALUE rb_czmq_socket_set_opt_unsubscribe(VALUE obj, VALUE value)
+{
+    ZmqSetStringSockOpt(obj, zsockopt_set_unsubscribe, &quot;UNSUBSCRIBE&quot;, value, {
+       ZmqAssertSockOptFor(ZMQ_SUB)
+    });
+}</pre>
+            </div><!-- unsubscribe-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- unsubscribe-method -->
+
+      
+        <div id="verbose-3D-method" class="method-detail ">
+          <a name="method-i-verbose-3D"></a>
+
+          
+          
+          <div class="method-heading">
+            <span class="method-callseq">verbose = true   =>  nil</span>
+            
+            <span class="method-click-advice">click to toggle source</span>
+            
+          </div>
+          
+          
+
+          <div class="method-description">
+            
+            <pre>Let this socket be verbose - dumps a lot of data to stdout for debugging.</pre>
+
+<h3>Examples</h3>
+
+<pre>ctx = ZMQ::Context.new
+sock = ctx.socket(:REP)
+sock.verbose = true    =&gt;  nil</pre>
+            
+
+            
+            <div class="method-source-code" id="verbose-3D-source">
+<pre>
+static VALUE rb_czmq_socket_set_verbose(VALUE obj, VALUE level)
+{
+    Bool vlevel;
+    GetZmqSocket(obj);
+    vlevel = (level == Qtrue) ? TRUE : FALSE;
+    sock-&gt;verbose = vlevel;
+    return Qnil;
+}</pre>
+            </div><!-- verbose-3D-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- verbose-3D-method -->
+
+      
+        <div id="writable-3F-method" class="method-detail ">
+          <a name="method-i-writable-3F"></a>
+
+          
+          <div class="method-heading">
+            <span class="method-name">writable?</span><span
+              class="method-args">()</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          
+
+          <div class="method-description">
+            
+            <p>Determines if this socket is in a writable state. Should be used in
+conjunction with the ZMQ_FD socket option for edge-triggered notifications.</p>
+
+<p>socket.writable? =&gt; true</p>
+            
+
+            
+            <div class="method-source-code" id="writable-3F-source">
+<pre>
+<span class="ruby-comment"># File lib/zmq/socket.rb, line 61</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">writable?</span>
+  (<span class="ruby-identifier">events</span> &amp; <span class="ruby-constant">ZMQ</span><span class="ruby-operator">::</span><span class="ruby-constant">POLLOUT</span>) <span class="ruby-operator">==</span> <span class="ruby-constant">ZMQ</span><span class="ruby-operator">::</span><span class="ruby-constant">POLLOUT</span>
+<span class="ruby-keyword">end</span></pre>
+            </div><!-- writable-3F-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- writable-3F-method -->
+
+      
+      </div><!-- public-instance-method-details -->
+    
+    </div><!-- 5Buntitled-5D -->
+  
+
+  </div><!-- documentation -->
+
+  <div id="validator-badges">
+    <p><small><a href="http://validator.w3.org/check/referer">[Validate]</a></small></p>
+    <p><small>Generated with the <a href="http://deveiate.org/projects/Darkfish-Rdoc/">Darkfish
+      Rdoc Generator</a> 2</small>.</p>
+  </div>
+
+</body>
+</html>
+
