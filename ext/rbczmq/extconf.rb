@@ -1,9 +1,11 @@
 # encoding: utf-8
 
 require 'mkmf'
-require 'fileutils'
 require 'pathname'
-include FileUtils
+
+def sys(cmd, err_msg)
+  system(cmd) || fail(err_msg)
+end
 
 def fail(msg)
   STDERR.puts msg
@@ -25,31 +27,28 @@ czmq_include_path = czmq_path + 'include'
 
 # extract dependencies
 unless File.directory?(zmq_path) && File.directory?(czmq_path)
-  if `which tar`.strip.empty?
-    puts "The 'tar' (creates and manipulates streaming archive files) utility is required to extract dependencies"
-    exit(1)
-  end
+  fail "The 'tar' (creates and manipulates streaming archive files) utility is required to extract dependencies" if `which tar`.strip.empty?
   Dir.chdir(vendor_path) do
-    system "tar xvzf zeromq.tar.gz"
-    system "tar xvzf czmq.tar.gz"
+    sys "tar xvzf zeromq.tar.gz", "Could not extract the ZeroMQ archive!"
+    sys "tar xvzf czmq.tar.gz", "Could not extract the CZMQ archive!"
   end
 end
 
 # build libzmq
 lib = File.join(zmq_path, 'src', '.libs', "libzmq.#{LIBEXT}")
 Dir.chdir zmq_path do
-  system "./autogen.sh" unless File.exist?(zmq_path + 'configure')
-  system "./configure && make"
+  sys "./autogen.sh", "ZeroMQ autogen failed!" unless File.exist?(zmq_path + 'configure')
+  sys "./configure && make", "ZeroMQ compile error!"
 end unless File.exist?(lib)
-cp lib, libs_path
+sys "cp #{lib} #{libs_path}", "Failed to copy compiled libzmq!"
 
 # build libczmq
 lib = File.join(czmq_path, 'src', '.libs', "libczmq.#{LIBEXT}")
 Dir.chdir czmq_path do
-  system "./autogen.sh" unless File.exist?(czmq_path + 'configure')
-  system "./configure --with-libzmq=#{zmq_path} && make all"
+  sys "./autogen.sh", "CZMQ autogen failed!" unless File.exist?(czmq_path + 'configure')
+  sys "./configure --with-libzmq=#{zmq_path} && make all", "CZMQ compile error!"
 end unless File.exist?(lib)
-cp lib, libs_path
+sys "cp #{lib} #{libs_path}", "Failed to copy compiled libczmq!"
 
 dir_config('rbczmq')
 
