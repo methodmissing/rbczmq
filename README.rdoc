@@ -1,4 +1,163 @@
-## TODO
+= rbczmq - Ruby extension that wraps the official high level ZeroMQ C API ( http://czmq.zeromq.org/ ) 
+
+(c) 2011 Lourens Naudé (methodmissing), with API guidance from the czmq (http://czmq.zeromq.org/) project.
+
+  http://github.com/methodmissing/rbczmq
+
+== About ZeroMQ
+
+In a nutshell, ZeroMQ is a hybrid networking library / concurrency framework. I quote the ØMQ Guide (http://zguide.zeromq.org/page:all) :
+
+"ØMQ (ZeroMQ, 0MQ, zmq) looks like an embeddable networking library but acts like a concurrency framework. It gives you sockets that carry whole messages across various transports like in-process, inter-process, TCP, and multicast. You can connect sockets N-to-N with patterns like fanout, pub-sub, task distribution, and request-reply. It's fast enough to be the fabric for clustered products. Its asynchronous I/O model gives you scalable multicore applications, built as asynchronous message-processing tasks. It has a score of language APIs and runs on most operating systems. ØMQ is from iMatix and is LGPL open source."
+
+== Another ZeroMQ extension ?
+
+This extension bundles both ZeroMQ (libzmq, http://www.zeromq.org/) and CZMQ (libczmq, http://czmq.zeromq.org/) and as such have no third party dependencies other than a Ruby distribution and a C compiler. My goals for this project were :
+
+* Access to a powerful messaging technology without having to install a bunch of dependencies
+* A stable and mostly version agnostic (2.x and 3.x series) API
+* Leverage and build upon a mature and maintained client (CZMQ)
+* Target Ruby distributions with a stable and comprehensive C API (MRI, Rubinius, JRuby is work in progress)
+* Support for running sockets in Threads - both green and native threads should be supported and preempt properly
+  with edge-triggered multiplexing from libzmq.
+* Integrate with the Garbage Collector in a predictable way. CZMQ and the ZeroMQ framework is very fast and can allocate
+  an enormous amount of objects in no time when using the Frame, Message and String wrappers. Resources such as socket
+  connections should be cleaned up when objects are finalized as well.
+* Expose Message envelopes and Frames to developers as well to allow for higher level protocols and constructs.
+* Enforce well known best practices such as restricting socket interactions to within the thread the socket was created in etc.
+
+== Usage
+
+As a first step I'd highly recommend you read (and reread) through the zguide (http://zguide.zeromq.org/page:all) as understanding the supported messaging patterns and topologies is fundamental to getting the most from this binding. 
+Here's a few basic examples. Please refer to documentation (http://methodmissing.github.com/rbczmq/) and test cases (https://github.com/methodmissing/rbczmq/tree/master/test) for detailed usage information.
+
+=== Basic send / receive, in process transport
+
+    ctx = ZMQ::Context.new
+    rep = ctx.socket(:PAIR)
+    port = rep.bind("inproc://send.receive")
+    req = ctx.socket(:PAIR)
+    req.connect("inproc://send.receive")
+    req.send("ping") # true
+    rep.recv # "ping"
+
+    ctx.destroy
+
+=== Fair-queued work distribution to a set of worker threads
+
+    ctx = ZMQ::Context.new
+    push = ctx.bind(:PUSH, "inproc://push-pull-distribution.test")
+    threads = []
+    5.times do
+      threads << Thread.new do
+        pull = ctx.connect(:PULL, "inproc://push-pull-distribution.test")
+        msg = pull.recv
+        pull.close
+        msg
+      end
+    end
+
+    sleep 0.5 # avoid "slow joiner" syndrome
+    messages = %w(a b c d e f)
+    messages.each do |m|
+      push.send m
+    end
+
+    threads.each{|t| t.join }
+    threads.all?{|t| messages.include?(t.value) } # true
+
+    ctx.destroy
+
+=== Async request / reply routing
+
+    ctx = ZMQ::Context.new
+    router = ctx.bind(:ROUTER, "inproc://routing-flow.test")
+    dealer = ctx.socket(:DEALER)
+    dealer.identity = "xyz"
+    dealer.connect("inproc://routing-flow.test")
+
+    router.sendm("xyz")
+    router.send("request")
+    dealer.recv # "request"
+
+    dealer.send("reply")
+    router.recv # "xyz"
+    router.recv # "reply"
+
+    ctx.destroy
+
+=== Send / receive frames
+
+    ctx = ZMQ::Context.new
+    rep = ctx.socket(:PAIR)
+    rep.bind("inproc://frames.test")
+    req = ctx.socket(:PAIR)
+    req.connect("inproc://frames.test")
+    ping = ZMQ::Frame("ping")
+    req.send_frame(ping) # true
+    rep.recv_frame # ZMQ::Frame("ping")
+    rep.send_frame(ZMQ::Frame("pong")) # true
+    req.recv_frame # ZMQ::Frame("pong")
+    rep.send_frame(ZMQ::Frame("pong")) # true
+    req.recv_frame_nonblock # nil
+    sleep 0.3
+    req.recv_frame_nonblock # ZMQ::Frame("pong")
+
+    ctx.destroy
+
+=== Send / receive messages
+
+    ctx = ZMQ::Context.new
+    rep = ctx.socket(:PAIR)
+    rep.bind("inproc://messages.test")
+    req = ctx.socket(:PAIR)
+    req.connect("inproc://messages.test")
+
+    msg = ZMQ::Message.new
+    msg.push ZMQ::Frame("header")
+    msg.push ZMQ::Frame("body")
+
+    req.send_message(msg) # nil
+
+    recvd_msg = rep.recv_message
+    recvd_msg.class # ZMQ::Message
+    recvd_msg.pop # ZMQ::Frame("header")
+    recvd_msg.pop # ZMQ::Frame("body")
+
+    ctx.destroy
+
+== Resources
+
+* ZeroMQ - http://www.zeromq.org/community
+* The ØMQ Reference Manual - http://api.zeromq.org/
+* The ØMQ FAQ - http://www.zeromq.org/area:faq
+* Whitepapers - http://www.zeromq.org/area:whitepapers
+* The ØMQ Guide - http://zguide.zeromq.org/page:all
+* CZMQ - http://czmq.zeromq.org/
+* Recent presentation on data transfer by the author of this binding - http://www.slideshare.net/methodmissing/sapo-codebits-2011
+
+== Requirements
+
+* A POSIX compliant OS, known to work well on Linux, BSD variants and Mac OS X
+* Ruby MRI 1.8, 1.9 or Rubinius (JRuby capi support forthcoming)
+* A C compiler
+
+== Installation
+
+Rubygems installation
+
+    gem install rbczmq
+
+Building from source
+
+    git clone git@github.com:methodmissing/rbczmq.git
+    rake
+
+Running tests
+
+    rake test
+
+== TODO
 
 * ZMQ::Message#save && ZMQ::Message.load
 * ZMQ::Socket#handler = x. Assert handler interface here instead ???
@@ -11,5 +170,10 @@
 * Enforce socket timeouts
 * Look into handling signals properly
 * ZMQ.poll implementation
+* Revisit the ZMQ::Loop API
 * Restrict pair sockets to inproc transport only
 * Revisit JRuby C API support
+
+== Contact, feedback and bugs
+
+This project is still work in progress and I'm looking for guidance on API design, use cases and any outlier experiences. Please log bugs and suggestions at https://github.com/methodmissing/rbczmq/issues

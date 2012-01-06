@@ -43,13 +43,13 @@ task :clobber_czmq do
   sh "rm -Rf ext/czmq" if File.directory?("ext/czmq")
 end
 
-RDOC_FILES = FileList["README.rdoc", "ext/rbczmq/*.c", "lib/**/*.rb"]
-
 Rake::RDocTask.new do |rd|
-  rd.title = ""
+  files = FileList["README.rdoc", "lib/**/*.rb", "ext/rbczmq/*.c"]
+  rd.title = "rbczmq - binding for the high level ZeroMQ C API"
   rd.main = "README.rdoc"
   rd.rdoc_dir = "doc"
-  rd.rdoc_files.include(RDOC_FILES)
+  rd.options << "--promiscuous"
+  rd.rdoc_files.include(files)
 end
 
 desc 'Run rbczmq tests'
