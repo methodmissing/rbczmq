@@ -34,11 +34,11 @@ ZeroMQ can have higher throughput than TCP in most cases by using a message batc
 
 Some notes about these benchmarks :
 
-* Go through the full network stack on localhost (TCP/IP transport)
+* Messages go through the full network stack on localhost (TCP/IP transport)
 * The sender and receiver endpoints are Ruby processes which coerce transferred data to native String objects
   on both ends.
-* There's just a definite method dispatch cost in addition to intermittent pauses from the Garbage Collector
-* It's still plenty fast for most soft real-time (a language with automatic memory management cannot easily comply to hard real-time guarantees anyways) applications and we're able to push in excess of 1 gigabit/s with the 1024 byte payloads.
+* There's thus a definite method dispatch cost in addition to intermittent pauses from the Garbage Collector
+* It's still plenty fast for most soft real-time applications and we're able to push in excess of 1 gigabits/s with the 1024 byte payloads. A language with automatic memory management cannot easily comply to hard real-time guarantees anyways.
 
 === TCP/IP loopback, 100k messages, 100 byte payloads
 
