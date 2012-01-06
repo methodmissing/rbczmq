@@ -1,8 +1,10 @@
-= rbczmq - Ruby extension that wraps the official high level ZeroMQ C API ( http://czmq.zeromq.org/ ) 
+= rbczmq - binding for the high level ZeroMQ C API
 
 (c) 2011 Lourens Naudé (methodmissing), with API guidance from the czmq (http://czmq.zeromq.org/) project.
 
   http://github.com/methodmissing/rbczmq
+
+==== NOT YET PRODUCTION READY, BUT ALMOST
 
 == About ZeroMQ
 
@@ -173,6 +175,7 @@ Running tests
 * Revisit the ZMQ::Loop API
 * Restrict pair sockets to inproc transport only
 * Revisit JRuby C API support
+* Push gem out to rubygems.org
 * RDOC fail on mixed C and Ruby source files that document that same constants
 * Setup CI
 
