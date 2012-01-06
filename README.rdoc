@@ -173,6 +173,8 @@ Running tests
 * Revisit the ZMQ::Loop API
 * Restrict pair sockets to inproc transport only
 * Revisit JRuby C API support
+* RDOC fail on mixed C and Ruby source files that document that same constants
+* Setup CI
 
 == Contact, feedback and bugs
 
