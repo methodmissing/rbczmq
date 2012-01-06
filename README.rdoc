@@ -28,6 +28,71 @@ This extension bundles both ZeroMQ (libzmq, http://www.zeromq.org/) and CZMQ (li
 * Expose Message envelopes and Frames to developers as well to allow for higher level protocols and constructs.
 * Enforce well known best practices such as restricting socket interactions to within the thread the socket was created in etc.
 
+== Performance
+
+ZeroMQ can have higher throughput than TCP in most cases by using a message batching technique. Please have a look through the Performance section in the ZeroMQ FAQ (http://www.zeromq.org/area:faq#toc2) for further implementation details.
+
+Some notes about these benchmarks :
+
+* Go through the full network stack on localhost (TCP/IP transport)
+* The sender and receiver endpoints are Ruby processes which coerce transferred data to native String objects
+  on both ends.
+* There's just a definite method dispatch cost in addition to intermittent pauses from the Garbage Collector
+* It's still plenty fast for most soft real-time (a language with automatic memory management cannot easily comply to hard real-time guarantees anyways) applications and we're able to push in excess of 1 gigabit/s with the 1024 byte payloads.
+
+=== TCP/IP loopback, 100k messages, 100 byte payloads
+
+    Lourenss-MacBook-Air:rbczmq lourens$ MSG_COUNT=100000 MSG_SIZE=100 ruby perf/pair.rb
+    Local pids: 2042
+    Remote pid: 2043
+    Sent 100000 messages in 0.3933s ...
+    [2043] Memory used before: 1128kb
+    [2043] Memory used after: 3012kb
+    [2042] Memory used before: 1120kb
+    ====== [2042] transfer stats ======
+    message encoding: string
+    message size: 100 [B]
+    message count: 100000
+    mean throughput: 227978 [msg/s]
+    mean throughput: 182.383 [Mb/s]
+    [2042] Memory used after: 22432kb
+
+=== TCP/IP loopback, 100k messages, 1024 byte payloads
+
+    Lourenss-MacBook-Air:rbczmq lourens$ MSG_COUNT=100000 MSG_SIZE=1024 ruby perf/pair.rb
+    Local pids: 2027
+    Remote pid: 2028
+    Sent 100000 messages in 0.641198s ...
+    [2028] Memory used before: 1120kb
+    [2028] Memory used after: 12776kb
+    [2027] Memory used before: 1144kb
+    ====== [2027] transfer stats ======
+    message encoding: string
+    message size: 1024 [B]
+    message count: 100000
+    mean throughput: 160756 [msg/s]
+    mean throughput: 1316.919 [Mb/s]
+    [2027] Memory used after: 189004kb
+
+=== TCP/IP loopback, 100k messages, 2048 byte payloads
+
+    Lourenss-MacBook-Air:rbczmq lourens$ MSG_COUNT=100000 MSG_SIZE=2048 ruby perf/pair.rb
+    Local pids: 2034
+    Remote pid: 2035
+    Sent 100000 messages in 0.94703s ...
+    [2035] Memory used before: 1140kb
+    [2035] Memory used after: 7212kb
+    [2034] Memory used before: 1128kb
+    ====== [2034] transfer stats ======
+    message encoding: string
+    message size: 2048 [B]
+    message count: 100000
+    mean throughput: 123506 [msg/s]
+    mean throughput: 2023.528 [Mb/s]
+    [2034] Memory used after: 277712kb
+
+Have a play around with the performance runner and other socket pairs as well - https://github.com/methodmissing/rbczmq/tree/master/perf
+
 == Usage
 
 As a first step I'd highly recommend you read (and reread) through the zguide (http://zguide.zeromq.org/page:all) as understanding the supported messaging patterns and topologies is fundamental to getting the most from this binding. 
@@ -178,6 +243,7 @@ Running tests
 * Push gem out to rubygems.org
 * RDOC fail on mixed C and Ruby source files that document that same constants
 * Setup CI
+* GC guards to prevent recycling objects being sent / received.
 
 == Contact, feedback and bugs
 

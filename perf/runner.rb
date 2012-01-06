@@ -41,7 +41,7 @@ require 'zmq'
 
 module Runner
   ENDPOINT = "tcp://127.0.0.1:5221"
-  DEFAULT_MSG_COUNT = 1_000_000
+  DEFAULT_MSG_COUNT = 100_000
   DEFAULT_MSG_SIZE = 100
   DEFAULT_ENCODING = :string
 
