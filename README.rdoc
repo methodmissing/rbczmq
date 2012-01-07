@@ -242,7 +242,6 @@ Running tests
 * Revisit JRuby C API support
 * Push gem out to rubygems.org
 * RDOC fail on mixed C and Ruby source files that document that same constants
-* Setup CI
 * GC guards to prevent recycling objects being sent / received.
 
 == Contact, feedback and bugs
