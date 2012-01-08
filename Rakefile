@@ -16,31 +16,17 @@ end
 
 gemspec = eval(IO.read('rbczmq.gemspec'))
 
-task :clobber => [:clobber_zeromq, :clobber_czmq]
-
 Gem::PackageTask.new(gemspec) do |pkg|
 end
-
-# XXX fallbacks specific to Darwin for JRuby (does not set these values in RbConfig::CONFIG)
-LIBEXT = RbConfig::CONFIG['LIBEXT'] || 'a'
-DLEXT = RbConfig::CONFIG['DLEXT'] || 'bundle'
 
 Rake::ExtensionTask.new('rbczmq', gemspec) do |ext|
   ext.name = 'rbczmq_ext'
   ext.ext_dir = 'ext/rbczmq'
   ext.lib_dir = File.join('lib', 'zmq')
 
-  CLEAN.include "#{ext.ext_dir}/libzmq.#{LIBEXT}"
-  CLEAN.include "#{ext.ext_dir}/libczmq.#{LIBEXT}"
-  CLEAN.include "#{ext.lib_dir}/*.#{DLEXT}"
-end
-
-task :clobber_zeromq do
-  sh "rm -Rf ext/zeromq" if File.directory?("ext/zeromq")
-end
-
-task :clobber_czmq do
-  sh "rm -Rf ext/czmq" if File.directory?("ext/czmq")
+  CLEAN.include 'ext/rbczmq/dst'
+  CLEAN.include 'ext/zeromq'
+  CLEAN.include 'ext/czmq'
 end
 
 Rake::RDocTask.new do |rd|

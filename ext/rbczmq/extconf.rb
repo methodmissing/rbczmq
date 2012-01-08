@@ -18,8 +18,10 @@ RbConfig::MAKEFILE_CONFIG['CC'] = ENV['CC'] if ENV['CC']
 LIBEXT = RbConfig::CONFIG['LIBEXT'] || 'a'
 DLEXT = RbConfig::CONFIG['DLEXT'] || 'bundle'
 
-libs_path = Pathname(File.expand_path(File.dirname(__FILE__)))
-vendor_path = libs_path + '..'
+cwd = Pathname(File.expand_path(File.dirname(__FILE__)))
+dst_path = cwd + 'dst'
+libs_path = dst_path + 'lib'
+vendor_path = cwd + '..'
 zmq_path = vendor_path + 'zeromq'
 czmq_path = vendor_path + 'czmq'
 zmq_include_path = zmq_path + 'include'
@@ -35,20 +37,18 @@ unless File.directory?(zmq_path) && File.directory?(czmq_path)
 end
 
 # build libzmq
-lib = File.join(zmq_path, 'src', '.libs', "libzmq.#{LIBEXT}")
+lib = libs_path + "libzmq.#{LIBEXT}"
 Dir.chdir zmq_path do
   sys "./autogen.sh", "ZeroMQ autogen failed!" unless File.exist?(zmq_path + 'configure')
-  sys "./configure && make", "ZeroMQ compile error!"
+  sys "./configure --prefix=#{dst_path} && make && make install", "ZeroMQ compile error!"
 end unless File.exist?(lib)
-sys "cp #{lib} #{libs_path}", "Failed to copy compiled libzmq!"
 
 # build libczmq
-lib = File.join(czmq_path, 'src', '.libs', "libczmq.#{LIBEXT}")
+lib = libs_path + "libczmq.#{LIBEXT}"
 Dir.chdir czmq_path do
   sys "./autogen.sh", "CZMQ autogen failed!" unless File.exist?(czmq_path + 'configure')
-  sys "./configure --with-libzmq=#{zmq_path} && make all", "CZMQ compile error!"
+  sys "./configure --prefix=#{dst_path} --with-libzmq=#{dst_path} && make all && make install", "CZMQ compile error!"
 end unless File.exist?(lib)
-sys "cp #{lib} #{libs_path}", "Failed to copy compiled libczmq!"
 
 dir_config('rbczmq')
 
