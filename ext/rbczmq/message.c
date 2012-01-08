@@ -594,7 +594,8 @@ static VALUE rb_czmq_message_equals(VALUE obj, VALUE other_message)
     return rb_czmq_message_eql_p(obj, other_message);
 }
 
-void _init_rb_czmq_message() {
+void _init_rb_czmq_message()
+{
     rb_cZmqMessage = rb_define_class_under(rb_mZmq, "Message", rb_cObject);
 
     rb_define_singleton_method(rb_cZmqMessage, "decode", rb_czmq_message_s_decode, 1);

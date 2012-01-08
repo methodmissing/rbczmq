@@ -199,7 +199,8 @@ static VALUE rb_czmq_socket_fd(VALUE obj)
  *  Binds to an endpoint while the GIL is released.
  *
 */
-VALUE rb_czmq_nogvl_socket_bind(void *ptr) {
+VALUE rb_czmq_nogvl_socket_bind(void *ptr)
+{
     int rc;
     struct nogvl_conn_args *args = ptr;
     errno = 0;
@@ -217,7 +218,8 @@ VALUE rb_czmq_nogvl_socket_bind(void *ptr) {
  *  Connects to an endpoint while the GIL is released.
  *
 */
-VALUE rb_czmq_nogvl_socket_connect(void *ptr) {
+VALUE rb_czmq_nogvl_socket_connect(void *ptr)
+{
     int rc;
     struct nogvl_conn_args *args = ptr;
     errno = 0;
@@ -322,7 +324,8 @@ static VALUE rb_czmq_socket_set_verbose(VALUE obj, VALUE level)
  *  Sends a raw string while the GIL is released.
  *
 */
-static VALUE rb_czmq_nogvl_zstr_send(void *ptr) {
+static VALUE rb_czmq_nogvl_zstr_send(void *ptr)
+{
     struct nogvl_send_args *args = ptr;
     errno = 0;
     zmq_sock_wrapper *socket = args->socket;
@@ -345,7 +348,8 @@ try_writable:
  *  Sends a raw string with the multi flag set while the GIL is released.
  *
 */
-static VALUE rb_czmq_nogvl_zstr_sendm(void *ptr) {
+static VALUE rb_czmq_nogvl_zstr_sendm(void *ptr)
+{
     struct nogvl_send_args *args = ptr;
     errno = 0;
     zmq_sock_wrapper *socket = args->socket;
@@ -431,7 +435,8 @@ static VALUE rb_czmq_socket_sendm(VALUE obj, VALUE msg)
  *  Receives a raw string while the GIL is released.
  *
 */
-static VALUE rb_czmq_nogvl_recv(void *ptr) {
+static VALUE rb_czmq_nogvl_recv(void *ptr)
+{
     struct nogvl_recv_args *args = ptr;
     errno = 0;
     zmq_sock_wrapper *socket = args->socket;
@@ -517,7 +522,8 @@ static VALUE rb_czmq_socket_recv_nonblock(VALUE obj)
  *  Sends a frame while the GIL is released.
  *
 */
-static VALUE rb_czmq_nogvl_send_frame(void *ptr) {
+static VALUE rb_czmq_nogvl_send_frame(void *ptr)
+{
     struct nogvl_send_frame_args *args = ptr;
     errno = 0;
     zmq_sock_wrapper *socket = args->socket;
@@ -593,7 +599,8 @@ static VALUE rb_czmq_socket_send_frame(int argc, VALUE *argv, VALUE obj)
  *  Sends a message while the GIL is released.
  *
 */
-static VALUE rb_czmq_nogvl_send_message(void *ptr) {
+static VALUE rb_czmq_nogvl_send_message(void *ptr)
+{
     struct nogvl_send_message_args *args = ptr;
     zmq_sock_wrapper *socket = args->socket;
     errno = 0;
@@ -653,7 +660,8 @@ static VALUE rb_czmq_socket_send_message(VALUE obj, VALUE message_obj)
  *  Receives a frame while the GIL is released.
  *
 */
-static VALUE rb_czmq_nogvl_recv_frame(void *ptr) {
+static VALUE rb_czmq_nogvl_recv_frame(void *ptr)
+{
     struct nogvl_recv_args *args = ptr;
     errno = 0;
     zmq_sock_wrapper *socket = args->socket;
@@ -745,7 +753,8 @@ static VALUE rb_czmq_socket_recv_frame_nonblock(VALUE obj)
  *  Receives a message while the GIL is released.
  *
 */
-static VALUE rb_czmq_nogvl_recv_message(void *ptr) {
+static VALUE rb_czmq_nogvl_recv_message(void *ptr)
+{
     struct nogvl_recv_args *args = ptr;
     errno = 0;
     zmq_sock_wrapper *socket = args->socket;
@@ -1505,7 +1514,8 @@ static VALUE rb_czmq_socket_opt_events(VALUE obj)
     return INT2NUM(zsockopt_events(sock->socket));
 }
 
-void _init_rb_czmq_socket() {
+void _init_rb_czmq_socket()
+{
     rb_cZmqSocket = rb_define_class_under(rb_mZmq, "Socket", rb_cObject);
     rb_cZmqPubSocket = rb_define_class_under(rb_cZmqSocket, "Pub", rb_cZmqSocket);
     rb_cZmqSubSocket = rb_define_class_under(rb_cZmqSocket, "Sub", rb_cZmqSocket);;

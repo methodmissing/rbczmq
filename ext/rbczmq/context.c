@@ -214,7 +214,8 @@ static VALUE rb_czmq_ctx_set_linger(VALUE obj, VALUE linger)
  *  Creates a new socket while the GIL is released.
  *
 */
-VALUE rb_czmq_nogvl_socket_new(void *ptr) {
+VALUE rb_czmq_nogvl_socket_new(void *ptr)
+{
     errno = 0;
     struct nogvl_socket_args *args = ptr;
     return (VALUE)zsocket_new(args->ctx, args->type);
@@ -225,7 +226,8 @@ VALUE rb_czmq_nogvl_socket_new(void *ptr) {
  *  Maps a Ruby class to a ZMQ socket type.
  *
 */
-static inline VALUE rb_czmq_ctx_socket_klass(int socket_type) {
+static inline VALUE rb_czmq_ctx_socket_klass(int socket_type)
+{
     switch (socket_type) {
         case ZMQ_PUB: return rb_cZmqPubSocket;
                       break;
@@ -300,7 +302,8 @@ static VALUE rb_czmq_ctx_socket(VALUE obj, VALUE type)
     return socket;
 }
 
-void _init_rb_czmq_context() {
+void _init_rb_czmq_context()
+{
     intern_zctx_process = rb_intern("@__zmq_ctx_process");
     rb_ivar_set(rb_mZmq, intern_zctx_process, rb_hash_new());
 

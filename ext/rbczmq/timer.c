@@ -133,7 +133,8 @@ static VALUE rb_czmq_timer_cancel(VALUE obj)
     return Qnil; 
 }
 
-void _init_rb_czmq_timer() {
+void _init_rb_czmq_timer()
+{
     intern_call = rb_intern("call");
 
     rb_cZmqTimer = rb_define_class_under(rb_mZmq, "Timer", rb_cObject);
@@ -143,4 +144,3 @@ void _init_rb_czmq_timer() {
     rb_define_alias(rb_cZmqTimer, "call", "fire");
     rb_define_method(rb_cZmqTimer, "cancel", rb_czmq_timer_cancel, 0);
 }
-

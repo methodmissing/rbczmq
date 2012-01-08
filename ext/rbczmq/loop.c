@@ -441,7 +441,8 @@ static VALUE rb_czmq_loop_cancel_timer(VALUE obj, VALUE tm)
     return Qtrue;
 }
 
-void _init_rb_czmq_loop() {
+void _init_rb_czmq_loop()
+{
     intern_call = rb_intern("call");
     intern_readable = rb_intern("on_readable");
     intern_writable = rb_intern("on_writable");

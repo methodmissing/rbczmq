@@ -71,7 +71,7 @@ VALUE rb_czmq_alloc_frame(zframe_t *frame)
  *  libczmq.
  *
 */
-void rb_czmq_free_frame(zframe_t *frame)
+static void rb_czmq_free_frame(zframe_t *frame)
 {
     if (frame)
         if (st_lookup(frames_map, (st_data_t)frame, 0)) zframe_destroy(&frame);
@@ -82,7 +82,7 @@ void rb_czmq_free_frame(zframe_t *frame)
  *  GC free callback
  *
 */
-void rb_czmq_free_frame_gc(void *ptr)
+static void rb_czmq_free_frame_gc(void *ptr)
 {
     zframe_t *frame = (zframe_t *)ptr;
     rb_czmq_free_frame(frame);
@@ -409,7 +409,8 @@ static VALUE rb_czmq_frame_reset(VALUE obj, VALUE data)
     return Qnil;
 }
 
-void _init_rb_czmq_frame() {
+void _init_rb_czmq_frame()
+{
     intern_data = rb_intern("data");
 
     rb_cZmqFrame = rb_define_class_under(rb_mZmq, "Frame", rb_cObject);
