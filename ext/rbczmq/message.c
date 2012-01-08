@@ -36,6 +36,11 @@
 
 #include <rbczmq_ext.h>
 
+/*
+ * :nodoc:
+ *  Free all resources for a message - invoked by the lower level ZMQ::Message#destroy as well as the GC callback.
+ *
+*/
 void rb_czmq_free_message(zmq_message_wrapper *message)
 {
     errno = 0;
@@ -44,6 +49,11 @@ void rb_czmq_free_message(zmq_message_wrapper *message)
     message->flags |= ZMQ_MESSAGE_DESTROYED;
 }
 
+/*
+ * :nodoc:
+ *  GC free callback
+ *
+*/
 static void rb_czmq_free_message_gc(void *ptr)
 {
     zmq_message_wrapper *msg = (zmq_message_wrapper *)ptr;
@@ -53,6 +63,11 @@ static void rb_czmq_free_message_gc(void *ptr)
     }
 }
 
+/*
+ * :nodoc:
+ *  Coerce a zmsg instance to a native Ruby object.
+ *
+*/
 VALUE rb_czmq_alloc_message(zmsg_t *message)
 {
     VALUE message_obj;
