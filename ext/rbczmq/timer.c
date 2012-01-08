@@ -38,12 +38,22 @@
 
 static VALUE intern_call;
 
+/*
+ * :nodoc:
+ *  GC mark callback
+ *
+*/
 static void rb_czmq_mark_timer(void *ptr)
 {
     zmq_timer_wrapper *timer =  (zmq_timer_wrapper *)ptr;
     rb_gc_mark(timer->callback);
 }
 
+/*
+ * :nodoc:
+ *  GC free callback
+ *
+*/
 static void rb_czmq_free_timer_gc(void *ptr)
 {
     zmq_timer_wrapper *timer = (zmq_timer_wrapper *)ptr;
