@@ -36,6 +36,11 @@
 
 #include <rbczmq_ext.h>
 
+/*
+ * :nodoc:
+ *  Destroy the socket while the GIL is released - may block depending on socket linger value.
+ *
+*/
 static VALUE rb_czmq_nogvl_zsocket_destroy(void *ptr)
 {
     errno = 0;
@@ -44,6 +49,12 @@ static VALUE rb_czmq_nogvl_zsocket_destroy(void *ptr)
     return Qnil;
 }
 
+/*
+ * :nodoc:
+ *  Free all resources for a socket - invoked by the lower level ZMQ::Socket#destroy as well as the GC callback (some
+ *  regressions here still though).
+ *
+*/
 void rb_czmq_free_sock(zmq_sock_wrapper *sock)
 {
     if (sock->ctx) {
@@ -54,6 +65,11 @@ void rb_czmq_free_sock(zmq_sock_wrapper *sock)
     }
 }
 
+/*
+ * :nodoc:
+ *  GC mark callback
+ *
+*/
 void rb_czmq_mark_sock(void *ptr)
 {
     zmq_sock_wrapper *sock = (zmq_sock_wrapper *)ptr;
@@ -68,9 +84,14 @@ void rb_czmq_mark_sock(void *ptr)
     }
 }
 
+/*
+ * :nodoc:
+ *  GC free callback
+ *
+*/
 void rb_czmq_free_sock_gc(void *ptr)
 {
-    zmq_sock_wrapper *sock = ptr;
+    zmq_sock_wrapper *sock = (zmq_sock_wrapper *)ptr;
     if (sock){
         if (sock->verbose)
             zclock_log ("I: %s socket %p, context %p: GC free", zsocket_type_str(sock->socket), sock, sock->ctx);
@@ -173,6 +194,11 @@ static VALUE rb_czmq_socket_fd(VALUE obj)
     return INT2NUM(zsockopt_fd(sock->socket));
 }
 
+/*
+ * :nodoc:
+ *  Binds to an endpoint while the GIL is released.
+ *
+*/
 VALUE rb_czmq_nogvl_socket_bind(void *ptr) {
     int rc;
     struct nogvl_conn_args *args = ptr;
@@ -186,6 +212,11 @@ VALUE rb_czmq_nogvl_socket_bind(void *ptr) {
     return (VALUE)rc;
 }
 
+/*
+ * :nodoc:
+ *  Connects to an endpoint while the GIL is released.
+ *
+*/
 VALUE rb_czmq_nogvl_socket_connect(void *ptr) {
     int rc;
     struct nogvl_conn_args *args = ptr;
@@ -286,6 +317,11 @@ static VALUE rb_czmq_socket_set_verbose(VALUE obj, VALUE level)
     return Qnil;
 }
 
+/*
+ * :nodoc:
+ *  Sends a raw string while the GIL is released.
+ *
+*/
 static VALUE rb_czmq_nogvl_zstr_send(void *ptr) {
     struct nogvl_send_args *args = ptr;
     errno = 0;
@@ -304,6 +340,11 @@ try_writable:
 #endif
 }
 
+/*
+ * :nodoc:
+ *  Sends a raw string with the multi flag set while the GIL is released.
+ *
+*/
 static VALUE rb_czmq_nogvl_zstr_sendm(void *ptr) {
     struct nogvl_send_args *args = ptr;
     errno = 0;
@@ -385,6 +426,11 @@ static VALUE rb_czmq_socket_sendm(VALUE obj, VALUE msg)
     return Qtrue;
 }
 
+/*
+ * :nodoc:
+ *  Receives a raw string while the GIL is released.
+ *
+*/
 static VALUE rb_czmq_nogvl_recv(void *ptr) {
     struct nogvl_recv_args *args = ptr;
     errno = 0;
@@ -466,6 +512,11 @@ static VALUE rb_czmq_socket_recv_nonblock(VALUE obj)
     return ZmqEncode(rb_str_new2(str));
 }
 
+/*
+ * :nodoc:
+ *  Sends a frame while the GIL is released.
+ *
+*/
 static VALUE rb_czmq_nogvl_send_frame(void *ptr) {
     struct nogvl_send_frame_args *args = ptr;
     errno = 0;
@@ -537,6 +588,11 @@ static VALUE rb_czmq_socket_send_frame(int argc, VALUE *argv, VALUE obj)
     return Qtrue;
 }
 
+/*
+ * :nodoc:
+ *  Sends a message while the GIL is released.
+ *
+*/
 static VALUE rb_czmq_nogvl_send_message(void *ptr) {
     struct nogvl_send_message_args *args = ptr;
     zmq_sock_wrapper *socket = args->socket;
@@ -592,6 +648,11 @@ static VALUE rb_czmq_socket_send_message(VALUE obj, VALUE message_obj)
     return Qnil;
 }
 
+/*
+ * :nodoc:
+ *  Receives a frame while the GIL is released.
+ *
+*/
 static VALUE rb_czmq_nogvl_recv_frame(void *ptr) {
     struct nogvl_recv_args *args = ptr;
     errno = 0;
@@ -679,6 +740,11 @@ static VALUE rb_czmq_socket_recv_frame_nonblock(VALUE obj)
     return rb_czmq_alloc_frame(frame);
 }
 
+/*
+ * :nodoc:
+ *  Receives a message while the GIL is released.
+ *
+*/
 static VALUE rb_czmq_nogvl_recv_message(void *ptr) {
     struct nogvl_recv_args *args = ptr;
     errno = 0;
