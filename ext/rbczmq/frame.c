@@ -37,11 +37,24 @@
 #include <rbczmq_ext.h>
 static VALUE intern_data;
 
+/*
+ * :nodoc:
+ *  Callback invoked by zframe_destroy in libczmq. We track all frames coerced to native objects in a symbol table
+ *  to guard against a mismatch between allocated frames and the Ruby object space as zframe_destroy is invoked
+ *  throughout libczmq (zmsg.c) where the Ruby GC can't easily track it. Ruby MRI Object finalizers are a real
+ *  pita to deal with.
+ *
+*/
 void rb_czmq_frame_freed(zframe_t *frame)
 {
     st_delete(frames_map, (st_data_t*)&frame, 0);
 }
 
+/*
+ * :nodoc:
+ *  Coerce a zframe instance to a native Ruby object.
+ *
+*/
 VALUE rb_czmq_alloc_frame(zframe_t *frame)
 {
     VALUE frame_obj;
@@ -51,12 +64,24 @@ VALUE rb_czmq_alloc_frame(zframe_t *frame)
     return frame_obj;
 }
 
+/*
+ * :nodoc:
+ *  Free all resources for a frame - invoked by the lower level ZMQ::Frame#destroy as well as the GC callback. We also
+ *  do a symbol table lookup here to ensure we don't double free a struct that's already been recycled from within
+ *  libczmq.
+ *
+*/
 void rb_czmq_free_frame(zframe_t *frame)
 {
     if (frame)
         if (st_lookup(frames_map, (st_data_t)frame, 0)) zframe_destroy(&frame);
 }
 
+/*
+ * :nodoc:
+ *  GC free callback
+ *
+*/
 void rb_czmq_free_frame_gc(void *ptr)
 {
     zframe_t *frame = (zframe_t *)ptr;
