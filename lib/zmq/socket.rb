@@ -45,6 +45,19 @@ class ZMQ::Socket
     end
   end
 
+  def self.handle_fsm_errors(error, *methods)
+    methods.each do |m|
+      class_eval <<-"evl", __FILE__, __LINE__
+        def #{m}(*args);
+          super
+        rescue SystemCallError => e
+          raise(ZMQ::Error, "#{error} Please assert that you're not sending / receiving out of band data when using the REQ / REP socket pairs.") if e.errno == ZMQ::EFSM
+          raise
+        end
+      evl
+    end
+  end
+
   # Determines if there are one or more messages to read from this socket. Should be used in conjunction with the
   # ZMQ_FD socket option for edge-triggered notifications.
   #

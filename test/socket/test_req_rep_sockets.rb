@@ -9,8 +9,8 @@ class TestReqRepSockets < ZmqTestCase
     req = ctx.connect(:REQ, "inproc://test.req-rep-flow")
     begin
       rep.send("message")
-    rescue => e
-      assert_match(/Operation cannot be accomplished in current state/, e.message)
+    rescue ZMQ::Error => e
+      assert_match(/REP sockets allows only an alternating sequence of receive and subsequent send calls. Please assert that you're not sending \/ receiving out of band data when using the REQ \/ REP socket pairs./, e.message)
     end
   ensure
     ctx.destroy
