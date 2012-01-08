@@ -181,6 +181,11 @@ void Init_rbczmq_ext()
     rb_define_const(rb_mZmq, "PUSH", INT2NUM(ZMQ_PUSH));
     rb_define_const(rb_mZmq, "PULL", INT2NUM(ZMQ_PULL));
 
+    rb_define_const(rb_mZmq, "EFSM", INT2NUM(EFSM));
+    rb_define_const(rb_mZmq, "ENOCOMPATPROTO", INT2NUM(ENOCOMPATPROTO));
+    rb_define_const(rb_mZmq, "ETERM", INT2NUM(ETERM));
+    rb_define_const(rb_mZmq, "EMTHREAD", INT2NUM(EMTHREAD));
+
     _init_rb_czmq_context();
     _init_rb_czmq_socket();
     _init_rb_czmq_frame();
