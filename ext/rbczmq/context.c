@@ -46,6 +46,12 @@ static VALUE get_pid()
     return INT2NUM(getpid());
 }
 
+/*
+ * :nodoc:
+ *  Destroy the context while the GIL is released - zctx_destroy also closes it's list of sockets and thus may block
+ *  depending on socket linger values.
+ *
+*/
 static VALUE rb_czmq_nogvl_zctx_destroy(void *ptr)
 {
     errno = 0;
@@ -55,6 +61,11 @@ static VALUE rb_czmq_nogvl_zctx_destroy(void *ptr)
     return Qnil;
 }
 
+/*
+ * :nodoc:
+ *  Free all resources for a context - invoked by the lower level ZMQ::Context#destroy as well as the GC callback
+ *
+*/
 static void rb_czmq_free_ctx(zmq_ctx_wrapper *ctx)
 {
     VALUE ctx_map;
@@ -64,6 +75,11 @@ static void rb_czmq_free_ctx(zmq_ctx_wrapper *ctx)
     rb_hash_aset(ctx_map, get_pid(), Qnil);
 }
 
+/*
+ * :nodoc:
+ *  GC free callback
+ *
+*/
 static void rb_czmq_free_ctx_gc(void *ptr)
 {
     zmq_ctx_wrapper *ctx = (zmq_ctx_wrapper *)ptr;
@@ -73,6 +89,11 @@ static void rb_czmq_free_ctx_gc(void *ptr)
     }
 }
 
+/*
+ * :nodoc:
+ *  Creates a new context while the GIL is released.
+ *
+*/
 static VALUE rb_czmq_nogvl_zctx_new(ZMQ_UNUSED void *ptr)
 {
     errno = 0;
@@ -188,12 +209,22 @@ static VALUE rb_czmq_ctx_set_linger(VALUE obj, VALUE linger)
     return Qnil;
 }
 
+/*
+ * :nodoc:
+ *  Creates a new socket while the GIL is released.
+ *
+*/
 VALUE rb_czmq_nogvl_socket_new(void *ptr) {
     errno = 0;
     struct nogvl_socket_args *args = ptr;
     return (VALUE)zsocket_new(args->ctx, args->type);
 }
 
+/*
+ * :nodoc:
+ *  Maps a Ruby class to a ZMQ socket type.
+ *
+*/
 static inline VALUE rb_czmq_ctx_socket_klass(int socket_type) {
     switch (socket_type) {
         case ZMQ_PUB: return rb_cZmqPubSocket;
