@@ -119,7 +119,7 @@ class TestZmqSocket < ZmqTestCase
     req.connect("tcp://127.0.0.1:#{port}")
     assert_equal "PAIR socket", sock.to_s
     assert_equal "PAIR socket bound to tcp://127.0.0.1:*", rep.to_s
-    assert_equal "PAIR socket connected to tcp://127.0.0.1:49152", req.to_s
+    assert_equal "PAIR socket connected to tcp://127.0.0.1:#{port}", req.to_s
   ensure
     ctx.destroy
   end
@@ -131,7 +131,7 @@ class TestZmqSocket < ZmqTestCase
     req = ctx.socket(:PAIR)
     req.connect("tcp://127.0.0.1:#{port}")
     assert_equal "tcp://127.0.0.1:*", rep.endpoint
-    assert_equal "tcp://127.0.0.1:49152", req.endpoint
+    assert_equal "tcp://127.0.0.1:#{port}", req.endpoint
   ensure
     ctx.destroy
   end

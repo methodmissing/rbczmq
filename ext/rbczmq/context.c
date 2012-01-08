@@ -156,7 +156,7 @@ static VALUE rb_czmq_ctx_set_iothreads(VALUE obj, VALUE threads)
     Check_Type(threads, T_FIXNUM);
     iothreads = FIX2INT(threads);
     if (iothreads > 1) rb_warn("You probably don't want to spawn more than 1 I/O thread per ZMQ context.");
-	if (iothreads < 0) rb_raise(rb_eZmqError, "negative I/O threads count is not supported.");
+    if (iothreads < 0) rb_raise(rb_eZmqError, "negative I/O threads count is not supported.");
     zctx_set_iothreads(ctx->ctx, iothreads);
     if (zmq_errno() == EINVAL) ZmqRaiseSysError();
     return Qnil;
@@ -179,10 +179,12 @@ static VALUE rb_czmq_ctx_set_iothreads(VALUE obj, VALUE threads)
 static VALUE rb_czmq_ctx_set_linger(VALUE obj, VALUE linger)
 {
     errno = 0;
+    int msecs;
     ZmqGetContext(obj);
     Check_Type(linger, T_FIXNUM);
-   /* XXX: boundary checks */
-    zctx_set_linger(ctx->ctx, FIX2INT(linger));
+    msecs = FIX2INT(linger);
+    if (msecs < 0) rb_raise(rb_eZmqError, "negative linger / timeout values is not supported.");
+    zctx_set_linger(ctx->ctx, msecs);
     return Qnil;
 }
 

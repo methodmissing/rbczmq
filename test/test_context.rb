@@ -52,6 +52,9 @@ class TestZmqContext < ZmqTestCase
       ctx.linger = :invalid  
     end
     ctx.linger = 10
+    assert_raises ZMQ::Error do
+      ctx.linger = -2
+    end
   ensure
     ctx.destroy
   end
