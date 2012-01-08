@@ -40,7 +40,7 @@ static VALUE intern_call;
 
 static void rb_czmq_mark_timer(void *ptr)
 {
-    zmq_timer_wrapper *timer = ptr;
+    zmq_timer_wrapper *timer =  (zmq_timer_wrapper *)ptr;
     rb_gc_mark(timer->callback);
 }
 
