@@ -5,8 +5,8 @@ require File.join(File.dirname(__FILE__), '..', 'helper')
 class TestPubSubSockets < ZmqTestCase
   def test_flow
     ctx = ZMQ::Context.new
-    pub = ctx.bind(:PUB, "inproc://pub-sub-flow.test")
-    sub = ctx.connect(:SUB, "inproc://pub-sub-flow.test")
+    pub = ctx.bind(:PUB, "inproc://test.pub-sub-flow")
+    sub = ctx.connect(:SUB, "inproc://test.pub-sub-flow")
     pub.send("a")
     assert_equal "a", sub.recv
   ensure
@@ -15,8 +15,8 @@ class TestPubSubSockets < ZmqTestCase
 
   def test_transfer
     ctx = ZMQ::Context.new
-    pub = ctx.bind(:PUB, "inproc://pub-sub-transfer.test")
-    sub = ctx.connect(:SUB, "inproc://pub-sub-transfer.test")
+    pub = ctx.bind(:PUB, "inproc://test.pub-sub-transfer")
+    sub = ctx.connect(:SUB, "inproc://test.pub-sub-transfer")
     pub.send("message")
     assert_equal "message", sub.recv
 
@@ -56,11 +56,11 @@ class TestPubSubSockets < ZmqTestCase
 
   def test_distribution
     ctx = ZMQ::Context.new
-    pub = ctx.bind(:PUB, "inproc://pub-sub-distribution.test")
+    pub = ctx.bind(:PUB, "inproc://test.pub-sub-distribution")
     threads = []
     5.times do |i|
       threads << Thread.new do
-        sub = ctx.connect(:SUB, "inproc://pub-sub-distribution.test")
+        sub = ctx.connect(:SUB, "inproc://test.pub-sub-distribution")
         messages = []
         5.times do
           messages << sub.recv

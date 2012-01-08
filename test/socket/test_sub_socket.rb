@@ -12,7 +12,7 @@ class TestSubSocket < ZmqTestCase
       sock.send("message")
     end
     assert_raises ZMQ::Error do
-      sock.bind("tcp://127.0.0.1:*")
+      sock.bind("inproc://test.sub-sock-behavior")
     end
   ensure
     ctx.destroy

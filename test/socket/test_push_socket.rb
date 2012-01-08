@@ -12,7 +12,7 @@ class TestPushSocket < ZmqTestCase
       sock.recv
     end
     assert_raises ZMQ::Error do
-      sock.connect("tcp://127.0.0.1:5000")
+      sock.connect("inproc://test.push-sock-behavior")
     end
   ensure
     ctx.destroy

@@ -5,8 +5,8 @@ require File.join(File.dirname(__FILE__), '..', 'helper')
 class TestReqRepSockets < ZmqTestCase
   def test_flow
     ctx = ZMQ::Context.new
-    rep = ctx.bind(:REP, "inproc://req-rep-flow.test")
-    req = ctx.connect(:REQ, "inproc://req-rep-flow.test")
+    rep = ctx.bind(:REP, "inproc://test.req-rep-flow")
+    req = ctx.connect(:REQ, "inproc://test.req-rep-flow")
     begin
       rep.send("message")
     rescue => e
@@ -18,8 +18,8 @@ class TestReqRepSockets < ZmqTestCase
 
   def test_transfer
     ctx = ZMQ::Context.new
-    rep = ctx.bind(:REP, "inproc://req-rep-transfer.test")
-    req = ctx.connect(:REQ, "inproc://req-rep-transfer.test")
+    rep = ctx.bind(:REP, "inproc://test.req-rep-transfer")
+    req = ctx.connect(:REQ, "inproc://test.req-rep-transfer")
     req.send("message")
     assert_equal "message", rep.recv
   ensure
@@ -28,9 +28,9 @@ class TestReqRepSockets < ZmqTestCase
 
   def test_distribution
     ctx = ZMQ::Context.new
-    rep = ctx.bind(:REP, "inproc://req-rep-distribution.test")
+    rep = ctx.bind(:REP, "inproc://test.req-rep-distribution")
     thread = Thread.new do
-      req = ctx.connect(:REQ, "inproc://req-rep-distribution.test")
+      req = ctx.connect(:REQ, "inproc://test.req-rep-distribution")
       req.send_frame ZMQ::Frame("message")
       req.close
     end

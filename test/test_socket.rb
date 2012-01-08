@@ -24,8 +24,8 @@ class TestZmqSocket < ZmqTestCase
   def test_readable_p
     ctx = ZMQ::Context.new
     rep = ctx.socket(:REP)
-    port = rep.bind("tcp://127.0.0.1:*")
-    req = ctx.connect(:REQ, "tcp://127.0.0.1:#{port}")
+    rep.bind("inproc://test.socket-readable_p")
+    req = ctx.connect(:REQ, "inproc://test.socket-readable_p")
     assert req.writable?
     req.send("m")
     sleep 0.1
@@ -99,10 +99,10 @@ class TestZmqSocket < ZmqTestCase
   def test_connect
     ctx = ZMQ::Context.new
     rep = ctx.socket(:PAIR)
-    port = rep.bind("tcp://127.0.0.1:*")
+    port = rep.bind("inproc://test.socket-connect")
     req = ctx.socket(:PAIR)
     assert(req.state & ZMQ::Socket::PENDING)
-    req.connect("tcp://127.0.0.1:#{port}")
+    req.connect("inproc://test.socket-connect")
     assert req.fd != -1
     assert(req.state & ZMQ::Socket::CONNECTED)
   ensure
@@ -158,9 +158,9 @@ class TestZmqSocket < ZmqTestCase
   def test_send_receive
     ctx = ZMQ::Context.new
     rep = ctx.socket(:PAIR)
-    port = rep.bind("tcp://127.0.0.1:*")
+    rep.bind("inproc://test.socket-send_receive")
     req = ctx.socket(:PAIR)
-    req.connect("tcp://127.0.0.1:#{port}")
+    req.connect("inproc://test.socket-send_receive")
     assert req.send("ping")
     assert_equal "ping", rep.recv
   ensure
@@ -171,10 +171,10 @@ class TestZmqSocket < ZmqTestCase
     ctx = ZMQ::Context.new
     rep = ctx.socket(:PAIR)
     rep.verbose = true
-    port = rep.bind("tcp://127.0.0.1:*")
+    rep.bind("inproc://test.socket-verbose")
     req = ctx.socket(:PAIR)
     req.verbose = true
-    req.connect("tcp://127.0.0.1:#{port}")
+    req.connect("inproc://test.socket-verbose")
     assert req.send("ping")
     assert_equal "ping", rep.recv
     req.send_frame(ZMQ::Frame("frame"))
@@ -200,9 +200,9 @@ class TestZmqSocket < ZmqTestCase
   def test_send_multi
     ctx = ZMQ::Context.new
     rep = ctx.socket(:PAIR)
-    port = rep.bind("tcp://127.0.0.1:*")
+    rep.bind("inproc://test.socket-send_multi")
     req = ctx.socket(:PAIR)
-    req.connect("tcp://127.0.0.1:#{port}")
+    req.connect("inproc://test.socket-send_multi")
     assert req.sendm("batch")
     req.sendm("of")
     req.send("messages")
@@ -235,9 +235,9 @@ class TestZmqSocket < ZmqTestCase
   def test_send_frame_more
     ctx = ZMQ::Context.new
     rep = ctx.socket(:PAIR)
-    port = rep.bind("tcp://127.0.0.1:*")
+    rep.bind("inproc://test.socket-send_frame_more")
     req = ctx.socket(:PAIR)
-    req.connect("tcp://127.0.0.1:#{port}")
+    req.connect("inproc://test.socket-send_frame_more")
     5.times do |i|
       frame = ZMQ::Frame("m#{i}")
       req.send_frame(frame, ZMQ::Frame::MORE)
@@ -255,9 +255,9 @@ class TestZmqSocket < ZmqTestCase
   def test_send_frame_reuse
     ctx = ZMQ::Context.new
     rep = ctx.socket(:PAIR)
-    port = rep.bind("tcp://127.0.0.1:*")
+    rep.bind("inproc://test.socket-send_frame_reuse")
     req = ctx.socket(:PAIR)
-    req.connect("tcp://127.0.0.1:#{port}")
+    req.connect("inproc://test.socket-send_frame_reuse")
     frame = ZMQ::Frame("reused_frame")
     5.times do |i|
       req.send_frame(frame, :REUSE)
@@ -275,10 +275,10 @@ class TestZmqSocket < ZmqTestCase
     ctx = ZMQ::Context.new
     rep = ctx.socket(:PAIR)
     rep.verbose = true
-    port = rep.bind("tcp://127.0.0.1:*")
+    rep.bind("inproc://test.socket-send_receive_message")
     req = ctx.socket(:PAIR)
     req.verbose = true
-    req.connect("tcp://127.0.0.1:#{port}")
+    req.connect("inproc://test.socket-send_receive_message")
 
     msg = ZMQ::Message.new
     msg.push ZMQ::Frame("header")

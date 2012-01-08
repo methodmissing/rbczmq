@@ -5,8 +5,8 @@ require File.join(File.dirname(__FILE__), '..', 'helper')
 class TestPairSockets < ZmqTestCase
   def test_flow
     ctx = ZMQ::Context.new
-    a = ctx.bind(:PAIR, "inproc://pair-flow.test")
-    b = ctx.connect(:PAIR, "inproc://pair-flow.test")
+    a = ctx.bind(:PAIR, "inproc://test.pair-flow")
+    b = ctx.connect(:PAIR, "inproc://test.pair-flow")
     a.send("a")
     b.send("b")
     assert_equal "b", a.recv
@@ -17,8 +17,8 @@ class TestPairSockets < ZmqTestCase
 
   def test_transfer
     ctx = ZMQ::Context.new
-    a = ctx.bind(:PAIR, "inproc://pair-transfer.test")
-    b = ctx.connect(:PAIR, "inproc://pair-transfer.test")
+    a = ctx.bind(:PAIR, "inproc://test.pair-transfer")
+    b = ctx.connect(:PAIR, "inproc://test.pair-transfer")
     a.send("message")
     assert_equal "message", b.recv
 
@@ -58,9 +58,9 @@ class TestPairSockets < ZmqTestCase
 
   def test_distribution
     ctx = ZMQ::Context.new
-    a = ctx.bind(:PAIR, "inproc://pair-distribution.test")
+    a = ctx.bind(:PAIR, "inproc://test.pair-distribution")
     thread = Thread.new do
-      b = ctx.connect(:PAIR, "inproc://pair-distribution.test")
+      b = ctx.connect(:PAIR, "inproc://test.pair-distribution")
       frame = b.recv_frame
       b.close
       frame

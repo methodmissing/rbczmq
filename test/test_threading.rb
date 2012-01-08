@@ -15,14 +15,14 @@ class TestZmqThreading < ZmqTestCase
     expected = "threaded message"
     threads << Thread.new do 
       rep = ctx.socket ZMQ::PAIR
-      rep.bind('inproc://threaded.test')
+      rep.bind('inproc://test.threaded')
       sleep 0.5
       rep.recv
     end
     sleep 0.3
     threads << Thread.new do
       req = ctx.socket ZMQ::PAIR
-      req.connect('inproc://threaded.test')
+      req.connect('inproc://test.threaded')
       req.send(expected)
     end
     Thread.pass

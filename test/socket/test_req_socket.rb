@@ -9,7 +9,7 @@ class TestReqSocket < ZmqTestCase
     assert_equal ZMQ::REQ, sock.type
     assert_equal "REQ socket", sock.to_s
     assert_raises ZMQ::Error do
-      sock.bind("tcp://127.0.0.1:*")
+      sock.bind("inproc://test.req-sock-behavior")
     end
   ensure
     ctx.destroy
@@ -17,8 +17,10 @@ class TestReqSocket < ZmqTestCase
 
   def test_flow
     ctx = ZMQ::Context.new
+    rep = ctx.socket(:REP)
+    rep.bind("inproc://test.req-sock-flow")
     sock = ctx.socket(:REQ)
-    sock.connect("tcp://127.0.0.1:5000")
+    sock.connect("inproc://test.req-sock-flow")
     assert_raises ZMQ::Error do
       sock.send_frame(ZMQ::Frame("frame"), ZMQ::Frame::MORE)
     end

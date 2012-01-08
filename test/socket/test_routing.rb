@@ -5,10 +5,10 @@ require File.join(File.dirname(__FILE__), '..', 'helper')
 class TestRouting < ZmqTestCase
   def test_flow
     ctx = ZMQ::Context.new
-    router = ctx.bind(:ROUTER, "inproc://routing-flow.test")
+    router = ctx.bind(:ROUTER, "inproc://test.routing-flow")
     dealer = ctx.socket(:DEALER)
     dealer.identity = "xyz"
-    dealer.connect("inproc://routing-flow.test")
+    dealer.connect("inproc://test.routing-flow")
 
     router.sendm("xyz")
     router.send("request")
@@ -23,10 +23,10 @@ class TestRouting < ZmqTestCase
 
   def test_transfer
     ctx = ZMQ::Context.new
-    router = ctx.bind(:ROUTER, "inproc://routing-transfer.test")
+    router = ctx.bind(:ROUTER, "inproc://test.routing-transfer")
     dealer = ctx.socket(:DEALER)
     dealer.identity = "xyz"
-    dealer.connect("inproc://routing-transfer.test")
+    dealer.connect("inproc://test.routing-transfer")
 
     router.send_frame ZMQ::Frame("xyz"), ZMQ::Frame::MORE
     router.send_frame ZMQ::Frame("request")
@@ -46,11 +46,11 @@ class TestRouting < ZmqTestCase
 
   def test_distribution
     ctx = ZMQ::Context.new
-    router = ctx.bind(:ROUTER, "inproc://routing-distribution.test")
+    router = ctx.bind(:ROUTER, "inproc://test.routing-distribution")
     thread = Thread.new do
       dealer = ctx.socket(:DEALER)
       dealer.identity = "xyz"
-      dealer.connect("inproc://routing-distribution.test")
+      dealer.connect("inproc://test.routing-distribution")
       frame = dealer.recv_frame
       dealer.close
       frame

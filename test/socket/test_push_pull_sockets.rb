@@ -5,8 +5,8 @@ require File.join(File.dirname(__FILE__), '..', 'helper')
 class TestPushPullSockets < ZmqTestCase
   def test_flow
     ctx = ZMQ::Context.new
-    push = ctx.bind(:PUSH, "inproc://push-pull-flow.test")
-    pull = ctx.connect(:PULL, "inproc://push-pull-flow.test")
+    push = ctx.bind(:PUSH, "inproc://test.push-pull-flow")
+    pull = ctx.connect(:PULL, "inproc://test.push-pull-flow")
     push.send("a")
     assert_equal "a", pull.recv
   ensure
@@ -15,8 +15,8 @@ class TestPushPullSockets < ZmqTestCase
 
   def test_transfer
     ctx = ZMQ::Context.new
-    push = ctx.bind(:PUSH, "inproc://push-pull-transfer.test")
-    pull = ctx.connect(:PULL, "inproc://push-pull-transfer.test")
+    push = ctx.bind(:PUSH, "inproc://test.push-pull-transfer")
+    pull = ctx.connect(:PULL, "inproc://test.push-pull-transfer")
     push.send("message")
     assert_equal "message", pull.recv
 
@@ -56,11 +56,11 @@ class TestPushPullSockets < ZmqTestCase
 
   def test_distribution
     ctx = ZMQ::Context.new
-    push = ctx.bind(:PUSH, "inproc://push-pull-distribution.test")
+    push = ctx.bind(:PUSH, "inproc://test.push-pull-distribution")
     threads = []
     5.times do |i|
       threads << Thread.new do
-        pull = ctx.connect(:PULL, "inproc://push-pull-distribution.test")
+        pull = ctx.connect(:PULL, "inproc://test.push-pull-distribution")
         msg = pull.recv
         pull.close
         msg

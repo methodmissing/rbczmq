@@ -9,7 +9,7 @@ class TestRepSocket < ZmqTestCase
     assert_equal ZMQ::REP, sock.type
     assert_equal "REP socket", sock.to_s
     assert_raises ZMQ::Error do
-      sock.connect("tcp://127.0.0.1:5000")
+      sock.connect("inproc://test.rep-sock-behavior")
     end
   ensure
     ctx.destroy
@@ -18,7 +18,7 @@ class TestRepSocket < ZmqTestCase
   def test_flow
     ctx = ZMQ::Context.new
     sock = ctx.socket(:REP)
-    sock.bind("tcp://127.0.0.1:5000")
+    sock.bind("inproc://test.rep-sock-flow")
     assert_raises ZMQ::Error do
       sock.send_frame(ZMQ::Frame("frame"), ZMQ::Frame::MORE)
     end
