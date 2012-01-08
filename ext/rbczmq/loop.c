@@ -41,11 +41,22 @@ static VALUE intern_readable;
 static VALUE intern_writable;
 static VALUE intern_error;
 
+/*
+ * :nodoc:
+ *  Wraps rb_funcall to support callbacks with or without callbacks.
+ *
+*/
 static VALUE rb_czmq_callback0(VALUE *args)
 {
    return (NIL_P(args[2])) ? rb_funcall(args[0], args[1], 0) : rb_funcall(args[0], args[1], args[2], 1);
 }
 
+/*
+ * :nodoc:
+ *  Callback for when the reactor started. Invoked from a a oneshot timer that fires after 1ms and updates the running
+ *  member on the loop struct.
+ *
+*/
 ZMQ_NOINLINE static int rb_czmq_loop_started_callback(ZMQ_UNUSED zloop_t *loop, ZMQ_UNUSED zmq_pollitem_t *item, void *arg)
 {
     zmq_loop_wrapper *loop_wrapper = arg;
@@ -53,6 +64,12 @@ ZMQ_NOINLINE static int rb_czmq_loop_started_callback(ZMQ_UNUSED zloop_t *loop, 
     return 0;
 }
 
+/*
+ * :nodoc:
+ *  Callback to signal / break the reactor loop. Triggered when we invoke ZMQ::Loop#stop. The -1 return will trickle down
+ *  to libczmq and stop the event loop.
+ *
+*/
 ZMQ_NOINLINE static int rb_czmq_loop_breaker_callback(ZMQ_UNUSED zloop_t *loop, ZMQ_UNUSED zmq_pollitem_t *item, void *arg)
 {
     zmq_loop_wrapper *loop_wrapper = arg;
@@ -60,6 +77,11 @@ ZMQ_NOINLINE static int rb_czmq_loop_breaker_callback(ZMQ_UNUSED zloop_t *loop, 
     return -1;
 }
 
+/*
+ * :nodoc:
+ *  Wraps calls back into the Ruby VM with rb_protect and properly bubbles up an errors to the user.
+ *
+*/
 ZMQ_NOINLINE static int rb_czmq_callback(zloop_t *loop, VALUE *args)
 {
     int status;
@@ -81,6 +103,11 @@ ZMQ_NOINLINE static int rb_czmq_callback(zloop_t *loop, VALUE *args)
     return 0;
 }
 
+/*
+ * :nodoc:
+ *  Low level callback for when timers registered with the reactor fires. This calls back into the Ruby VM.
+ *
+*/
 ZMQ_NOINLINE static int rb_czmq_loop_timer_callback(zloop_t *loop, ZMQ_UNUSED zmq_pollitem_t *item, void *cb)
 {
     int rc;
@@ -97,6 +124,12 @@ ZMQ_NOINLINE static int rb_czmq_loop_timer_callback(zloop_t *loop, ZMQ_UNUSED zm
     return rc;
 }
 
+/*
+ * :nodoc:
+ *  Low level callback for handling socket activity. This calls back into the Ruby VM. We special case ZMQ_POLLERR
+ *  by invoking the error callback on the handler registered for this socket.
+ *
+*/
 ZMQ_NOINLINE static int rb_czmq_loop_socket_callback(zloop_t *loop, zmq_pollitem_t *item, void *arg)
 {
     int ret_r = 0;
@@ -124,6 +157,12 @@ ZMQ_NOINLINE static int rb_czmq_loop_socket_callback(zloop_t *loop, zmq_pollitem
 }
 
 static void rb_czmq_loop_stop0(zmq_loop_wrapper *loop);
+
+/*
+ * :nodoc:
+ *  Free all resources for a reactor loop - invoked by the lower level ZMQ::Loop#destroy as well as the GC callback
+ *
+*/
 static void rb_czmq_free_loop(zmq_loop_wrapper *loop)
 {
     rb_czmq_loop_stop0(loop);
@@ -132,6 +171,11 @@ static void rb_czmq_free_loop(zmq_loop_wrapper *loop)
     loop->flags |= ZMQ_LOOP_DESTROYED;
 }
 
+/*
+ * :nodoc:
+ *  GC free callback
+ *
+*/
 static void rb_czmq_free_loop_gc(void *ptr)
 {
     zmq_loop_wrapper *loop = (zmq_loop_wrapper *)ptr;
@@ -166,12 +210,6 @@ static VALUE rb_czmq_loop_new(VALUE loop)
     return loop;
 }
 
-static VALUE rb_czmq_nogvl_zloop_start(void *ptr)
-{
-    zloop_t *loop = ptr;
-    return (VALUE)zloop_start(loop);
-}
-
 /*
  *  call-seq:
  *     loop.start    =>  Fixnum
@@ -192,7 +230,6 @@ static VALUE rb_czmq_loop_start(VALUE obj)
     ZmqGetLoop(obj);
     THREAD_PASS;
     zloop_timer(loop->loop, 1, 1, rb_czmq_loop_started_callback, loop);
-    /*rc = (int)rb_thread_blocking_region(rb_czmq_nogvl_zloop_start, loop->loop, RUBY_UBF_IO, 0);*/
     rc = zloop_start(loop->loop);
     if (rc > 0) rb_raise(rb_eZmqError, "internal event loop error!");
     return INT2NUM(rc);
@@ -216,6 +253,11 @@ static VALUE rb_czmq_loop_running_p(VALUE obj)
     return (loop->running == TRUE) ? Qtrue : Qfalse;
 }
 
+/*
+ * :nodoc:
+ *  Registers a oneshot timer that'll fire after 1msec to signal a loop break.
+ *
+*/
 static void rb_czmq_loop_stop0(zmq_loop_wrapper *loop)
 {
     zloop_timer(loop->loop, 1, 1, rb_czmq_loop_breaker_callback, loop);
