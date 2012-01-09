@@ -2,13 +2,13 @@ PATH
   remote: .
   specs:
     rbczmq (0.1)
-      rake-compiler (~> 0.7.9)
+      rake-compiler (~> 0.8.0)
 
 GEM
   remote: http://rubygems.org/
   specs:
     rake (0.9.2.2)
-    rake-compiler (0.7.9)
+    rake-compiler (0.8.0)
       rake
 
 PLATFORMS

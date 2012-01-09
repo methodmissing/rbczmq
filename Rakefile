@@ -22,7 +22,6 @@ end
 Rake::ExtensionTask.new('rbczmq', gemspec) do |ext|
   ext.name = 'rbczmq_ext'
   ext.ext_dir = 'ext/rbczmq'
-  ext.lib_dir = File.join('lib', 'zmq')
 
   CLEAN.include 'ext/rbczmq/dst'
   CLEAN.include 'ext/zeromq'

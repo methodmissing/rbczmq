@@ -243,6 +243,7 @@ Running tests
 * RDOC fail on mixed C and Ruby source files that document that same constants
 * GC guards to prevent recycling objects being sent / received.
 * uuid-dev package dependency - look into a vendored package for this
+* Introduce support for ZMQ devices
 
 == Contact, feedback and bugs
 

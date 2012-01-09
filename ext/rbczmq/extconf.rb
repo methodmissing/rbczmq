@@ -40,14 +40,14 @@ end
 lib = libs_path + "libzmq.#{LIBEXT}"
 Dir.chdir zmq_path do
   sys "./autogen.sh", "ZeroMQ autogen failed!" unless File.exist?(zmq_path + 'configure')
-  sys "./configure --prefix=#{dst_path} && make && make install", "ZeroMQ compile error!"
+  sys "./configure --prefix=#{dst_path} --enable-shared && make && make install", "ZeroMQ compile error!"
 end unless File.exist?(lib)
 
 # build libczmq
 lib = libs_path + "libczmq.#{LIBEXT}"
 Dir.chdir czmq_path do
   sys "./autogen.sh", "CZMQ autogen failed!" unless File.exist?(czmq_path + 'configure')
-  sys "./configure --prefix=#{dst_path} --with-libzmq=#{dst_path} && make all && make install", "CZMQ compile error!"
+  sys "./configure --prefix=#{dst_path} --with-libzmq=#{dst_path} --disable-shared && make all && make install", "CZMQ compile error!"
 end unless File.exist?(lib)
 
 dir_config('rbczmq')
