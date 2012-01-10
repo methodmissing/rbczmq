@@ -4,6 +4,7 @@ require 'mkmf'
 require 'pathname'
 
 def sys(cmd, err_msg)
+  p cmd
   system(cmd) || fail(err_msg)
 end
 
@@ -47,7 +48,7 @@ end unless File.exist?(lib)
 lib = libs_path + "libczmq.#{LIBEXT}"
 Dir.chdir czmq_path do
   sys "./autogen.sh", "CZMQ autogen failed!" unless File.exist?(czmq_path + 'configure')
-  sys "./configure --prefix=#{dst_path} --with-libzmq=#{dst_path} --disable-shared && make all && make install", "CZMQ compile error!"
+  sys "./configure LDFLAGS=-L#{libs_path} --prefix=#{dst_path} --with-libzmq=#{dst_path} --disable-shared && make all && make install", "CZMQ compile error!"
 end unless File.exist?(lib)
 
 dir_config('rbczmq')
