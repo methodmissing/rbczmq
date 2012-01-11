@@ -26,6 +26,7 @@ Rake::ExtensionTask.new('rbczmq', gemspec) do |ext|
   CLEAN.include 'ext/rbczmq/dst'
   CLEAN.include 'ext/zeromq'
   CLEAN.include 'ext/czmq'
+  CLEAN.include 'lib/**/rbczmq_ext.*'
 end
 
 Rake::RDocTask.new do |rd|
