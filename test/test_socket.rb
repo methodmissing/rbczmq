@@ -138,13 +138,13 @@ class TestZmqSocket < ZmqTestCase
 
   def test_close
     ctx = ZMQ::Context.new
-    sock = ctx.socket(:PAIR)
+    sock = ctx.socket(:REP)
     port = sock.bind("tcp://127.0.0.1:*")
     assert sock.fd != -1
-    other = ctx.socket(:PAIR)
+    other = ctx.socket(:REQ)
     other.connect("tcp://127.0.0.1:#{port}")
-    sock.send("test")
-    assert_equal "test", other.recv
+    other.send("test")
+    assert_equal "test", sock.recv
     sock.close
     other.close
     sleep 0.2
