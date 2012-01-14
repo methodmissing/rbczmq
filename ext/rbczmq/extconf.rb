@@ -58,14 +58,19 @@ have_func('rb_thread_blocking_region')
 $INCFLAGS << " -I#{zmq_include_path}" if find_header("zmq.h", zmq_include_path)
 $INCFLAGS << " -I#{czmq_include_path}" if find_header("czmq.h", czmq_include_path)
 
-if RUBY_VERSION =~ /1.9.\d/
-  $LDFLAGS = "-L. -L#{libs_path}"
-else
+if defined?(RUBY_ENGINE) && RUBY_ENGINE =~ /rbx/
   $LDFLAGS << " -L#{libs_path}"
+else
+  $LIBPATH << libs_path.to_s
 end
 
 fail "Error compiling and linking libzmq" unless have_library("zmq")
 fail "Error compiling and linking libczmq" unless have_library("czmq")
+
+case RUBY_PLATFORM
+when /darwin/, /linux/, /freebsd/
+  CONFIG['LDSHARED'] = "$(CXX) " + CONFIG['LDSHARED'].split[1..-1].join(' ')
+end
 
 $defs << "-pedantic"
 
