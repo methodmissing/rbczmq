@@ -63,7 +63,7 @@ class ZMQ::Socket::Req
     ZMQ::REQ
   end
 
-  unsupported_api :bind, :sendm
+  unsupported_api :sendm
   handle_fsm_errors "REQ sockets allows only an alternating sequence of send and receive calls.", :send, :send_frame, :send_message, :recv, :recv_nonblock, :recv_frame, :recv_frame_nonblock, :recv_message
 
   def send_frame(frame, flags = 0)

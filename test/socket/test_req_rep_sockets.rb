@@ -6,7 +6,7 @@ class TestReqRepSockets < ZmqTestCase
   def test_flow
     ctx = ZMQ::Context.new
     rep = ctx.bind(:REP, "inproc://test.req-rep-flow")
-    req = ctx.connect(:REQ, "inproc://test.req-rep-flow")
+    ctx.connect(:REQ, "inproc://test.req-rep-flow")
     begin
       rep.send("message")
     rescue ZMQ::Error => e

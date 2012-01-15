@@ -11,9 +11,6 @@ class TestSubSocket < ZmqTestCase
     assert_raises ZMQ::Error do
       sock.send("message")
     end
-    assert_raises ZMQ::Error do
-      sock.bind("inproc://test.sub-sock-behavior")
-    end
   ensure
     ctx.destroy
   end

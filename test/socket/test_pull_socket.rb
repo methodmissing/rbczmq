@@ -11,9 +11,6 @@ class TestPullSocket < ZmqTestCase
     assert_raises ZMQ::Error do
       sock.send("message")
     end
-    assert_raises ZMQ::Error do
-      sock.bind("tcp://127.0.0.1:*")
-    end
   ensure
     ctx.destroy
   end

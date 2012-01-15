@@ -122,7 +122,7 @@ module ZMQ::DownstreamSocket
   # [Socket types] ZMQ::Socket::Pull, ZMQ::Socket::Sub
 
   def self.included(sock)
-    sock.unsupported_api :bind, :send, :sendm, :send_frame, :send_message
+    sock.unsupported_api :send, :sendm, :send_frame, :send_message
   end
 
   # Upstream sockets should never be polled for writable states
@@ -141,7 +141,7 @@ module ZMQ::UpstreamSocket
   # [Socket types] ZMQ::Socket::Push, ZMQ::Socket::Pub
 
   def self.included(sock)
-    sock.unsupported_api :connect, :recv, :recv_nonblock, :recv_frame, :recv_frame_nonblock, :recv_message
+    sock.unsupported_api :recv, :recv_nonblock, :recv_frame, :recv_frame_nonblock, :recv_message
   end
 
   # Upstream sockets should never be polled for readable states

@@ -5,6 +5,8 @@ require 'zmq'
 require 'stringio'
 require 'socket'
 
+Thread.abort_on_exception = true
+
 class ZmqTestCase < Test::Unit::TestCase
   undef_method :default_test if method_defined? :default_test
 

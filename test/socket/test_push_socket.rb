@@ -11,9 +11,6 @@ class TestPushSocket < ZmqTestCase
     assert_raises ZMQ::Error do
       sock.recv
     end
-    assert_raises ZMQ::Error do
-      sock.connect("inproc://test.push-sock-behavior")
-    end
   ensure
     ctx.destroy
   end

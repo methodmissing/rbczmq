@@ -11,9 +11,6 @@ class TestPubSocket < ZmqTestCase
     assert_raises ZMQ::Error do
       sock.recv
     end
-    assert_raises ZMQ::Error do
-      sock.connect("tcp://127.0.0.1:5000")
-    end
   ensure
     ctx.destroy
   end
