@@ -244,6 +244,8 @@ Running tests
 * GC guards to prevent recycling objects being sent / received.
 * uuid-dev package dependency - look into a vendored package for this
 * Sockets can bind && connect to multiple endpoints - account for that
+* Try to catch socket setup that'll have the context ripped out by the GC eg. ZMQ::Context.new.socket(:PUSH)
+* Watch out for further cases where REQ / REP pairs could raise EFSM
 
 == Contact, feedback and bugs
 

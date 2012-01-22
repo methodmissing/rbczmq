@@ -125,6 +125,9 @@ static VALUE rb_czmq_socket_close(VALUE obj)
 {
     GetZmqSocket(obj);
     ZmqSockGuardCrossThread(sock);
+    /* This is useless for production / real use cases as we can't query the state again OR assume
+    anything about the underlying connection. Merely doing the right thing. */
+    sock->state = ZMQ_SOCKET_PENDING;
     rb_czmq_free_sock(sock);
     return Qnil;
 }

@@ -147,6 +147,15 @@ class TestZmqSocket < ZmqTestCase
     assert_equal "test", sock.recv
     sock.close
     other.close
+    # zsocket_destroy in libczmq recycles the socket instance. libzmq don't support / expose underlying
+    # connection state or teardown through public API, thus we can't assert a PENDING socket state on close
+    # through the Ruby API as the socket instance has already been recycled.
+    begin
+      assert_equal ZMQ::Socket::PENDING, sock.state
+    rescue => e
+      assert_instance_of ZMQ::Error, e
+      assert_match(/object \w* has been destroyed by the ZMQ framework/, e.message)
+    end
     sleep 0.2
     assert_raises Errno::ECONNREFUSED do
       TCPSocket.new("127.0.0.1", port)
