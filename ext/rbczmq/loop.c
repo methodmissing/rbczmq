@@ -48,7 +48,7 @@ static VALUE intern_error;
 */
 static VALUE rb_czmq_callback0(VALUE *args)
 {
-   return (NIL_P(args[2])) ? rb_funcall(args[0], args[1], 0) : rb_funcall(args[0], args[1], args[2], 1);
+   return (NIL_P(args[2])) ? rb_funcall(args[0], args[1], 0) : rb_funcall(args[0], args[1], 1, args[2]);
 }
 
 /*
