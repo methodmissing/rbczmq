@@ -506,15 +506,18 @@ static VALUE rb_czmq_socket_recv_nonblock(VALUE obj)
 {
     char *str = NULL;
     errno = 0;
+    VALUE result = Qnil;
     GetZmqSocket(obj);
     ZmqAssertSocketNotPending(sock, "can only receive on a bound or connected socket!");
     ZmqSockGuardCrossThread(sock);
     str = zstr_recv_nowait(sock->socket);
-    if (str == NULL) return Qnil;
+    if (str == NULL) return result;
     ZmqAssertSysError();
     if (sock->verbose)
         zclock_log ("I: %s socket %p: recv_nonblock \"%s\"", zsocket_type_str(sock->socket), sock->socket, str);
-    return ZmqEncode(rb_str_new2(str));
+    result = ZmqEncode(rb_str_new2(str));
+    free(str);
+    return result;
 }
 
 /*
