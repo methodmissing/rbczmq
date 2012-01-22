@@ -476,16 +476,19 @@ static VALUE rb_czmq_socket_recv(VALUE obj)
 {
     char *str = NULL;
     struct nogvl_recv_args args;
+    VALUE result = Qnil;
     GetZmqSocket(obj);
     ZmqAssertSocketNotPending(sock, "can only receive on a bound or connected socket!");
     ZmqSockGuardCrossThread(sock);
     args.socket = sock;
     str = (char *)rb_thread_blocking_region(rb_czmq_nogvl_recv, (void *)&args, RUBY_UBF_IO, 0);
-    if (str == NULL) return Qnil;
+    if (str == NULL) return result;
     ZmqAssertSysError();
     if (sock->verbose)
         zclock_log ("I: %s socket %p: recv \"%s\"", zsocket_type_str(sock->socket), sock->socket, str);
-    return ZmqEncode(rb_str_new2(str));
+    result = ZmqEncode(rb_str_new2(str));
+    free(str);
+    return result;
 }
 
 /*
