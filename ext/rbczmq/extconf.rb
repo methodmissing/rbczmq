@@ -28,6 +28,11 @@ czmq_path = vendor_path + 'czmq'
 zmq_include_path = zmq_path + 'include'
 czmq_include_path = czmq_path + 'include'
 
+# Fail early if we don't meet the following dependencies.
+
+# Present on OS X and BSD systems, package install required on Linux
+fail("package uuid-dev required (apt-get install uuid-dev)") unless have_header('uuid/uuid.h')
+
 # extract dependencies
 unless File.directory?(zmq_path) && File.directory?(czmq_path)
   fail "The 'tar' (creates and manipulates streaming archive files) utility is required to extract dependencies" if `which tar`.strip.empty?
