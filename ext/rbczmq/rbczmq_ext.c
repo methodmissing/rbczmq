@@ -194,7 +194,7 @@ static VALUE rb_czmq_nogvl_device(void *ptr)
     MEMCPY(thargs, args, nogvl_device_args_t, 1);
     thargs->rc = 0;
     /* spawn an attached thread to avoid syscalls blocking the whole VM */
-    pipe = zthread_fork(args->ctx, rb_czmq_one_eight_device, (void *)thargs);
+    pipe = zthread_fork(thargs->ctx, rb_czmq_one_eight_device, (void *)thargs);
     if (pipe == NULL) {
         xfree(thargs);
         return (VALUE)-1;
