@@ -195,6 +195,10 @@ static VALUE rb_czmq_nogvl_device(void *ptr)
     thargs->rc = 0;
     /* spawn an attached thread to avoid syscalls blocking the whole VM */
     pipe = zthread_fork(args->ctx, rb_czmq_one_eight_device, (void *)thargs);
+    if (pipe == NULL) {
+        xfree(thargs);
+        return (VALUE)-1;
+    }
     fd = zsockopt_fd(pipe);
     FD_SET(fd, &fdset);
     rfds = &fdset;
@@ -204,7 +208,6 @@ static VALUE rb_czmq_nogvl_device(void *ptr)
         if (rc == 1) break;
     }
     rc = thargs->rc;
-    xfree(thargs);
     return (VALUE)rc;
 #endif
 }
