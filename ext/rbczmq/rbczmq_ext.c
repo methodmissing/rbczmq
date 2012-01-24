@@ -208,6 +208,7 @@ static VALUE rb_czmq_nogvl_device(void *ptr)
         if (rc == 1) break;
     }
     rc = thargs->rc;
+    xfree(thargs);
     return (VALUE)rc;
 #endif
 }
