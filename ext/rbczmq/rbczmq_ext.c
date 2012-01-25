@@ -173,6 +173,7 @@ static VALUE rb_czmq_nogvl_device(void *ptr)
 {
     struct nogvl_device_args *args = ptr;
 #ifndef HAVE_RB_THREAD_BLOCKING_REGION
+    int critical;
     nogvl_device_args_t *thargs = NULL;
     void *pipe;
     int fd, rc;
@@ -194,7 +195,10 @@ static VALUE rb_czmq_nogvl_device(void *ptr)
     MEMCPY(thargs, args, nogvl_device_args_t, 1);
     thargs->rc = 0;
     /* spawn an attached thread to avoid syscalls blocking the whole VM */
+    critical = rb_thread_critical;
+    rb_thread_critical = Qtrue;
     pipe = zthread_fork(thargs->ctx, rb_czmq_one_eight_device, (void *)thargs);
+    rb_thread_critical = critical;
     if (pipe == NULL) {
         xfree(thargs);
         return (VALUE)-1;
