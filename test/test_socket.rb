@@ -234,9 +234,13 @@ class TestZmqSocket < ZmqTestCase
     assert rep.send_frame(ZMQ::Frame("pong"))
     assert_equal ZMQ::Frame("pong"), req.recv_frame
     assert rep.send_frame(ZMQ::Frame("pong"))
-    assert_nil req.recv_frame_nonblock
-    sleep 0.3
-    assert_equal ZMQ::Frame("pong"), req.recv_frame_nonblock
+    frame = req.recv_frame_nonblock
+    if frame
+      assert_equal ZMQ::Frame("pong"), frame
+    else
+      sleep 0.3
+      assert_equal ZMQ::Frame("pong"), req.recv_frame_nonblock
+    end
   ensure
     ctx.destroy
   end

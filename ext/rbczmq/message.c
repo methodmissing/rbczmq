@@ -331,7 +331,7 @@ static VALUE rb_czmq_message_remove(VALUE obj, VALUE frame_obj)
     ZmqGetMessage(obj);
     zframe_t *frame = NULL;
     ZmqAssertFrame(frame_obj);
-    Data_Get_Struct(frame_obj, zframe_t, frame); \
+    Data_Get_Struct(frame_obj, zframe_t, frame);
     zmsg_remove(message->message, frame);
     return Qnil;
 }
