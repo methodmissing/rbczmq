@@ -149,123 +149,6 @@ static VALUE rb_czmq_m_error(ZMQ_UNUSED VALUE obj)
     return rb_exc_new2(rb_eZmqError, zmq_strerror(zmq_errno()));
 }
 
-/*
- * :nodoc:
- *  Spawn an attached thread for Ruby 1.8 to not block the VM.
- *
-*/
-#ifndef HAVE_RB_THREAD_BLOCKING_REGION
-static void rb_czmq_one_eight_device(void *ptr, zctx_t *ctx, void *pipe)
-{
-    struct nogvl_device_args *args = ptr;
-    zmq_sock_wrapper *in = args->in;
-    zmq_sock_wrapper *out = args->out;
-    args->rc = zmq_device(args->type, in->socket, out->socket);
-}
-#endif
-
-/*
- * :nodoc:
- *  Setup and start a device while the GIL is released.
- *
-*/
-static VALUE rb_czmq_nogvl_device(void *ptr)
-{
-    struct nogvl_device_args *args = ptr;
-#ifndef HAVE_RB_THREAD_BLOCKING_REGION
-    int critical;
-    nogvl_device_args_t *thargs = NULL;
-    void *pipe;
-    int fd, rc;
-    fd_set fdset;
-    fd_set *rfds = NULL;
-    fd_set *wfds = NULL;
-    fd_set *efds = NULL;
-    FD_ZERO(&fdset);
-#endif
-    errno = 0;
-#ifdef HAVE_RB_THREAD_BLOCKING_REGION
-    zmq_sock_wrapper *in = args->in;
-    zmq_sock_wrapper *out = args->out;
-    return (VALUE)zmq_device(args->type, in->socket, out->socket);
-#else
-    /* ruby overwrites the main OS thread's C stack when context switching to another ruby thread */
-    thargs = ALLOC(nogvl_device_args_t);
-    if (thargs == NULL) return (VALUE)-1;
-    MEMCPY(thargs, args, nogvl_device_args_t, 1);
-    thargs->rc = 0;
-    /* spawn an attached thread to avoid syscalls blocking the whole VM */
-    critical = rb_thread_critical;
-    rb_thread_critical = Qtrue;
-    pipe = zthread_fork(thargs->ctx, rb_czmq_one_eight_device, (void *)thargs);
-    rb_thread_critical = critical;
-    if (pipe == NULL) {
-        xfree(thargs);
-        return (VALUE)-1;
-    }
-    fd = zsockopt_fd(pipe);
-    FD_SET(fd, &fdset);
-    rfds = &fdset;
-    /* if our pipe's FD not readable anymore, we know zmq_device returned and our thread died */
-    for(;;) {
-        rc = rb_thread_select(fd + 1, rfds, wfds, efds, NULL);
-        if (rc == 1) break;
-    }
-    rc = thargs->rc;
-    xfree(thargs);
-    return (VALUE)rc;
-#endif
-}
-
-/*
- *  call-seq:
- *     ZMQ.device(type, sock1, sock2)    =>  nil
- *
- *  Setup and run a ZMQ device. These are intermediate (and stateless) components that reduce complexity in larger
- *  topologies. They generally connect a set of frontend sockets to a set of backend sockets. Devices also block
- *  the current thread of execution as they're like a dedicated "proxy", shuffling messages from one component /
- *  network to another.
- *
- * === Examples
- *     ZMQ.device(ZMQ::QUEUE, sock1, sock2)    =>  ZMQ::Error or nil
- *
-*/
-
-static VALUE rb_czmq_m_device(ZMQ_UNUSED VALUE obj, VALUE type, VALUE insock, VALUE outsock)
-{
-    int rc;
-    struct nogvl_device_args args;
-    zmq_sock_wrapper *in = NULL;
-    zmq_sock_wrapper *out = NULL;
-    Check_Type(type, T_FIXNUM);
-    ZmqAssertSocket(insock);
-    ZmqAssertSocket(outsock);
-
-    Data_Get_Struct(insock, zmq_sock_wrapper, in); \
-    if (!in) rb_raise(rb_eTypeError, "uninitialized ZMQ socket!"); \
-    if (in->flags & ZMQ_SOCKET_DESTROYED) rb_raise(rb_eZmqError, "object %p has been destroyed by the ZMQ framework", (void *)insock);
-    ZmqSockGuardCrossThread(in);
-    ZmqAssertSocketNotPending(in, "can only use a bound or connected frontend socket in a device!");
-
-    Data_Get_Struct(outsock, zmq_sock_wrapper, out); \
-    if (!out) rb_raise(rb_eTypeError, "uninitialized ZMQ socket!"); \
-    if (out->flags & ZMQ_SOCKET_DESTROYED) rb_raise(rb_eZmqError, "object %p has been destroyed by the ZMQ framework", (void *)outsock);
-    ZmqSockGuardCrossThread(out);
-    ZmqAssertSocketNotPending(out, "can only use a bound or connected backend socket in a device!");
-
-    args.type = FIX2INT(type);
-#ifndef HAVE_RB_THREAD_BLOCKING_REGION
-    args.ctx = in->ctx;
-#endif
-    args.in = in;
-    args.out = out;
-
-    rc = (int)rb_thread_blocking_region(rb_czmq_nogvl_device, (void *)&args, RUBY_UBF_IO, 0);
-    if (rc == -1 && zmq_errno() == EINVAL) rb_raise(rb_eZmqError, "Device type %s not supported!", RSTRING_PTR(rb_obj_as_string(type)));
-    if (rc == -1 && zmq_errno() == EFAULT) rb_raise(rb_eZmqError, "Frontend (%s) or backend (%s) socket is invalid!", RSTRING_PTR(rb_obj_as_string(insock)), RSTRING_PTR(rb_obj_as_string(outsock)));
-    return INT2NUM(rc);
-}
-
 void Init_rbczmq_ext()
 {
     frames_map = st_init_numtable();
@@ -283,7 +166,6 @@ void Init_rbczmq_ext()
     rb_define_module_function(rb_mZmq, "now", rb_czmq_m_now, 0);
     rb_define_module_function(rb_mZmq, "log", rb_czmq_m_log, 1);
     rb_define_module_function(rb_mZmq, "error", rb_czmq_m_error, 0);
-    rb_define_module_function(rb_mZmq, "device", rb_czmq_m_device, 3);
 
     rb_define_const(rb_mZmq, "POLLIN", INT2NUM(ZMQ_POLLIN));
     rb_define_const(rb_mZmq, "POLLOUT", INT2NUM(ZMQ_POLLOUT));
@@ -303,10 +185,6 @@ void Init_rbczmq_ext()
     rb_define_const(rb_mZmq, "ENOCOMPATPROTO", INT2NUM(ENOCOMPATPROTO));
     rb_define_const(rb_mZmq, "ETERM", INT2NUM(ETERM));
     rb_define_const(rb_mZmq, "EMTHREAD", INT2NUM(EMTHREAD));
-
-    rb_define_const(rb_mZmq, "STREAMER", INT2NUM(ZMQ_STREAMER));
-    rb_define_const(rb_mZmq, "FORWARDER", INT2NUM(ZMQ_FORWARDER));
-    rb_define_const(rb_mZmq, "QUEUE", INT2NUM(ZMQ_QUEUE));
 
     _init_rb_czmq_context();
     _init_rb_czmq_socket();
