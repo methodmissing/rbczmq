@@ -245,6 +245,7 @@ Running tests
 * Sockets can bind && connect to multiple endpoints - account for that
 * Try to catch socket setup that'll have the context ripped out by the GC eg. ZMQ::Context.new.socket(:PUSH)
 * Watch out for further cases where REQ / REP pairs could raise EFSM
+* Fix Rubinius 1.8 mode linking wrong libzeromq
 
 == Contact, feedback and bugs
 

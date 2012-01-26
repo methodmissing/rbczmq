@@ -41,8 +41,12 @@
 
 #define RSTRING_NOT_MODIFIED
 
-/* XXX */
+#ifdef HAVE_RUBY_ENCODING_H
+extern rb_encoding *binary_encoding;
+#define ZmqEncode(str) rb_enc_associate(str, binary_encoding)
+#else
 #define ZmqEncode(str) str
+#endif
 
 #define TRAP_BEG
 #define TRAP_END
