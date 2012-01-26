@@ -166,6 +166,7 @@ static VALUE rb_czmq_message_push(VALUE obj, VALUE frame_obj)
     ZmqGetFrame(frame_obj);
     rc = zmsg_push(message->message, frame);
     ZmqAssert(rc);
+    rb_czmq_frame_freed(frame);
     return Qtrue;
 }
 
@@ -191,6 +192,7 @@ static VALUE rb_czmq_message_add(VALUE obj, VALUE frame_obj)
     ZmqGetFrame(frame_obj);
     rc = zmsg_add(message->message, frame);
     ZmqAssert(rc);
+    rb_czmq_frame_freed(frame);
     return Qtrue;
 }
 
@@ -258,7 +260,7 @@ static VALUE rb_czmq_message_first(VALUE obj)
     ZmqGetMessage(obj);
     frame = zmsg_first(message->message);
     if (frame == NULL) return Qnil;
-    return rb_czmq_alloc_frame(frame);
+    return rb_czmq_alloc_frame(zframe_dup(frame));
 }
 
 /*
@@ -282,7 +284,7 @@ static VALUE rb_czmq_message_next(VALUE obj)
     ZmqGetMessage(obj);
     frame = zmsg_next(message->message);
     if (frame == NULL) return Qnil;
-    return rb_czmq_alloc_frame(frame);
+    return rb_czmq_alloc_frame(zframe_dup(frame));
 }
 
 /*
@@ -305,7 +307,7 @@ static VALUE rb_czmq_message_last(VALUE obj)
     ZmqGetMessage(obj);
     frame = zmsg_last(message->message);
     if (frame == NULL) return Qnil;
-    return rb_czmq_alloc_frame(frame);
+    return rb_czmq_alloc_frame(zframe_dup(frame));
 }
 
 /*
@@ -327,7 +329,9 @@ static VALUE rb_czmq_message_last(VALUE obj)
 static VALUE rb_czmq_message_remove(VALUE obj, VALUE frame_obj)
 {
     ZmqGetMessage(obj);
-    ZmqGetFrame(frame_obj);
+    zframe_t *frame = NULL;
+    ZmqAssertFrame(frame_obj);
+    Data_Get_Struct(frame_obj, zframe_t, frame); \
     zmsg_remove(message->message, frame);
     return Qnil;
 }
@@ -420,6 +424,7 @@ static VALUE rb_czmq_message_wrap(VALUE obj, VALUE frame_obj)
     ZmqGetMessage(obj);
     ZmqGetFrame(frame_obj);
     zmsg_wrap(message->message, frame);
+    rb_czmq_frame_freed(frame);
     return Qnil;
 }
 
