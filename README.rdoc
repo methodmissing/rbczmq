@@ -235,7 +235,6 @@ Running tests
 * czmq send methods aren't non-blocking by default
 * Enforce socket timeouts
 * Look into handling signals properly
-* ZMQ.poll implementation
 * Revisit the ZMQ::Loop API
 * Restrict pair sockets to inproc transport only
 * Revisit JRuby C API support
@@ -245,7 +244,7 @@ Running tests
 * Sockets can bind && connect to multiple endpoints - account for that
 * Try to catch socket setup that'll have the context ripped out by the GC eg. ZMQ::Context.new.socket(:PUSH)
 * Watch out for further cases where REQ / REP pairs could raise EFSM
-* Fix Rubinius 1.8 mode linking wrong libzeromq
+* Fix Rubinius linking wrong libzmq
 
 == Contact, feedback and bugs
 
