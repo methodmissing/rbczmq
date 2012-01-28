@@ -165,7 +165,12 @@ VALUE rb_czmq_poller_poll(int argc, VALUE *argv, VALUE obj)
     if (timeout < 0) timeout = -1;
     rc = zmq_poll(poller->pollset, poller->poll_size, (long)timeout);
     ZmqAssert(rc);
-    if (rc != 0) rb_czmq_poller_rebuild_selectables(poller);
+    if (rc == 0) {
+        rb_ary_clear(poller->readables);
+        rb_ary_clear(poller->writables);
+    } else {
+        rb_czmq_poller_rebuild_selectables(poller);
+    }
     return INT2NUM(rc);
 }
 
