@@ -1,5 +1,20 @@
 #include <rbczmq_ext.h>
 
+#ifdef RUBINIUS
+/* Rubinius does not include this symbol table mark utility function */
+static int mark_entry(ID key, VALUE value)
+{
+    rb_gc_mark(value);
+    return ST_CONTINUE;
+}
+
+void rb_mark_tbl(st_table *tbl)
+{
+    if (!tbl) return;
+    st_foreach(tbl, mark_entry);
+}
+#endif
+
 /*
  * :nodoc:
  *  GC mark callback
@@ -9,7 +24,7 @@ static void rb_czmq_mark_poller(void *ptr)
 {
     zmq_poll_wrapper *poller =  (zmq_poll_wrapper *)ptr;
     if (poller) {
-        /* XXX: mark VALUEs in poller->socket_map as well ?*/
+        rb_mark_tbl(poller->socket_map);
         rb_gc_mark(poller->sockets);
         rb_gc_mark(poller->readables);
         rb_gc_mark(poller->writables);
@@ -26,6 +41,7 @@ static void rb_czmq_free_poller_gc(void *ptr)
     zmq_poll_wrapper *poller = (zmq_poll_wrapper *)ptr;
     if (poller) {
         st_free_table(poller->socket_map);
+        xfree(poller->pollset);
         xfree(poller);
     }
 }
@@ -62,16 +78,13 @@ int rb_czmq_poller_rebuild_pollset(zmq_poll_wrapper *poller)
 {
     VALUE socket;
     int rebuilt;
-    xfree(poller->pollset);
+    if (poller->pollset) xfree(poller->pollset);
     poller->pollset = NULL;
     poller->pollset = ALLOC_N(zmq_pollitem_t, poller->poll_size);
     if (!poller->pollset) return -1;
 
-    rebuilt = 0;
-    socket = rb_ary_entry(poller->sockets, 0);
-    if (NIL_P(socket)) return 0;
-    for (rebuilt = 0; rebuilt <= poller->poll_size; rebuilt++) {
-        socket = rb_ary_entry(poller->sockets, 0);
+    for (rebuilt = 0; rebuilt < poller->poll_size; rebuilt++) {
+        socket = rb_ary_entry(poller->sockets, rebuilt);
         GetZmqSocket(socket);
         poller->pollset[rebuilt].socket = sock->socket;
         poller->pollset[rebuilt].events = sock->poll_events;
@@ -84,7 +97,7 @@ int rb_czmq_poller_rebuild_selectables(zmq_poll_wrapper *poller)
     int rebuilt;
     rb_ary_clear(poller->readables);
     rb_ary_clear(poller->writables);
-    for (rebuilt = 0; rebuilt <= poller->poll_size; rebuilt++) {
+    for (rebuilt = 0; rebuilt < poller->poll_size; rebuilt++) {
         zmq_pollitem_t item = poller->pollset[rebuilt];
         if (item.revents & ZMQ_POLLIN)
             rb_ary_push(poller->readables, rb_czmq_poller_map_socket(poller, item.socket));
@@ -117,10 +130,11 @@ VALUE rb_czmq_poller_poll(int argc, VALUE *argv, VALUE obj)
     rb_scan_args(argc, argv, "01", &tmout);
     if (NIL_P(tmout)) tmout = INT2NUM(0);
     if (TYPE(tmout) != T_FIXNUM && TYPE(tmout) != T_FLOAT) rb_raise(rb_eTypeError, "wrong timeout type %s (expected Fixnum or Float)", RSTRING_PTR(rb_obj_as_string(tmout)));
-    if (poller->dirty == TRUE) rb_czmq_poller_rebuild_pollset(poller);
     if (poller->poll_size == 0) return INT2NUM(0);
+    if (poller->dirty == TRUE) rb_czmq_poller_rebuild_pollset(poller);
     timeout = (size_t)(((TYPE(tmout) == T_FIXNUM) ? FIX2LONG(tmout) : RFLOAT_VALUE(tmout)) * 1000); 
-    rc = zmq_poll(poller->pollset, poller->poll_size, timeout);
+    if (timeout < 0) timeout = -1;
+    rc = zmq_poll(poller->pollset, poller->poll_size, (long)timeout);
     ZmqAssert(rc);
     if (rc != 0) rb_czmq_poller_rebuild_selectables(poller);
     return INT2NUM(rc);
@@ -164,6 +178,12 @@ VALUE rb_czmq_poller_remove(VALUE obj, VALUE socket)
     return Qfalse;
 }
 
+VALUE rb_czmq_poller_sockets(VALUE obj)
+{
+    ZmqGetPoller(obj);
+    return poller->sockets;
+}
+
 VALUE rb_czmq_poller_readables(VALUE obj)
 {
     ZmqGetPoller(obj);
@@ -186,4 +206,5 @@ void _init_rb_czmq_poller()
     rb_define_method(rb_cZmqPoller, "remove", rb_czmq_poller_remove, 1);
     rb_define_method(rb_cZmqPoller, "readables", rb_czmq_poller_readables, 0);
     rb_define_method(rb_cZmqPoller, "writables", rb_czmq_poller_writables, 0);
+    rb_define_method(rb_cZmqPoller, "sockets", rb_czmq_poller_sockets, 0);
 }

@@ -245,6 +245,9 @@ Running tests
 * Try to catch socket setup that'll have the context ripped out by the GC eg. ZMQ::Context.new.socket(:PUSH)
 * Watch out for further cases where REQ / REP pairs could raise EFSM
 * Fix Rubinius linking wrong libzmq
+* Poller documentation
+* Poller examples
+* Remove noop ZMQ_POLLERR from zloop wrapper - useless for 0MQ sockets
 
 == Contact, feedback and bugs
 

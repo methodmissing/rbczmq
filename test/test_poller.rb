@@ -25,9 +25,9 @@ class TestZmqPoller < ZmqTestCase
 
     assert_equal 0, poller.poll_nonblock
 
-    poller.register_readable(rep)
+    assert poller.register_readable(rep)
     sleep 0.2
-    req.send("request")
+    assert req.send("request")
     sleep 0.1
 
     assert_equal 1, poller.poll(1)
@@ -35,14 +35,14 @@ class TestZmqPoller < ZmqTestCase
     assert_equal [], poller.writables
     rep.recv
 
-    poller.register_writable(req)
+    assert poller.register(req)
     sleep 0.2
-    rep.send("reply")
+    assert rep.send("reply")
     sleep 0.1
 
     assert_equal 1, poller.poll(1)
-    assert_equal [], poller.readables
-    assert_equal [req], poller.writables
+    assert_equal [req], poller.readables
+    assert_equal [], poller.writables
   ensure
     ctx.destroy
   end
