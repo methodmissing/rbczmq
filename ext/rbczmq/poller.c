@@ -46,7 +46,12 @@ static void rb_czmq_free_poller_gc(void *ptr)
     }
 }
 
-int rb_czmq_poller_rebuild(zmq_poll_wrapper *poller)
+/*
+ * :nodoc:
+ *  Rebuild the pollset from the sockets registered with this poller
+ *
+*/
+int rb_czmq_poller_rebuild_pollset(zmq_poll_wrapper *poller)
 {
     VALUE socket;
     int rebuilt;
@@ -68,30 +73,23 @@ int rb_czmq_poller_rebuild(zmq_poll_wrapper *poller)
     return 0;
 }
 
+/*
+ * :nodoc:
+ *  Maps a raw socket pointer back to a Ruby objects
+ *
+*/
 VALUE rb_czmq_poller_map_socket(zmq_poll_wrapper *poller, void *sock)
 {
     VALUE socket;
     st_lookup(poller->socket_map, (st_data_t)sock, &socket);
     return socket;
 }
-int rb_czmq_poller_rebuild_pollset(zmq_poll_wrapper *poller)
-{
-    VALUE socket;
-    int rebuilt;
-    if (poller->pollset) xfree(poller->pollset);
-    poller->pollset = NULL;
-    poller->pollset = ALLOC_N(zmq_pollitem_t, poller->poll_size);
-    if (!poller->pollset) return -1;
 
-    for (rebuilt = 0; rebuilt < poller->poll_size; rebuilt++) {
-        socket = rb_ary_entry(poller->sockets, rebuilt);
-        GetZmqSocket(socket);
-        poller->pollset[rebuilt].socket = sock->socket;
-        poller->pollset[rebuilt].events = sock->poll_events;
-    }
-    return 0;
-}
-
+/*
+ * :nodoc:
+ *  Rebuild the readable and writable arrays if any sockets are in a ready state
+ *
+*/
 int rb_czmq_poller_rebuild_selectables(zmq_poll_wrapper *poller)
 {
     int rebuilt;
@@ -107,6 +105,17 @@ int rb_czmq_poller_rebuild_selectables(zmq_poll_wrapper *poller)
     return 0;
 }
 
+/*
+ *  call-seq:
+ *     ZMQ::Poller.new    =>  ZMQ::Poller
+ *
+ *  Initializes a new ZMQ::Poller instance.
+ *
+ * === Examples
+ *
+ *     ZMQ::Poller.new    =>  ZMQ::Poller
+ *
+*/
 VALUE rb_czmq_poller_new(VALUE obj)
 {
     zmq_poll_wrapper *poller = NULL;
@@ -121,6 +130,26 @@ VALUE rb_czmq_poller_new(VALUE obj)
     return obj;
 }
 
+/*
+ *  call-seq:
+ *     poller.poll(1)    =>  Fixnum
+ *
+ *  Multiplexes input/output events in a level-triggered fashion over a set of registered sockets.
+ *
+ * === Examples
+ *
+ *  Supported timeout values :
+ *
+ *  -1  : block until any sockets are ready (no timeout)
+ *   0  : non-blocking poll
+ *   1  : block for 1 second (1000ms)
+ *  0.1 : block for 0.1 seconds (100ms)
+ *
+ *     poller = ZMQ::Poller.new             =>  ZMQ::Poller
+ *     poller.register(req, ZMQ::POLLIN)    =>  true
+ *     poller.poll(1)                       =>  Fixnum
+ *
+*/
 VALUE rb_czmq_poller_poll(int argc, VALUE *argv, VALUE obj)
 {
     VALUE tmout;
@@ -140,6 +169,23 @@ VALUE rb_czmq_poller_poll(int argc, VALUE *argv, VALUE obj)
     return INT2NUM(rc);
 }
 
+/*
+ *  call-seq:
+ *     poller.register(sock, ZMQ::POLLIN)    =>  boolean
+ *
+ *  Registers a socket for a particular I/O event (ZMQ::POLLIN or ZMQ::POLLOUT).
+ *
+ * === Examples
+ *
+ *  Supported events :
+ *
+ *  ZMQ::POLLIN   : readable state
+ *  ZMQ::POLLOUT  : writable state
+ *
+ *     poller = ZMQ::Poller.new             =>  ZMQ::Poller
+ *     poller.register(req, ZMQ::POLLIN)    =>  true
+ *
+*/
 VALUE rb_czmq_poller_register(int argc, VALUE *argv, VALUE obj)
 {
     VALUE socket, evts;
@@ -163,6 +209,19 @@ VALUE rb_czmq_poller_register(int argc, VALUE *argv, VALUE obj)
     return Qtrue;
 }
 
+/*
+ *  call-seq:
+ *     poller.remove(sock)    =>  boolean
+ *
+ *  Removes a socket from this poller. Deregisters the socket for *any* previously registered events.
+ *
+ * === Examples
+ *
+ *     poller = ZMQ::Poller.new             =>  ZMQ::Poller
+ *     poller.register(req, ZMQ::POLLIN)    =>  true
+ *     poller.remove(req)                   =>  true
+ *
+*/
 VALUE rb_czmq_poller_remove(VALUE obj, VALUE socket)
 {
     VALUE ret;
@@ -178,18 +237,40 @@ VALUE rb_czmq_poller_remove(VALUE obj, VALUE socket)
     return Qfalse;
 }
 
-VALUE rb_czmq_poller_sockets(VALUE obj)
-{
-    ZmqGetPoller(obj);
-    return poller->sockets;
-}
-
+/*
+ *  call-seq:
+ *     poller.readables    =>  Array
+ *
+ *  All sockets in a readable state after the last poll.
+ *
+ * === Examples
+ *
+ *     poller = ZMQ::Poller.new             =>  ZMQ::Poller
+ *     poller.register(req, ZMQ::POLLIN)    =>  true
+ *     poller.poll(1)                       =>  1
+ *     poller.readables                     =>  [req]
+ *
+*/
 VALUE rb_czmq_poller_readables(VALUE obj)
 {
     ZmqGetPoller(obj);
     return poller->readables;
 }
 
+/*
+ *  call-seq:
+ *     poller.writables    =>  Array
+ *
+ *  All sockets in a writable state after the last poll.
+ *
+ * === Examples
+ *
+ *     poller = ZMQ::Poller.new             =>  ZMQ::Poller
+ *     poller.register(req, ZMQ::POLLOUT)   =>  true
+ *     poller.poll(1)                       =>  1
+ *     poller.writables                     =>  [req]
+ *
+*/
 VALUE rb_czmq_poller_writables(VALUE obj)
 {
     ZmqGetPoller(obj);
@@ -206,5 +287,4 @@ void _init_rb_czmq_poller()
     rb_define_method(rb_cZmqPoller, "remove", rb_czmq_poller_remove, 1);
     rb_define_method(rb_cZmqPoller, "readables", rb_czmq_poller_readables, 0);
     rb_define_method(rb_cZmqPoller, "writables", rb_czmq_poller_writables, 0);
-    rb_define_method(rb_cZmqPoller, "sockets", rb_czmq_poller_sockets, 0);
 }
