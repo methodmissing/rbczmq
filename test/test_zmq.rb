@@ -23,4 +23,30 @@ class TestZmq < ZmqTestCase
     expected = [ZMQ::Error, NilClass]
     assert expected.any?{|c| c === ZMQ.error }
   end
+
+  def test_select
+    ctx = ZMQ::Context.new
+    poller = ZMQ::Poller.new
+    assert_equal 0, poller.poll
+    rep = ctx.socket(:REP)
+    rep.linger = 0
+    rep.bind("inproc://test.select")
+    req = ctx.socket(:REQ)
+    req.linger = 0
+    req.connect("inproc://test.select")
+
+    r, w, e = ZMQ.select([rep], nil, nil, 1)
+    assert_equal [], r
+    assert_equal [], w
+    assert_equal [], e
+
+    assert req.send("request")
+
+    r, w, e = ZMQ.select([rep], nil, nil, 1)
+    assert_equal [rep], r
+    assert_equal [], w
+    assert_equal [], e
+  ensure
+    ctx.destroy
+  end
 end

@@ -80,6 +80,16 @@ module ZMQ
     @loop ||= ZMQ::Loop.new(context)
   end
 
+  # API sugaring: IO.select compatible API, but for ZMQ sockets.
+  #
+  def self.select(read = [], write = [], error = [], timeout = nil)
+    poller = ZMQ::Poller.new
+    read.each{|s| poller.register_readable(s) } if read
+    write.each{|s| poller.register_writable(s) } if write
+    ready = poller.poll(timeout)
+    [poller.readables, poller.writables, []] if ready
+  end
+
   autoload :Handler, 'zmq/handler'
   autoload :DefaultHandler, 'zmq/default_handler'
 end
