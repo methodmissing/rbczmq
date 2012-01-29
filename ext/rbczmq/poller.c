@@ -48,28 +48,33 @@ static void rb_czmq_free_poller_gc(void *ptr)
 
 /*
  * :nodoc:
+ *  Generate a pollset item for a single poll socket
+ *
+*/
+static int rb_czmq_poller_rebuild_pollset_i(VALUE key, VALUE value, VALUE *args)
+{
+    zmq_poll_wrapper *poller = (zmq_poll_wrapper *)args;
+    GetZmqSocket(key);
+    poller->pollset[poller->rebuilt].socket = sock->socket;
+    poller->pollset[poller->rebuilt].events = NUM2INT(value);
+    poller->rebuilt++;
+    return ST_CONTINUE;
+}
+
+/*
+ * :nodoc:
  *  Rebuild the pollset from the sockets registered with this poller
  *
 */
 int rb_czmq_poller_rebuild_pollset(zmq_poll_wrapper *poller)
 {
-    VALUE socket;
-    int rebuilt;
     xfree(poller->pollset);
     poller->pollset = NULL;
     poller->pollset = ALLOC_N(zmq_pollitem_t, poller->poll_size);
     if (!poller->pollset) return -1;
 
-    rebuilt = 0;
-    socket = rb_ary_entry(poller->sockets, 0);
-    if (NIL_P(socket)) return 0;
-    while (rebuilt != poller->poll_size) {
-        GetZmqSocket(socket);
-        poller->pollset[rebuilt].socket = sock->socket;
-        poller->pollset[rebuilt].events = sock->poll_events;
-        rebuilt++;
-        socket = rb_ary_entry(poller->sockets, rebuilt);
-    }
+    poller->rebuilt = 0;
+    rb_hash_foreach(poller->sockets, rb_czmq_poller_rebuild_pollset_i, (st_data_t)poller);
     return 0;
 }
 
@@ -121,7 +126,7 @@ VALUE rb_czmq_poller_new(VALUE obj)
     zmq_poll_wrapper *poller = NULL;
     obj = Data_Make_Struct(rb_cZmqPoller, zmq_poll_wrapper, rb_czmq_mark_poller, rb_czmq_free_poller_gc, poller);
     poller->pollset = NULL;
-    poller->sockets = rb_ary_new();
+    poller->sockets = rb_hash_new();
     poller->readables = rb_ary_new();
     poller->writables = rb_ary_new();
     poller->socket_map = st_init_numtable();
@@ -142,8 +147,8 @@ VALUE rb_czmq_poller_new(VALUE obj)
  *
  *  -1  : block until any sockets are ready (no timeout)
  *   0  : non-blocking poll
- *   1  : block for 1 second (1000ms)
- *  0.1 : block for 0.1 seconds (100ms)
+ *   1  : block for up to 1 second (1000ms)
+ *  0.1 : block for up to 0.1 seconds (100ms)
  *
  *     poller = ZMQ::Poller.new             =>  ZMQ::Poller
  *     poller.register(req, ZMQ::POLLIN)    =>  true
@@ -193,23 +198,24 @@ VALUE rb_czmq_poller_poll(int argc, VALUE *argv, VALUE obj)
 */
 VALUE rb_czmq_poller_register(int argc, VALUE *argv, VALUE obj)
 {
-    VALUE socket, evts;
-    int events;
+    VALUE socket, events, revents;
     ZmqGetPoller(obj);
-    rb_scan_args(argc, argv, "11", &socket, &evts);
+    rb_scan_args(argc, argv, "11", &socket, &events);
     GetZmqSocket(socket);
     ZmqAssertSocketNotPending(sock, "socket in a pending state (not bound or connected) and thus cannot be registered with a poller!");
     ZmqSockGuardCrossThread(sock);
-    sock->poll_events = 0;
-    if (NIL_P(evts)) {
-        events = ZMQ_POLLIN | ZMQ_POLLOUT;
+    if (NIL_P(events)) {
+        events = INT2NUM(ZMQ_POLLIN | ZMQ_POLLOUT);
     } else {
-        Check_Type(evts, T_FIXNUM);
-        events = NUM2INT(evts);
+        Check_Type(events, T_FIXNUM);
     }
-    if (events == 0) return Qfalse;
-    sock->poll_events = events;
-    rb_ary_push(poller->sockets, socket);
+    if (events == INT2NUM(0)) return Qfalse;
+    revents = rb_hash_aref(poller->sockets, socket);
+    if (NIL_P(revents)) {
+        rb_hash_aset(poller->sockets, socket, events);
+    } else {
+        rb_hash_aset(poller->sockets, socket, INT2NUM(NUM2INT(revents) | NUM2INT(events)));
+    }
     st_insert(poller->socket_map, (st_data_t)sock->socket, (st_data_t)socket);
     poller->poll_size++;
     poller->dirty = TRUE;
@@ -235,7 +241,7 @@ VALUE rb_czmq_poller_remove(VALUE obj, VALUE socket)
     ZmqGetPoller(obj);
     GetZmqSocket(socket);
     ZmqSockGuardCrossThread(sock);
-    ret = rb_ary_delete(poller->sockets, socket);
+    ret = rb_hash_delete(poller->sockets, socket);
     if (!NIL_P(ret)) {
         poller->poll_size--;
         poller->dirty = TRUE;

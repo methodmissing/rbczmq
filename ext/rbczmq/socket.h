@@ -51,8 +51,6 @@ typedef struct {
     int flags;
     Bool verbose;
     int state;
-/* XXX: limits sockets to a single poller instance, prefer a struct in poller.h */
-    int poll_events;
 #ifndef HAVE_RB_THREAD_BLOCKING_REGION
     zlist_t *str_buffer;
     zlist_t *frame_buffer;

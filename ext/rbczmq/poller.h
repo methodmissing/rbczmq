@@ -8,13 +8,9 @@ typedef struct {
     st_table * socket_map;
     zmq_pollitem_t *pollset;
     int poll_size;
+    int rebuilt;
     Bool dirty;
 } zmq_poll_wrapper;
-
-typedef struct {
-    VALUE socket;
-    zmq_pollitem_t *pollitem;
-} zmq_poll_item_wrapper;
 
 #define ZmqAssertPoller(obj) ZmqAssertType(obj, rb_cZmqPoller, "ZMQ::Poller")
 #define ZmqGetPoller(obj) \
