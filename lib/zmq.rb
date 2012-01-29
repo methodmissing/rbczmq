@@ -80,30 +80,6 @@ module ZMQ
     @loop ||= ZMQ::Loop.new(context)
   end
 
-  # Higher level API for the ZMQ QUEUE device
-  #
-  # ZMQ.queue(backend, frontend)    =>   nil # blocks current thread
-  #
-  def self.queue(backend, frontend)
-    device(ZMQ::QUEUE, backend, frontend)
-  end
-
-  # Higher level API for the ZMQ FORWARDER device
-  #
-  # ZMQ.forwarder(backend, frontend)    =>   nil # blocks current thread
-  #
-  def self.forwarder(backend, frontend)
-    device(ZMQ::FORWARDER, backend, frontend)
-  end
-
-  # Higher level API for the ZMQ STREAMER device
-  #
-  # ZMQ.streamer(backend, frontend)    =>   nil # blocks current thread
-  #
-  def self.streamer(backend, frontend)
-    device(ZMQ::STREAMER, backend, frontend)
-  end
-
   autoload :Handler, 'zmq/handler'
   autoload :DefaultHandler, 'zmq/default_handler'
 end
