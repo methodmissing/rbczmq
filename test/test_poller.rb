@@ -49,37 +49,41 @@ class TestZmqPoller < ZmqTestCase
 
   def test_register
     ctx = ZMQ::Context.new
-    req = ctx.socket(:REQ)
-    rep = ctx.socket(:REP)
+    rep = ctx.bind(:REP, 'inproc://test.poller-register')
+    req = ctx.connect(:REQ, 'inproc://test.poller-register')
     poller = ZMQ::Poller.new
     assert poller.register(rep, ZMQ::POLLIN)
     assert !poller.register(req, 0)
+    unbound = ctx.socket(:REP)
+    assert_raises ZMQ::Error do
+      poller.register(unbound, ZMQ::POLLIN)
+    end
   ensure
     ctx.destroy
   end
 
   def test_register_readable
     ctx = ZMQ::Context.new
-    req = ctx.socket(:REQ)
+    rep = ctx.bind(:REP, 'inproc://test.poller-register_readable')
     poller = ZMQ::Poller.new
-    assert poller.register_readable(req)
+    assert poller.register_readable(rep)
   ensure
     ctx.destroy
   end
 
   def test_register_writable
     ctx = ZMQ::Context.new
-    req = ctx.socket(:REQ)
+    rep = ctx.bind(:REP, 'inproc://test.poller-register_writable')
     poller = ZMQ::Poller.new
-    assert poller.register_writable(req)
+    assert poller.register_writable(rep)
   ensure
     ctx.destroy
   end
 
   def test_remove
     ctx = ZMQ::Context.new
-    req = ctx.socket(:REQ)
-    rep = ctx.socket(:REP)
+    rep = ctx.bind(:REP, 'inproc://test.poller-remove')
+    req = ctx.connect(:REQ, 'inproc://test.poller-remove')
     poller = ZMQ::Poller.new
     assert poller.register(req)
     assert poller.remove(req)

@@ -198,6 +198,8 @@ VALUE rb_czmq_poller_register(int argc, VALUE *argv, VALUE obj)
     ZmqGetPoller(obj);
     rb_scan_args(argc, argv, "11", &socket, &evts);
     GetZmqSocket(socket);
+    ZmqAssertSocketNotPending(sock, "socket in a pending state (not bound or connected) and thus cannot be registered with a poller!");
+    ZmqSockGuardCrossThread(sock);
     sock->poll_events = 0;
     if (NIL_P(evts)) {
         events = ZMQ_POLLIN | ZMQ_POLLOUT;
@@ -232,6 +234,7 @@ VALUE rb_czmq_poller_remove(VALUE obj, VALUE socket)
     VALUE ret;
     ZmqGetPoller(obj);
     GetZmqSocket(socket);
+    ZmqSockGuardCrossThread(sock);
     ret = rb_ary_delete(poller->sockets, socket);
     if (!NIL_P(ret)) {
         poller->poll_size--;

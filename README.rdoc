@@ -246,7 +246,6 @@ Running tests
 * Watch out for further cases where REQ / REP pairs could raise EFSM
 * Fix Rubinius linking wrong libzmq
 * Regen gh-pages branch to reflect ZMQ::Poller changes
-* Assert sockets registered with ZMQ::Poller instances are in bound or connected states
 
 == Contact, feedback and bugs
 
