@@ -247,7 +247,6 @@ Running tests
 * Fix Rubinius linking wrong libzmq
 * Regen gh-pages branch to reflect ZMQ::Poller changes
 * Assert sockets registered with ZMQ::Poller instances are in bound or connected states
-* Remove noop ZMQ_POLLERR from zloop wrapper - useless for 0MQ sockets
 
 == Contact, feedback and bugs
 

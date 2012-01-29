@@ -331,8 +331,7 @@ static VALUE rb_czmq_loop_set_verbose(VALUE obj, VALUE level)
  *  call-seq:
  *     loop.register_socket(sock, ZMQ::POLLIN)    =>  true
  *
- *  Registers a socket for read or write events. Only ZMQ::POLLIN and ZMQ::POLLOUT events are supported. All sockets are
- *  implicitly registered for ZMQ::POLLERR events.
+ *  Registers a socket for read or write events. Only ZMQ::POLLIN and ZMQ::POLLOUT events are supported.
  *
  * === Examples
  *     loop = ZMQ::Loop.new    =>   ZMQ::Loop
@@ -355,7 +354,7 @@ static VALUE rb_czmq_loop_register_socket(VALUE obj, VALUE socket, VALUE event)
         rb_raise(rb_eZmqError, "invalid socket event: Only ZMQ::POLLIN and ZMQ::POLLOUT events are supported!");
     pollitem = ruby_xmalloc(sizeof(zmq_pollitem_t));
     pollitem->socket = sock->socket;
-    pollitem->events |= ZMQ_POLLERR | evt;
+    pollitem->events |= evt;
     rc = zloop_poller(loop->loop, pollitem, rb_czmq_loop_socket_callback, (void *)sock);
     ZmqAssert(rc);
     /* Do not block on socket close */
@@ -387,7 +386,7 @@ static VALUE rb_czmq_loop_remove_socket(VALUE obj, VALUE socket)
     ZmqSockGuardCrossThread(sock);
     pollitem = ruby_xmalloc(sizeof(zmq_pollitem_t));
     pollitem->socket = sock->socket;
-    pollitem->events |= ZMQ_POLLIN | ZMQ_POLLOUT | ZMQ_POLLERR;
+    pollitem->events |= ZMQ_POLLIN | ZMQ_POLLOUT;
     zloop_poller_end(loop->loop, pollitem);
     return Qnil;
 }
