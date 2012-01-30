@@ -54,6 +54,7 @@ static void rb_czmq_free_poller_gc(void *ptr)
 static int rb_czmq_poller_rebuild_pollset_i(VALUE key, VALUE value, VALUE *args)
 {
     zmq_poll_wrapper *poller = (zmq_poll_wrapper *)args;
+    zmq_sock_wrapper *sock = NULL;
     GetZmqSocket(key);
     poller->pollset[poller->rebuilt].socket = sock->socket;
     poller->pollset[poller->rebuilt].events = NUM2INT(value);
@@ -199,6 +200,7 @@ VALUE rb_czmq_poller_poll(int argc, VALUE *argv, VALUE obj)
 VALUE rb_czmq_poller_register(int argc, VALUE *argv, VALUE obj)
 {
     VALUE socket, events, revents;
+    zmq_sock_wrapper *sock = NULL;
     ZmqGetPoller(obj);
     rb_scan_args(argc, argv, "11", &socket, &events);
     GetZmqSocket(socket);
@@ -238,6 +240,7 @@ VALUE rb_czmq_poller_register(int argc, VALUE *argv, VALUE obj)
 VALUE rb_czmq_poller_remove(VALUE obj, VALUE socket)
 {
     VALUE ret;
+    zmq_sock_wrapper *sock = NULL;
     ZmqGetPoller(obj);
     GetZmqSocket(socket);
     ZmqSockGuardCrossThread(sock);

@@ -67,7 +67,6 @@ typedef struct {
 
 #define ZmqAssertSocket(obj) ZmqAssertType(obj, rb_cZmqSocket, "ZMQ::Socket")
 #define GetZmqSocket(obj) \
-    zmq_sock_wrapper *sock = NULL; \
     ZmqAssertSocket(obj); \
     Data_Get_Struct(obj, zmq_sock_wrapper, sock); \
     if (!sock) rb_raise(rb_eTypeError, "uninitialized ZMQ socket!"); \
