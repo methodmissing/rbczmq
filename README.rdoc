@@ -246,7 +246,10 @@ Running tests
 * Watch out for further cases where REQ / REP pairs could raise EFSM
 * Fix Rubinius linking wrong libzmq
 * Regen gh-pages branch to reflect ZMQ::Poller changes
-
+* ZMQ::Pollable implementation
+* ZmqCastPollable() to replace ZmqAssertSocket + ZmqAssertSocketNotPending() on poller and loop registration and removal
+  - rbczmq_get_pollitem(pollitem); rbczmq_get_pollitem(socket); rbczmq_get_pollitem(VALUE)
+  - struct { VALUE socket; VALUE io; zmq_pollitem pollitem } rbczmq_pollitem;
 == Contact, feedback and bugs
 
 This project is still work in progress and I'm looking for guidance on API design, use cases and any outlier experiences. Please log bugs and suggestions at https://github.com/methodmissing/rbczmq/issues
