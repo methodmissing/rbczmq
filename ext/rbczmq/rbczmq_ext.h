@@ -93,6 +93,7 @@ extern VALUE rb_cZmqMessage;
 extern VALUE rb_cZmqLoop;
 extern VALUE rb_cZmqTimer;
 extern VALUE rb_cZmqPoller;
+extern VALUE rb_cZmqPollitem;
 
 extern st_table *frames_map;
 
@@ -103,6 +104,7 @@ extern st_table *frames_map;
 #include <loop.h>
 #include <timer.h>
 #include <poller.h>
+#include <pollitem.h>
 
 static inline char *rb_czmq_formatted_current_time()
 {

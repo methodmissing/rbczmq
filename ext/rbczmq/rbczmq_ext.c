@@ -56,6 +56,7 @@ VALUE rb_cZmqMessage;
 VALUE rb_cZmqLoop;
 VALUE rb_cZmqTimer;
 VALUE rb_cZmqPoller;
+VALUE rb_cZmqPollitem;
 
 st_table *frames_map = NULL;
 
@@ -194,4 +195,5 @@ void Init_rbczmq_ext()
     _init_rb_czmq_timer();
     _init_rb_czmq_loop();
     _init_rb_czmq_poller();
+    _init_rb_czmq_pollitem();
 }
