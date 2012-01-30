@@ -6,6 +6,13 @@ class TestZmqPollitem < ZmqTestCase
   def test_alloc_io
     pollitem = ZMQ::Pollitem.new(STDIN, ZMQ::POLLIN)
     assert_equal STDIN, pollitem.pollable
+    assert_equal ZMQ::POLLIN, pollitem.events
+  end
+
+  def test_alloc_without_events
+    pollitem = ZMQ::Pollitem.new(STDIN)
+    assert pollitem.events & ZMQ::POLLIN
+    assert pollitem.events & ZMQ::POLLOUT
   end
 
   def test_alloc_socket
@@ -13,6 +20,7 @@ class TestZmqPollitem < ZmqTestCase
     rep = ctx.bind(:REP, 'inproc://test.pollitem-alloc_socket')
     pollitem = ZMQ::Pollitem.new(rep, ZMQ::POLLIN)
     assert_equal rep, pollitem.pollable
+    assert_equal ZMQ::POLLIN, pollitem.events
   ensure
     ctx.destroy
   end

@@ -39,7 +39,7 @@ static VALUE rb_czmq_pollitem_s_new(int argc, VALUE *argv, VALUE obj)
     if (NIL_P(events)) events = INT2NUM((ZMQ_POLLIN | ZMQ_POLLOUT));
     Check_Type(events, T_FIXNUM);
     evts = NUM2INT(events);
-    if (evts != ZMQ_POLLIN && evts != ZMQ_POLLOUT)
+    if (!(evts & ZMQ_POLLIN) && !(evts & ZMQ_POLLOUT))
         rb_raise(rb_eZmqError, "invalid socket event: Only ZMQ::POLLIN and ZMQ::POLLOUT events are supported!");
 
     /* XXX: Cleanup allocated struct on any failures below */
@@ -73,10 +73,17 @@ VALUE rb_czmq_pollitem_pollable(VALUE obj)
     return pollitem->socket;
 }
 
+VALUE rb_czmq_pollitem_events(VALUE obj)
+{
+    ZmqGetPollitem(obj);
+    return pollitem->events;
+}
+
 void _init_rb_czmq_pollitem()
 {
     rb_cZmqPollitem = rb_define_class_under(rb_mZmq, "Pollitem", rb_cObject);
 
     rb_define_singleton_method(rb_cZmqPollitem, "new", rb_czmq_pollitem_s_new, -1);
     rb_define_method(rb_cZmqPollitem, "pollable", rb_czmq_pollitem_pollable, 0);
+    rb_define_method(rb_cZmqPollitem, "events", rb_czmq_pollitem_events, 0);
 }
