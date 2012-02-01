@@ -11,12 +11,12 @@ class ZMQ::Poller
   # API sugar for registering a socket for readability
   #
   def register_readable(socket)
-    register socket, ZMQ::POLLIN
+    register ZMQ::Pollitem.new(socket, ZMQ::POLLIN)
   end
 
   # API sugar for registering a socket for writability
   #
   def register_writable(socket)
-    register socket, ZMQ::POLLOUT
+    register ZMQ::Pollitem.new(socket, ZMQ::POLLOUT)
   end
 end

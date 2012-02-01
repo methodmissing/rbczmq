@@ -66,6 +66,14 @@ module ZMQ
     m
   end
 
+  # Sugaring for creating new poll items
+  #
+  # ZMQ::Pollitem(STDIN, ZMQ::POLLIN)  =>  ZMQ::Pollitem
+  #
+  def self.Pollitem(pollable, events = nil)
+    ZMQ::Pollitem.new(pollable, events)
+  end
+
   # Returns the ZMQ context for this process, if any
   #
   def self.context

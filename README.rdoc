@@ -246,11 +246,8 @@ Running tests
 * Watch out for further cases where REQ / REP pairs could raise EFSM
 * Fix Rubinius linking wrong libzmq
 * Regen gh-pages branch to reflect ZMQ::Poller changes
-* ZMQ::Pollable implementation
-* ZmqCastPollable() to replace ZmqAssertSocket + ZmqAssertSocketNotPending() on poller and loop registration and removal
-  - rbczmq_get_pollitem(pollitem); rbczmq_get_pollitem(socket); rbczmq_get_pollitem(VALUE)
-  - struct { VALUE socket; VALUE io; zmq_pollitem pollitem } rbczmq_pollitem;
-* Do not clobber local scope from macros
+* Let ZMQ::Loop prefer ZMQ::Poller instances for (de)registration with the reactor
+* Do not clobber local scope from macros (James's commit in master)
 
 == Contact, feedback and bugs
 

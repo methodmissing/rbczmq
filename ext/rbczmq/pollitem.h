@@ -15,6 +15,10 @@ typedef struct {
     Data_Get_Struct(obj, zmq_pollitem_wrapper, pollitem); \
     if (!pollitem) rb_raise(rb_eTypeError, "uninitialized ZMQ pollitem!");
 
+VALUE rb_czmq_coerce_pollable(VALUE obj);
+VALUE rb_czmq_pollitem_pollable(VALUE obj);
+VALUE rb_czmq_pollitem_events(VALUE obj);
+
 void _init_rb_czmq_pollitem();
 
 #endif

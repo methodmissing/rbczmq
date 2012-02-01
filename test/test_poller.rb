@@ -8,7 +8,7 @@ class TestZmqPoller < ZmqTestCase
     assert_instance_of ZMQ::Poller, ZMQ::Poller.new
   end
 
-  def test_poll
+  def test_poll_sockets
     ctx = ZMQ::Context.new
     poller = ZMQ::Poller.new
     assert_equal 0, poller.poll
@@ -26,7 +26,6 @@ class TestZmqPoller < ZmqTestCase
     assert_equal 0, poller.poll_nonblock
 
     assert poller.register_readable(rep)
-    sleep 0.2
     assert req.send("request")
     sleep 0.1
 
@@ -36,7 +35,6 @@ class TestZmqPoller < ZmqTestCase
     rep.recv
 
     assert poller.register(req)
-    sleep 0.2
     assert rep.send("reply")
     sleep 0.1
 
@@ -47,16 +45,35 @@ class TestZmqPoller < ZmqTestCase
     ctx.destroy
   end
 
+  def test_poll_ios
+    poller = ZMQ::Poller.new
+    r, w = IO.pipe
+
+    poller.register(ZMQ::Pollitem(r, ZMQ::POLLIN))
+    poller.register(ZMQ::Pollitem(w, ZMQ::POLLOUT))
+
+    w.write("message")
+    sleep 0.2
+
+    assert_equal 2, poller.poll(1)
+    assert_equal [r], poller.readables
+    assert_equal [w], poller.writables
+
+    assert_equal "message", r.read(7)
+  end
+
   def test_register
     ctx = ZMQ::Context.new
     rep = ctx.bind(:REP, 'inproc://test.poller-register')
     req = ctx.connect(:REQ, 'inproc://test.poller-register')
     poller = ZMQ::Poller.new
-    assert poller.register(rep, ZMQ::POLLIN)
-    assert !poller.register(req, 0)
+    assert poller.register(rep)
+    assert_raises ZMQ::Error do
+      poller.register(ZMQ::Pollitem.new(req, 0))
+    end
     unbound = ctx.socket(:REP)
     assert_raises ZMQ::Error do
-      poller.register(unbound, ZMQ::POLLIN)
+      poller.register(unbound)
     end
   ensure
     ctx.destroy
@@ -88,6 +105,13 @@ class TestZmqPoller < ZmqTestCase
     assert poller.register(req)
     assert poller.remove(req)
     assert !poller.remove(rep)
+
+    io_poll_item = ZMQ::Pollitem.new(STDIN, ZMQ::POLLIN)
+    poller.register(io_poll_item)
+    assert poller.remove(io_poll_item)
+
+    poller.register(io_poll_item)
+    assert poller.remove(STDIN)
   ensure
     ctx.destroy
   end

@@ -2,13 +2,11 @@
 #define RBCZMQ_POLLER_H
 
 typedef struct {
-    VALUE sockets;
+    VALUE pollables;
     VALUE readables;
     VALUE writables;
-    st_table * socket_map;
     zmq_pollitem_t *pollset;
     int poll_size;
-    int rebuilt;
     Bool dirty;
 } zmq_poll_wrapper;
 

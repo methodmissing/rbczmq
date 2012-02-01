@@ -49,4 +49,10 @@ class TestZmq < ZmqTestCase
   ensure
     ctx.destroy
   end
+
+  def test_pollitem
+    item = ZMQ::Pollitem(STDOUT, ZMQ::POLLIN)
+    assert_equal STDOUT, item.pollable
+    assert_equal ZMQ::POLLIN, item.events
+  end
 end
