@@ -343,6 +343,7 @@ static VALUE rb_czmq_loop_register_socket(VALUE obj, VALUE socket, VALUE event)
 {
     int rc, evt;
     zmq_pollitem_t *pollitem = NULL;
+    zmq_sock_wrapper *sock = NULL;
     errno = 0;
     ZmqGetLoop(obj);
     GetZmqSocket(socket);
@@ -379,6 +380,7 @@ static VALUE rb_czmq_loop_register_socket(VALUE obj, VALUE socket, VALUE event)
 static VALUE rb_czmq_loop_remove_socket(VALUE obj, VALUE socket)
 {
     zmq_pollitem_t *pollitem = NULL;
+    zmq_sock_wrapper *sock = NULL;
     errno = 0;
     ZmqGetLoop(obj);
     GetZmqSocket(socket);

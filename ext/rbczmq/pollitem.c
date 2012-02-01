@@ -56,6 +56,7 @@ void rb_czmq_free_pollitem_gc(void *ptr)
 */
 static VALUE rb_czmq_pollitem_s_new(int argc, VALUE *argv, VALUE obj)
 {
+    zmq_sock_wrapper *sock = NULL;
     VALUE pollable, events;
     int evts;
     zmq_pollitem_wrapper *pollitem = NULL;

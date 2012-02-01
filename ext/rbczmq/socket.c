@@ -43,8 +43,8 @@
 */
 static VALUE rb_czmq_nogvl_zsocket_destroy(void *ptr)
 {
-    errno = 0;
     zmq_sock_wrapper *sock = ptr;
+    errno = 0;
     zsocket_destroy(sock->ctx, sock->socket);
     return Qnil;
 }
@@ -123,6 +123,7 @@ void rb_czmq_free_sock_gc(void *ptr)
 
 static VALUE rb_czmq_socket_close(VALUE obj)
 {
+    zmq_sock_wrapper *sock = NULL;
     GetZmqSocket(obj);
     ZmqSockGuardCrossThread(sock);
     /* This is useless for production / real use cases as we can't query the state again OR assume
@@ -149,6 +150,7 @@ static VALUE rb_czmq_socket_close(VALUE obj)
 
 static VALUE rb_czmq_socket_endpoint(VALUE obj)
 {
+    zmq_sock_wrapper *sock = NULL;
     GetZmqSocket(obj);
     return sock->endpoint;
 }
@@ -170,6 +172,7 @@ static VALUE rb_czmq_socket_endpoint(VALUE obj)
 
 static VALUE rb_czmq_socket_state(VALUE obj)
 {
+    zmq_sock_wrapper *sock = NULL;
     GetZmqSocket(obj);
     return INT2NUM(sock->state);
 }
@@ -192,6 +195,7 @@ static VALUE rb_czmq_socket_state(VALUE obj)
 
 static VALUE rb_czmq_socket_fd(VALUE obj)
 {
+    zmq_sock_wrapper *sock = NULL;
     GetZmqSocket(obj);
     if (sock->state == ZMQ_SOCKET_PENDING) return INT2NUM(-1);
     return INT2NUM(zsockopt_fd(sock->socket));
@@ -253,6 +257,7 @@ static VALUE rb_czmq_socket_bind(VALUE obj, VALUE endpoint)
 {
     struct nogvl_conn_args args;
     int rc;
+    zmq_sock_wrapper *sock = NULL;
     GetZmqSocket(obj);
     ZmqSockGuardCrossThread(sock);
     Check_Type(endpoint, T_STRING);
@@ -286,6 +291,7 @@ static VALUE rb_czmq_socket_connect(VALUE obj, VALUE endpoint)
 {
     struct nogvl_conn_args args;
     int rc;
+    zmq_sock_wrapper *sock = NULL;
     GetZmqSocket(obj);
     ZmqSockGuardCrossThread(sock);
     Check_Type(endpoint, T_STRING);
@@ -316,6 +322,7 @@ static VALUE rb_czmq_socket_connect(VALUE obj, VALUE endpoint)
 static VALUE rb_czmq_socket_set_verbose(VALUE obj, VALUE level)
 {
     Bool vlevel;
+    zmq_sock_wrapper *sock = NULL;
     GetZmqSocket(obj);
     vlevel = (level == Qtrue) ? TRUE : FALSE;
     sock->verbose = vlevel;
@@ -388,6 +395,7 @@ static VALUE rb_czmq_socket_send(VALUE obj, VALUE msg)
 {
     int rc;
     struct nogvl_send_args args;
+    zmq_sock_wrapper *sock = NULL;
     GetZmqSocket(obj);
     ZmqAssertSocketNotPending(sock, "can only send on a bound or connected socket!");
     ZmqSockGuardCrossThread(sock);
@@ -420,6 +428,7 @@ static VALUE rb_czmq_socket_sendm(VALUE obj, VALUE msg)
 {
     int rc;
     struct nogvl_send_args args;
+    zmq_sock_wrapper *sock = NULL;
     GetZmqSocket(obj);
     ZmqAssertSocketNotPending(sock, "can only send on a bound or connected socket!");
     ZmqSockGuardCrossThread(sock);
@@ -480,6 +489,7 @@ static VALUE rb_czmq_socket_recv(VALUE obj)
     char *str = NULL;
     struct nogvl_recv_args args;
     VALUE result = Qnil;
+    zmq_sock_wrapper *sock = NULL;
     GetZmqSocket(obj);
     ZmqAssertSocketNotPending(sock, "can only receive on a bound or connected socket!");
     ZmqSockGuardCrossThread(sock);
@@ -513,6 +523,7 @@ static VALUE rb_czmq_socket_recv_nonblock(VALUE obj)
     char *str = NULL;
     errno = 0;
     VALUE result = Qnil;
+    zmq_sock_wrapper *sock = NULL;
     GetZmqSocket(obj);
     ZmqAssertSocketNotPending(sock, "can only receive on a bound or connected socket!");
     ZmqSockGuardCrossThread(sock);
@@ -576,6 +587,7 @@ static VALUE rb_czmq_socket_send_frame(int argc, VALUE *argv, VALUE obj)
     char *cur_time = NULL;
     zframe_t *print_frame = NULL;
     int rc, flgs;
+    zmq_sock_wrapper *sock = NULL;
     GetZmqSocket(obj);
     ZmqAssertSocketNotPending(sock, "can only send on a bound or connected socket!");
     ZmqSockGuardCrossThread(sock);
@@ -651,6 +663,7 @@ static VALUE rb_czmq_socket_send_message(VALUE obj, VALUE message_obj)
 {
     struct nogvl_send_message_args args;
     zmsg_t *print_message = NULL;
+    zmq_sock_wrapper *sock = NULL;
     GetZmqSocket(obj);
     ZmqAssertSocketNotPending(sock, "can only send on a bound or connected socket!");
     ZmqSockGuardCrossThread(sock);
@@ -712,6 +725,7 @@ static VALUE rb_czmq_socket_recv_frame(VALUE obj)
     struct nogvl_recv_args args;
     char print_prefix[255];
     char *cur_time = NULL;
+    zmq_sock_wrapper *sock = NULL;
     GetZmqSocket(obj);
     ZmqAssertSocketNotPending(sock, "can only receive on a bound or connected socket!");
     ZmqSockGuardCrossThread(sock);
@@ -745,6 +759,7 @@ static VALUE rb_czmq_socket_recv_frame_nonblock(VALUE obj)
     char print_prefix[255];
     char *cur_time = NULL;
     errno = 0;
+    zmq_sock_wrapper *sock = NULL;
     GetZmqSocket(obj);
     ZmqAssertSocketNotPending(sock, "can only receive on a bound or connected socket!");
     ZmqSockGuardCrossThread(sock);
@@ -803,6 +818,7 @@ static VALUE rb_czmq_socket_recv_message(VALUE obj)
 {
     zmsg_t *message = NULL;
     struct nogvl_recv_args args;
+    zmq_sock_wrapper *sock = NULL;
     GetZmqSocket(obj);
     ZmqAssertSocketNotPending(sock, "can only receive on a bound or connected socket!");
     ZmqSockGuardCrossThread(sock);
@@ -828,6 +844,7 @@ static VALUE rb_czmq_socket_recv_message(VALUE obj)
 
 static VALUE rb_czmq_socket_set_handler(VALUE obj, VALUE handler)
 {
+    zmq_sock_wrapper *sock = NULL;
     GetZmqSocket(obj);
     sock->handler = handler;
     return Qnil;
@@ -849,6 +866,7 @@ static VALUE rb_czmq_socket_set_handler(VALUE obj, VALUE handler)
 
 static VALUE rb_czmq_socket_handler(VALUE obj)
 {
+    zmq_sock_wrapper *sock = NULL;
     GetZmqSocket(obj);
     return sock->handler;
 }
@@ -868,6 +886,7 @@ static VALUE rb_czmq_socket_handler(VALUE obj)
 
 static VALUE rb_czmq_socket_set_recv_timeout(VALUE obj, VALUE timeout)
 {
+    zmq_sock_wrapper *sock = NULL;
     GetZmqSocket(obj);
     if (TYPE(timeout) != T_FIXNUM && TYPE(timeout) != T_FLOAT) rb_raise(rb_eTypeError, "wrong timeout type %s (expected Fixnum or Float)", RSTRING_PTR(rb_obj_as_string(timeout)));
     sock->recv_timeout = timeout;
@@ -890,6 +909,7 @@ static VALUE rb_czmq_socket_set_recv_timeout(VALUE obj, VALUE timeout)
 
 static VALUE rb_czmq_socket_recv_timeout(VALUE obj)
 {
+    zmq_sock_wrapper *sock = NULL;
     GetZmqSocket(obj);
     return sock->recv_timeout;
 }
@@ -909,6 +929,7 @@ static VALUE rb_czmq_socket_recv_timeout(VALUE obj)
 
 static VALUE rb_czmq_socket_set_send_timeout(VALUE obj, VALUE timeout)
 {
+    zmq_sock_wrapper *sock = NULL;
     GetZmqSocket(obj);
     if (TYPE(timeout) != T_FIXNUM && TYPE(timeout) != T_FLOAT) rb_raise(rb_eTypeError, "wrong timeout type %s (expected Fixnum or Float)", RSTRING_PTR(rb_obj_as_string(timeout)));
     sock->send_timeout = timeout;
@@ -931,6 +952,7 @@ static VALUE rb_czmq_socket_set_send_timeout(VALUE obj, VALUE timeout)
 
 static VALUE rb_czmq_socket_send_timeout(VALUE obj)
 {
+    zmq_sock_wrapper *sock = NULL;
     GetZmqSocket(obj);
     return sock->send_timeout;
 }
@@ -950,6 +972,7 @@ static VALUE rb_czmq_socket_send_timeout(VALUE obj)
 
 static VALUE rb_czmq_socket_opt_hwm(VALUE obj)
 {
+    zmq_sock_wrapper *sock = NULL;
     GetZmqSocket(obj);
     return INT2NUM(zsockopt_hwm(sock->socket));
 }
@@ -970,6 +993,7 @@ static VALUE rb_czmq_socket_opt_hwm(VALUE obj)
 
 static VALUE rb_czmq_socket_set_opt_hwm(VALUE obj, VALUE value)
 {
+    zmq_sock_wrapper *sock = NULL;
     ZmqSetSockOpt(obj, zsockopt_set_hwm, "HWM", value);
 }
 
@@ -988,6 +1012,7 @@ static VALUE rb_czmq_socket_set_opt_hwm(VALUE obj, VALUE value)
 
 static VALUE rb_czmq_socket_opt_swap(VALUE obj)
 {
+    zmq_sock_wrapper *sock = NULL;
     GetZmqSocket(obj);
     return INT2NUM(zsockopt_swap(sock->socket));
 }
@@ -1007,6 +1032,7 @@ static VALUE rb_czmq_socket_opt_swap(VALUE obj)
 
 static VALUE rb_czmq_socket_set_opt_swap(VALUE obj, VALUE value)
 {
+    zmq_sock_wrapper *sock = NULL;
     ZmqSetSockOpt(obj, zsockopt_set_swap, "SWAP", value);
 }
 
@@ -1025,6 +1051,7 @@ static VALUE rb_czmq_socket_set_opt_swap(VALUE obj, VALUE value)
 
 static VALUE rb_czmq_socket_opt_affinity(VALUE obj)
 {
+    zmq_sock_wrapper *sock = NULL;
     GetZmqSocket(obj);
     return INT2NUM(zsockopt_affinity(sock->socket));
 }
@@ -1044,6 +1071,7 @@ static VALUE rb_czmq_socket_opt_affinity(VALUE obj)
 
 static VALUE rb_czmq_socket_set_opt_affinity(VALUE obj, VALUE value)
 {
+    zmq_sock_wrapper *sock = NULL;
     ZmqSetSockOpt(obj, zsockopt_set_affinity, "AFFINITY", value);
 }
 
@@ -1062,6 +1090,7 @@ static VALUE rb_czmq_socket_set_opt_affinity(VALUE obj, VALUE value)
 
 static VALUE rb_czmq_socket_opt_rate(VALUE obj)
 {
+    zmq_sock_wrapper *sock = NULL;
     GetZmqSocket(obj);
     return INT2NUM(zsockopt_rate(sock->socket));
 }
@@ -1081,6 +1110,7 @@ static VALUE rb_czmq_socket_opt_rate(VALUE obj)
 
 static VALUE rb_czmq_socket_set_opt_rate(VALUE obj, VALUE value)
 {
+    zmq_sock_wrapper *sock = NULL;
     ZmqSetSockOpt(obj, zsockopt_set_rate, "RATE", value);
 }
 
@@ -1099,6 +1129,7 @@ static VALUE rb_czmq_socket_set_opt_rate(VALUE obj, VALUE value)
 
 static VALUE rb_czmq_socket_opt_recovery_ivl(VALUE obj)
 {
+    zmq_sock_wrapper *sock = NULL;
     GetZmqSocket(obj);
     return INT2NUM(zsockopt_recovery_ivl(sock->socket));
 }
@@ -1118,6 +1149,7 @@ static VALUE rb_czmq_socket_opt_recovery_ivl(VALUE obj)
 
 static VALUE rb_czmq_socket_set_opt_recovery_ivl(VALUE obj, VALUE value)
 {
+    zmq_sock_wrapper *sock = NULL;
     ZmqSetSockOpt(obj, zsockopt_set_recovery_ivl, "RECOVERY_IVL", value);
 }
 
@@ -1136,6 +1168,7 @@ static VALUE rb_czmq_socket_set_opt_recovery_ivl(VALUE obj, VALUE value)
 
 static VALUE rb_czmq_socket_opt_recovery_ivl_msec(VALUE obj)
 {
+    zmq_sock_wrapper *sock = NULL;
     GetZmqSocket(obj);
     return INT2NUM(zsockopt_recovery_ivl_msec(sock->socket));
 }
@@ -1155,6 +1188,7 @@ static VALUE rb_czmq_socket_opt_recovery_ivl_msec(VALUE obj)
 
 static VALUE rb_czmq_socket_set_opt_recovery_ivl_msec(VALUE obj, VALUE value)
 {
+    zmq_sock_wrapper *sock = NULL;
     ZmqSetSockOpt(obj, zsockopt_set_recovery_ivl_msec, "RECOVERY_IVL_MSEC", value);
 }
 
@@ -1173,6 +1207,7 @@ static VALUE rb_czmq_socket_set_opt_recovery_ivl_msec(VALUE obj, VALUE value)
 
 static VALUE rb_czmq_socket_opt_mcast_loop(VALUE obj)
 {
+    zmq_sock_wrapper *sock = NULL;
     GetZmqSocket(obj);
     return (zsockopt_mcast_loop(sock->socket) == 1) ? Qtrue : Qfalse;
 }
@@ -1192,6 +1227,7 @@ static VALUE rb_czmq_socket_opt_mcast_loop(VALUE obj)
 
 static VALUE rb_czmq_socket_set_opt_mcast_loop(VALUE obj, VALUE value)
 {
+    zmq_sock_wrapper *sock = NULL;
     ZmqSetBooleanSockOpt(obj, zsockopt_set_mcast_loop, "MCAST_LOOP", value);
 }
 
@@ -1210,6 +1246,7 @@ static VALUE rb_czmq_socket_set_opt_mcast_loop(VALUE obj, VALUE value)
 
 static VALUE rb_czmq_socket_opt_sndbuf(VALUE obj)
 {
+    zmq_sock_wrapper *sock = NULL;
     GetZmqSocket(obj);
     return INT2NUM(zsockopt_sndbuf(sock->socket));
 }
@@ -1229,6 +1266,7 @@ static VALUE rb_czmq_socket_opt_sndbuf(VALUE obj)
 
 static VALUE rb_czmq_socket_set_opt_sndbuf(VALUE obj, VALUE value)
 {
+    zmq_sock_wrapper *sock = NULL;
     ZmqSetSockOpt(obj, zsockopt_set_sndbuf, "SNDBUF", value);
 }
 
@@ -1247,6 +1285,7 @@ static VALUE rb_czmq_socket_set_opt_sndbuf(VALUE obj, VALUE value)
 
 static VALUE rb_czmq_socket_opt_rcvbuf(VALUE obj)
 {
+    zmq_sock_wrapper *sock = NULL;
     GetZmqSocket(obj);
     return INT2NUM(zsockopt_rcvbuf(sock->socket));
 }
@@ -1266,6 +1305,7 @@ static VALUE rb_czmq_socket_opt_rcvbuf(VALUE obj)
 
 static VALUE rb_czmq_socket_set_opt_rcvbuf(VALUE obj, VALUE value)
 {
+    zmq_sock_wrapper *sock = NULL;
     ZmqSetSockOpt(obj, zsockopt_set_rcvbuf, "RCVBUF", value);
 }
 
@@ -1284,6 +1324,7 @@ static VALUE rb_czmq_socket_set_opt_rcvbuf(VALUE obj, VALUE value)
 
 static VALUE rb_czmq_socket_opt_linger(VALUE obj)
 {
+    zmq_sock_wrapper *sock = NULL;
     GetZmqSocket(obj);
     return INT2NUM(zsockopt_linger(sock->socket));
 }
@@ -1303,6 +1344,7 @@ static VALUE rb_czmq_socket_opt_linger(VALUE obj)
 
 static VALUE rb_czmq_socket_set_opt_linger(VALUE obj, VALUE value)
 {
+    zmq_sock_wrapper *sock = NULL;
     ZmqSetSockOpt(obj, zsockopt_set_linger, "LINGER", value);
 }
 
@@ -1321,6 +1363,7 @@ static VALUE rb_czmq_socket_set_opt_linger(VALUE obj, VALUE value)
 
 static VALUE rb_czmq_socket_opt_backlog(VALUE obj)
 {
+    zmq_sock_wrapper *sock = NULL;
     GetZmqSocket(obj);
     return INT2NUM(zsockopt_backlog(sock->socket));
 }
@@ -1340,6 +1383,7 @@ static VALUE rb_czmq_socket_opt_backlog(VALUE obj)
 
 static VALUE rb_czmq_socket_set_opt_backlog(VALUE obj, VALUE value)
 {
+    zmq_sock_wrapper *sock = NULL;
     ZmqSetSockOpt(obj, zsockopt_set_backlog, "BACKLOG", value);
 }
 
@@ -1358,6 +1402,7 @@ static VALUE rb_czmq_socket_set_opt_backlog(VALUE obj, VALUE value)
 
 static VALUE rb_czmq_socket_opt_reconnect_ivl(VALUE obj)
 {
+    zmq_sock_wrapper *sock = NULL;
     GetZmqSocket(obj);
     return INT2NUM(zsockopt_reconnect_ivl(sock->socket));
 }
@@ -1377,6 +1422,7 @@ static VALUE rb_czmq_socket_opt_reconnect_ivl(VALUE obj)
 
 static VALUE rb_czmq_socket_set_opt_reconnect_ivl(VALUE obj, VALUE value)
 {
+    zmq_sock_wrapper *sock = NULL;
     ZmqSetSockOpt(obj, zsockopt_set_reconnect_ivl, "RECONNECT_IVL", value);
 }
 
@@ -1395,6 +1441,7 @@ static VALUE rb_czmq_socket_set_opt_reconnect_ivl(VALUE obj, VALUE value)
 
 static VALUE rb_czmq_socket_opt_reconnect_ivl_max(VALUE obj)
 {
+    zmq_sock_wrapper *sock = NULL;
     GetZmqSocket(obj);
     return INT2NUM(zsockopt_reconnect_ivl_max(sock->socket));
 }
@@ -1414,6 +1461,7 @@ static VALUE rb_czmq_socket_opt_reconnect_ivl_max(VALUE obj)
 
 static VALUE rb_czmq_socket_set_opt_reconnect_ivl_max(VALUE obj, VALUE value)
 {
+    zmq_sock_wrapper *sock = NULL;
     ZmqSetSockOpt(obj, zsockopt_set_reconnect_ivl_max, "RECONNECT_IVL_MAX", value);
 }
 
@@ -1433,6 +1481,7 @@ static VALUE rb_czmq_socket_set_opt_reconnect_ivl_max(VALUE obj, VALUE value)
 static VALUE rb_czmq_socket_set_opt_identity(VALUE obj, VALUE value)
 {
     char *val;
+    zmq_sock_wrapper *sock = NULL;
     GetZmqSocket(obj);
     ZmqSockGuardCrossThread(sock);
     Check_Type(value, T_STRING);
@@ -1460,6 +1509,7 @@ static VALUE rb_czmq_socket_set_opt_identity(VALUE obj, VALUE value)
 
 static VALUE rb_czmq_socket_set_opt_subscribe(VALUE obj, VALUE value)
 {
+    zmq_sock_wrapper *sock = NULL;
     ZmqSetStringSockOpt(obj, zsockopt_set_subscribe, "SUBSCRIBE", value, {
        ZmqAssertSockOptFor(ZMQ_SUB)
     });
@@ -1480,6 +1530,7 @@ static VALUE rb_czmq_socket_set_opt_subscribe(VALUE obj, VALUE value)
 
 static VALUE rb_czmq_socket_set_opt_unsubscribe(VALUE obj, VALUE value)
 {
+    zmq_sock_wrapper *sock = NULL;
     ZmqSetStringSockOpt(obj, zsockopt_set_unsubscribe, "UNSUBSCRIBE", value, {
        ZmqAssertSockOptFor(ZMQ_SUB)
     });
@@ -1500,6 +1551,7 @@ static VALUE rb_czmq_socket_set_opt_unsubscribe(VALUE obj, VALUE value)
 
 static VALUE rb_czmq_socket_opt_rcvmore(VALUE obj)
 {
+    zmq_sock_wrapper *sock = NULL;
     GetZmqSocket(obj);
     return (zsockopt_rcvmore(sock->socket) == 1) ? Qtrue : Qfalse;
 }
@@ -1519,6 +1571,7 @@ static VALUE rb_czmq_socket_opt_rcvmore(VALUE obj)
 
 static VALUE rb_czmq_socket_opt_events(VALUE obj)
 {
+    zmq_sock_wrapper *sock = NULL;
     GetZmqSocket(obj);
     return INT2NUM(zsockopt_events(sock->socket));
 }
