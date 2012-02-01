@@ -46,7 +46,7 @@ class ZMQ::Loop
 
   class << self
     extend Forwardable
-    def_delegators :instance, :context, :stop, :running?, :verbose=, :register_timer, :cancel_timer, :register_socket, :remove_socket
+    def_delegators :instance, :context, :stop, :running?, :verbose=, :register_timer, :cancel_timer, :register, :remove
     private
     attr_accessor :instance
   end
@@ -98,7 +98,7 @@ class ZMQ::Loop
   def self.register_readable(socket, handler = ZMQ::DefaultHandler, *args)
     socket.handler = handler.new(socket, *args) if handler
     assert_handler_for_event(socket, :on_readable)
-    instance.register_socket(socket, ZMQ::POLLIN)
+    instance.register(socket, ZMQ::POLLIN)
   end
 
   # Registers a given ZMQ::Socket instance for writable events notification.
@@ -110,7 +110,7 @@ class ZMQ::Loop
   def self.register_writable(socket, handler = ZMQ::DefaultHandler, *args)
     socket.handler = handler.new(socket, *args) if handler
     assert_handler_for_event(socket, :on_writable)
-    instance.register_socket(socket, ZMQ::POLLOUT)
+    instance.register(socket, ZMQ::POLLOUT)
   end
 
   # Registers a oneshot timer with the event loop.

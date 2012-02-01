@@ -329,17 +329,17 @@ static VALUE rb_czmq_loop_set_verbose(VALUE obj, VALUE level)
 
 /*
  *  call-seq:
- *     loop.register_socket(sock, ZMQ::POLLIN)    =>  true
+ *     loop.register(sock, ZMQ::POLLIN)    =>  true
  *
  *  Registers a socket for read or write events. Only ZMQ::POLLIN and ZMQ::POLLOUT events are supported.
  *
  * === Examples
- *     loop = ZMQ::Loop.new    =>   ZMQ::Loop
- *     loop.register_socket(sock, ZMQ::POLLIN)   =>   true
+ *     loop = ZMQ::Loop.new                =>   ZMQ::Loop
+ *     loop.register(sock, ZMQ::POLLIN)    =>   true
  *
 */
 
-static VALUE rb_czmq_loop_register_socket(VALUE obj, VALUE socket, VALUE event)
+static VALUE rb_czmq_loop_register(VALUE obj, VALUE socket, VALUE event)
 {
     int rc, evt;
     zmq_pollitem_t *pollitem = NULL;
@@ -367,17 +367,18 @@ static VALUE rb_czmq_loop_register_socket(VALUE obj, VALUE socket, VALUE event)
 
 /*
  *  call-seq:
- *     loop.remove_socket(sock)    =>  nil
+ *     loop.remove(sock)    =>  nil
  *
- *  Removes a previously registered socket from the reactor loop.
+ *  Removes a previously registered poll item from the reactor loop.
  *
  * === Examples
- *     loop = ZMQ::Loop.new    =>   ZMQ::Loop
- *     loop.verbose = true   =>    nil
+ *     loop = ZMQ::Loop.new                =>   ZMQ::Loop
+ *     loop.register(sock, ZMQ::POLLIN)    =>   true
+ *     loop.remove(sock)
  *
 */
 
-static VALUE rb_czmq_loop_remove_socket(VALUE obj, VALUE socket)
+static VALUE rb_czmq_loop_remove(VALUE obj, VALUE socket)
 {
     zmq_pollitem_t *pollitem = NULL;
     zmq_sock_wrapper *sock = NULL;
@@ -457,8 +458,8 @@ void _init_rb_czmq_loop()
     rb_define_method(rb_cZmqLoop, "running?", rb_czmq_loop_running_p, 0);
     rb_define_method(rb_cZmqLoop, "destroy", rb_czmq_loop_destroy, 0);
     rb_define_method(rb_cZmqLoop, "verbose=", rb_czmq_loop_set_verbose, 1);
-    rb_define_method(rb_cZmqLoop, "register_socket", rb_czmq_loop_register_socket, 2);
-    rb_define_method(rb_cZmqLoop, "remove_socket", rb_czmq_loop_remove_socket, 1);
+    rb_define_method(rb_cZmqLoop, "register", rb_czmq_loop_register, 2);
+    rb_define_method(rb_cZmqLoop, "remove", rb_czmq_loop_remove, 1);
     rb_define_method(rb_cZmqLoop, "register_timer", rb_czmq_loop_register_timer, 1);
     rb_define_method(rb_cZmqLoop, "cancel_timer", rb_czmq_loop_cancel_timer, 1);
 }

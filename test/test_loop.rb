@@ -145,17 +145,17 @@ class TestZmqLoop < ZmqTestCase
     end
   end
 
-  def test_register_socket
+  def test_register
     ctx = ZMQ::Context.new
     ret = ZMQ::Loop.run do
       s1 = ctx.socket(:PAIR)
       s2 = ctx.socket(:PAIR)
       s3 = ctx.socket(:PAIR)
-      ZL.bind(s1, "inproc://test_register_socket", LoopBreaker)
-      ZL.connect(s2, "inproc://test_register_socket")
+      ZL.bind(s1, "inproc://test.loop-register", LoopBreaker)
+      ZL.connect(s2, "inproc://test.loop-register")
       s2.send("message")
       assert_raises ZMQ::Error do
-        ZL.register_socket(s3, ZMQ::POLLIN)
+        ZL.register(s3, ZMQ::POLLIN)
       end
     end
     assert_equal(-1, ret)
@@ -179,8 +179,8 @@ class TestZmqLoop < ZmqTestCase
       ret = ZMQ::Loop.run do
         s1 = ctx.socket(:PAIR)
         s2 = ctx.socket(:PAIR)
-        ZL.bind(s1, "inproc://test_raise_from_socket_callback", FailHandler)
-        ZL.connect(s2, "inproc://test_raise_from_socket_callback")
+        ZL.bind(s1, "inproc://test.loop-raise_from_socket_callback", FailHandler)
+        ZL.connect(s2, "inproc://test.loop-raise_from_socket_callback")
         s2.send("message")
       end
       assert_equal(-1, ret)
@@ -195,8 +195,8 @@ class TestZmqLoop < ZmqTestCase
       ret = ZMQ::Loop.run do
         s1 = ctx.socket(:PAIR)
         s2 = ctx.socket(:PAIR)
-        ZL.bind(s1, "inproc://test_raise_on_invalid_handler", FailHandler)
-        ZL.connect(s2, "inproc://test_raise_on_invalid_handler")
+        ZL.bind(s1, "inproc://test.loop-raise_on_invalid_handler", FailHandler)
+        ZL.connect(s2, "inproc://test.loop-raise_on_invalid_handler")
         s2.send("message")
       end
       assert_equal(-1, ret)

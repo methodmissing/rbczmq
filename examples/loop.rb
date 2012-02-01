@@ -80,7 +80,7 @@ class Consumer
   end
 
   def stop
-    ZL.remove_socket(@socket)
+    ZL.remove(@socket)
     stats
   end
 
@@ -122,7 +122,7 @@ class Producer
 
   def stop
     @consumers.each{|c| c.stop }
-    ZL.remove_socket(@socket)
+    ZL.remove(@socket)
     ZL.stop
     @ctx.destroy
   end
