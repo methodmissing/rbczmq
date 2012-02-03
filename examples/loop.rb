@@ -42,18 +42,18 @@ require 'zmq'
 require 'pp'
 
 class ConsumerHandler < ZMQ::Handler
-  def initialize(socket, consumer)
+  def initialize(pollable, consumer)
     super
     @consumer = consumer
   end
 
   def on_readable
-    @consumer.perform socket.recv_nonblock
+    @consumer.perform recv
   end
 end
 
 class ProducerHandler < ZMQ::Handler
-  def initialize(socket, producer)
+  def initialize(pollable, producer)
     super
     @producer = producer
   end

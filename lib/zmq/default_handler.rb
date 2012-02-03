@@ -38,15 +38,15 @@
 
 class ZMQ::DefaultHandler < ZMQ::Handler
 
-  # A default / blanket socket callback handler for when a socket is registered on a ZMQ::Loop instance.
+  # A default / blanket pollitem callback handler for when a socket or IO is registered on a ZMQ::Loop instance.
   #
-  # XXX: Likely a massive fail for some socket pairs as a default - look into removing this.
+  # XXX: Likely a massive fail for some socket / IO pairs as a default - look into removing this.
 
   def on_readable
-    p socket.recv_nonblock
+    p recv
   end
 
   def on_writable
-    socket.send("")
+    send("")
   end
 end

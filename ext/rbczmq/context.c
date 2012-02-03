@@ -289,7 +289,6 @@ static VALUE rb_czmq_ctx_socket(VALUE obj, VALUE type)
     sock->frame_buffer = zlist_new();
     sock->msg_buffer = zlist_new();
 #endif
-    sock->handler = Qnil;
     sock->flags = 0;
     sock->ctx = ctx->ctx;
     sock->verbose = FALSE;

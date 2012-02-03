@@ -170,7 +170,7 @@ VALUE rb_czmq_poller_poll(int argc, VALUE *argv, VALUE obj)
 VALUE rb_czmq_poller_register(VALUE obj, VALUE pollable)
 {
     ZmqGetPoller(obj);
-    pollable = rb_czmq_coerce_pollable(pollable);
+    pollable = rb_czmq_pollitem_coerce(pollable);
     ZmqGetPollitem(pollable);
     rb_ary_push(poller->pollables, pollable);
     poller->poll_size++;
@@ -197,7 +197,7 @@ VALUE rb_czmq_poller_remove(VALUE obj, VALUE pollable)
     int pos;
     VALUE rpollable;
     ZmqGetPoller(obj);
-    pollable = rb_czmq_coerce_pollable(pollable);
+    pollable = rb_czmq_pollitem_coerce(pollable);
     ZmqGetPollitem(pollable);
     for (pos = 0; pos < poller->poll_size; pos++) {
         rpollable = rb_ary_entry(poller->pollables, (long)pos);

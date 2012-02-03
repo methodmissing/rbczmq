@@ -246,8 +246,12 @@ Running tests
 * Watch out for further cases where REQ / REP pairs could raise EFSM
 * Fix Rubinius linking wrong libzmq
 * Regen gh-pages branch to reflect ZMQ::Poller changes
-* Let ZMQ::Loop prefer ZMQ::Poller instances for (de)registration with the reactor
 * Do not clobber local scope from macros (James's commit in master)
+* Release GIL for poller + reactor loop
+* Let ZMQ::Pollitem support BasicSocket as well
+* Revisit ZMQ::Handler#send && ZMQ::Handler#recv
+* Verbose mode for ZMQ::Poller and let ZMQ::Pollitem be aware of verbose pollables as well
+* Handle examples/../lib/zmq/loop.rb:69: [BUG] Segmentation fault
 
 == Contact, feedback and bugs
 

@@ -76,7 +76,6 @@ void rb_czmq_mark_sock(void *ptr)
     if (sock){
         if (sock->verbose)
             zclock_log ("I: %s socket %p, context %p: GC mark", zsocket_type_str(sock->socket), sock, sock->ctx);
-        rb_gc_mark(sock->handler);
         rb_gc_mark(sock->endpoint);
         rb_gc_mark(sock->thread);
         rb_gc_mark(sock->recv_timeout);
@@ -831,48 +830,6 @@ static VALUE rb_czmq_socket_recv_message(VALUE obj)
 
 /*
  *  call-seq:
- *     sock.handler = MyFrameHandler =>  nil
- *
- *  Associates a callback handler with this socket.
- *
- * === Examples
- *     ctx = ZMQ::Context.new
- *     sock = ctx.socket(:REP)
- *     sock.handler = MyFrameHandler => nil
- *
-*/
-
-static VALUE rb_czmq_socket_set_handler(VALUE obj, VALUE handler)
-{
-    zmq_sock_wrapper *sock = NULL;
-    GetZmqSocket(obj);
-    sock->handler = handler;
-    return Qnil;
-}
-
-/*
- *  call-seq:
- *     sock.handler =>  Object or nil
- *
- *  Returns the callback handler currently associated with this socket.
- *
- * === Examples
- *     ctx = ZMQ::Context.new
- *     sock = ctx.socket(:REP)
- *     sock.handler = MyFrameHandler
- *     sock.handler   =>   MyFrameHandler
- *
-*/
-
-static VALUE rb_czmq_socket_handler(VALUE obj)
-{
-    zmq_sock_wrapper *sock = NULL;
-    GetZmqSocket(obj);
-    return sock->handler;
-}
-
-/*
- *  call-seq:
  *     sock.recv_timeout = 5 =>  nil
  *
  *  Sets a receive timeout for this socket.
@@ -1610,8 +1567,6 @@ void _init_rb_czmq_socket()
     rb_define_method(rb_cZmqSocket, "recv_frame", rb_czmq_socket_recv_frame, 0);
     rb_define_method(rb_cZmqSocket, "recv_frame_nonblock", rb_czmq_socket_recv_frame_nonblock, 0);
     rb_define_method(rb_cZmqSocket, "recv_message", rb_czmq_socket_recv_message, 0);
-    rb_define_method(rb_cZmqSocket, "handler=", rb_czmq_socket_set_handler, 1);
-    rb_define_method(rb_cZmqSocket, "handler", rb_czmq_socket_handler, 0);
     rb_define_method(rb_cZmqSocket, "recv_timeout=", rb_czmq_socket_set_recv_timeout, 1);
     rb_define_method(rb_cZmqSocket, "recv_timeout", rb_czmq_socket_recv_timeout, 0);
     rb_define_method(rb_cZmqSocket, "send_timeout=", rb_czmq_socket_set_send_timeout, 1);

@@ -313,17 +313,6 @@ class TestZmqSocket < ZmqTestCase
     ctx.destroy
   end
 
-  def test_handler
-    ctx = ZMQ::Context.new
-    sock = ctx.socket(:PAIR)
-    assert_nil sock.handler
-    handler = Module.new
-    sock.handler = handler
-    assert_equal handler, handler
-  ensure
-    ctx.destroy
-  end
-
   def test_sock_options
     ctx = ZMQ::Context.new
     sock = ctx.socket(:PAIR)

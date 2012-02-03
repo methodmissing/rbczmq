@@ -41,8 +41,9 @@ require "forwardable"
 
 class ZMQ::Loop
 
-  # The ZMQ::Loop class provides an event-driven reactor pattern. The reactor handlers ZMQ::Socket instances and once-off
-  # or repeated timers. Its resolution is 1 msec. It uses a tickless timer to reduce CPU interrupts in inactive processes.
+  # The ZMQ::Loop class provides an event-driven reactor pattern. The reactor handles ZMQ::Socket or IO instances and
+  # once-off or repeated timers. Its resolution is 1 msec. It uses a tickless timer to reduce CPU interrupts in inactive
+  # processes.
 
   class << self
     extend Forwardable
@@ -51,7 +52,7 @@ class ZMQ::Loop
     attr_accessor :instance
   end
 
-  # Start the reactor. Takes control of the thread and returns when :
+  # Start the reactor. Takes control of the current thread and returns when :
   #
   # * the 0MQ context is terminated or
   # * the process is interrupted or
@@ -68,7 +69,7 @@ class ZMQ::Loop
     instance.start
   end
 
-  # A higher level API for socket bind and loop registration.
+  # A higher level API for ZMQ socket bind and loop registration.
   #
   # ZMQ::Loop.run do
   #   ZL.bind(pub, "inproc://fanout", Producer)
@@ -78,7 +79,7 @@ class ZMQ::Loop
     attach(socket, :bind, address, handler, *args)
   end
 
-  # A higher level API for socket bind and loop registration.
+  # A higher level API for ZMQ socket bind and loop registration.
   #
   # ZMQ::Loop.run do
   #   ZL.bind(pub, "inproc://fanout", Producer)
@@ -89,28 +90,30 @@ class ZMQ::Loop
     attach(socket, :connect, address, handler, *args)
   end
 
-  # Registers a given ZMQ::Socket instance for readable events notification.
+  # Registers a given ZMQ::Socket or IO instance for readable events notification.
   #
   # ZMQ::Loop.run do
   #   ZL.register_readable(sub, "inproc://fanout", Consumer)
   # end
   #
-  def self.register_readable(socket, handler = ZMQ::DefaultHandler, *args)
-    socket.handler = handler.new(socket, *args) if handler
-    assert_handler_for_event(socket, :on_readable)
-    instance.register(socket, ZMQ::POLLIN)
+  def self.register_readable(pollable, handler = ZMQ::DefaultHandler, *args)
+    pollitem = ZMQ::Pollitem.new(pollable, ZMQ::POLLIN)
+    pollitem.handler = handler.new(pollable, *args) if handler
+    assert_handler_for_event(pollitem, :on_readable)
+    instance.register(pollitem)
   end
 
-  # Registers a given ZMQ::Socket instance for writable events notification.
+  # Registers a given ZMQ::Socket or IO instance for writable events notification.
   #
   # ZMQ::Loop.run do
   #   ZL.register_writable(pub, "inproc://fanout", Producer)
   # end
   #
-  def self.register_writable(socket, handler = ZMQ::DefaultHandler, *args)
-    socket.handler = handler.new(socket, *args) if handler
-    assert_handler_for_event(socket, :on_writable)
-    instance.register(socket, ZMQ::POLLOUT)
+  def self.register_writable(pollable, handler = ZMQ::DefaultHandler, *args)
+    pollitem = ZMQ::Pollitem.new(pollable, ZMQ::POLLOUT)
+    pollitem.handler = handler.new(pollable, *args) if handler
+    assert_handler_for_event(pollitem, :on_writable)
+    instance.register(pollitem)
   end
 
   # Registers a oneshot timer with the event loop.
@@ -153,10 +156,10 @@ class ZMQ::Loop
     ret
   end
 
-  def self.assert_handler_for_event(socket, cb)
-    unless socket.handler.respond_to?(cb)
-      socket.handler = nil
-      raise ZMQ::Error, "Socket #{socket.type_str}'s handler #{socket.handler.class} expected to implement an #{cb} callback!"
+  def self.assert_handler_for_event(pollitem, cb)
+    unless pollitem.handler.respond_to?(cb)
+      pollitem.handler = nil
+      raise ZMQ::Error, "Pollable entity #{pollitem.pollable}'s handler #{pollitem.handler.class} expected to implement an #{cb} callback!"
     end
   end
 end

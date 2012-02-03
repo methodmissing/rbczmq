@@ -12,6 +12,7 @@ void rb_czmq_mark_pollitem(void *ptr)
         rb_gc_mark(pollitem->socket);
         rb_gc_mark(pollitem->io);
         rb_gc_mark(pollitem->events);
+        rb_gc_mark(pollitem->handler);
     }
 }
 
@@ -70,6 +71,7 @@ static VALUE rb_czmq_pollitem_s_new(int argc, VALUE *argv, VALUE obj)
     /* XXX: Cleanup allocated struct on any failures below */
     obj = Data_Make_Struct(rb_cZmqPollitem, zmq_pollitem_wrapper, rb_czmq_mark_pollitem, rb_czmq_free_pollitem_gc, pollitem);
     pollitem->events = events;
+    pollitem->handler = Qnil;
     pollitem->item = ALLOC(zmq_pollitem_t);
     if (!pollitem->item) rb_memerror();
     pollitem->item->events = evts;
@@ -81,6 +83,8 @@ static VALUE rb_czmq_pollitem_s_new(int argc, VALUE *argv, VALUE obj)
        pollitem->io = Qnil;
        pollitem->item->fd = 0;
        pollitem->item->socket = sock->socket;
+       /* Do not block on socket close */
+       zsockopt_set_linger(sock->socket, 1);
     } else if (rb_obj_is_kind_of(pollable, rb_cIO)) {
        pollitem->io = pollable;
        pollitem->socket = Qnil;
@@ -95,18 +99,36 @@ static VALUE rb_czmq_pollitem_s_new(int argc, VALUE *argv, VALUE obj)
 }
 
 /*
+ *  call-seq:
+ *     ZMQ::Pollitem.coerce(sock) =>  ZMQ::Pollitem
+ *
+ *  Attempts to coerce a ZMQ::Socket or IO to a ZMQ::Pollitem instance
+ *
+ * === Examples
+ *
+ *     ZMQ::Pollitem.coerce(sock)   =>  ZMQ::Pollitem
+ *     ZMQ::Pollitem.coerce(STDOUT) =>  IO
+ *
+*/
+
+VALUE rb_czmq_pollitem_s_coerce(ZMQ_UNUSED VALUE obj, VALUE pollable)
+{
+    VALUE pollitem;
+    VALUE args[1];
+    if (rb_obj_is_kind_of(pollable, rb_cZmqPollitem)) return pollable;
+    args[0] = pollable;
+    pollitem = Qnil;
+    return rb_czmq_pollitem_s_new(1, args, pollitem);
+}
+
+/*
  * :nodoc:
  *  Attempt to coerce an object to a ZMQ::Pollitem instance
  *
 */
-VALUE rb_czmq_coerce_pollable(VALUE obj)
+VALUE rb_czmq_pollitem_coerce(VALUE pollable)
 {
-    VALUE pollable;
-    VALUE args[1];
-    if (rb_obj_is_kind_of(obj, rb_cZmqPollitem)) return obj;
-    args[0] = obj;
-    return rb_czmq_pollitem_s_new(1, args, pollable);
-    return pollable;	
+    return rb_czmq_pollitem_s_coerce(Qnil, pollable);
 }
 
 /*
@@ -124,6 +146,7 @@ VALUE rb_czmq_coerce_pollable(VALUE obj)
  *     item.pollable                            =>  ZMQ::Socket
  *
 */
+
 VALUE rb_czmq_pollitem_pollable(VALUE obj)
 {
     ZmqGetPollitem(obj);
@@ -143,10 +166,49 @@ VALUE rb_czmq_pollitem_pollable(VALUE obj)
  *     item.events                                   =>  ZMQ::POLLIN
  *
 */
+
 VALUE rb_czmq_pollitem_events(VALUE obj)
 {
     ZmqGetPollitem(obj);
     return pollitem->events;
+}
+
+/*
+ *  call-seq:
+ *     pollitem.handler =>  Object or nil
+ *
+ *  Returns the callback handler currently associated with this poll item.
+ *
+ * === Examples
+ *     item = ZMQ::Pollitem.new(sock)
+ *     item.handler = MyFrameHandler   => nil
+ *     item.handler                    => MyFrameHandler
+ *
+*/
+
+VALUE rb_czmq_pollitem_handler(VALUE obj)
+{
+    ZmqGetPollitem(obj);
+    return pollitem->handler;
+}
+
+/*
+ *  call-seq:
+ *     pollitem.handler = MyFrameHandler =>  nil
+ *
+ *  Associates a callback handler with this poll item.
+ *
+ * === Examples
+ *     item = ZMQ::Pollitem.new(sock)
+ *     item.handler = MyFrameHandler => nil
+ *
+*/
+
+VALUE rb_czmq_pollitem_handler_equals(VALUE obj, VALUE handler)
+{
+    ZmqGetPollitem(obj);
+    pollitem->handler = handler;
+    return Qnil;
 }
 
 void _init_rb_czmq_pollitem()
@@ -154,6 +216,9 @@ void _init_rb_czmq_pollitem()
     rb_cZmqPollitem = rb_define_class_under(rb_mZmq, "Pollitem", rb_cObject);
 
     rb_define_singleton_method(rb_cZmqPollitem, "new", rb_czmq_pollitem_s_new, -1);
+    rb_define_singleton_method(rb_cZmqPollitem, "coerce", rb_czmq_pollitem_s_coerce, 1);
     rb_define_method(rb_cZmqPollitem, "pollable", rb_czmq_pollitem_pollable, 0);
     rb_define_method(rb_cZmqPollitem, "events", rb_czmq_pollitem_events, 0);
+    rb_define_method(rb_cZmqPollitem, "handler", rb_czmq_pollitem_handler, 0);
+    rb_define_method(rb_cZmqPollitem, "handler=", rb_czmq_pollitem_handler_equals, 1);
 }

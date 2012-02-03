@@ -145,7 +145,7 @@ class TestZmqLoop < ZmqTestCase
     end
   end
 
-  def test_register
+  def test_register_sockets
     ctx = ZMQ::Context.new
     ret = ZMQ::Loop.run do
       s1 = ctx.socket(:PAIR)
@@ -155,12 +155,22 @@ class TestZmqLoop < ZmqTestCase
       ZL.connect(s2, "inproc://test.loop-register")
       s2.send("message")
       assert_raises ZMQ::Error do
-        ZL.register(s3, ZMQ::POLLIN)
+        ZL.register(s3)
       end
     end
     assert_equal(-1, ret)
   ensure
     ctx.destroy
+  end
+
+  def test_register_ios
+    ret = ZMQ::Loop.run do
+      r, w = IO.pipe
+      ZL.register_readable(r, LoopBreaker)
+      ZL.register_writable(w)
+      w.write("message")
+    end
+    assert_equal(-1, ret)
   end
 
   class FailHandler < ZMQ::Handler
@@ -187,6 +197,18 @@ class TestZmqLoop < ZmqTestCase
     end
   ensure
     ctx.destroy
+  end
+
+  def test_raise_from_io_callback
+    assert_raises RuntimeError do
+      ret = ZMQ::Loop.run do
+        r, w = IO.pipe
+        ZL.register_readable(r, FailHandler)
+        ZL.register_writable(w)
+        w.write("message")
+      end
+      assert_equal(-1, ret)
+    end
   end
 
   def test_raise_on_invalid_handler

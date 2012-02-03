@@ -130,14 +130,14 @@ ZMQ_NOINLINE static int rb_czmq_loop_timer_callback(zloop_t *loop, ZMQ_UNUSED zm
  *  by invoking the error callback on the handler registered for this socket.
  *
 */
-ZMQ_NOINLINE static int rb_czmq_loop_socket_callback(zloop_t *loop, zmq_pollitem_t *item, void *arg)
+ZMQ_NOINLINE static int rb_czmq_loop_pollitem_callback(zloop_t *loop, zmq_pollitem_t *item, void *arg)
 {
     int ret_r = 0;
     int ret_w = 0;
     int ret_e = 0;
     VALUE args[3];
-    zmq_sock_wrapper *socket = arg;
-    args[0] = (VALUE)socket->handler;
+    zmq_pollitem_wrapper *pollitem = (zmq_pollitem_wrapper *)arg;
+    args[0] = (VALUE)pollitem->handler;
     args[2] = Qnil;
     if (item->revents & ZMQ_POLLIN) {
         args[1] = intern_readable;
@@ -329,68 +329,52 @@ static VALUE rb_czmq_loop_set_verbose(VALUE obj, VALUE level)
 
 /*
  *  call-seq:
- *     loop.register(sock, ZMQ::POLLIN)    =>  true
+ *     loop.register(item)                 =>  true
  *
- *  Registers a socket for read or write events. Only ZMQ::POLLIN and ZMQ::POLLOUT events are supported.
+ *  Registers a poll item with the reactor. Only ZMQ::POLLIN and ZMQ::POLLOUT events are supported.
  *
  * === Examples
- *     loop = ZMQ::Loop.new                =>   ZMQ::Loop
- *     loop.register(sock, ZMQ::POLLIN)    =>   true
+ *     loop = ZMQ::Loop.new                        =>   ZMQ::Loop
+ *     item = ZMQ::Pollitem.new(sock, ZMQ::POLLIN) =>   ZMQ::Pollitem
+ *     loop.register(item)                         =>   true
  *
 */
 
-static VALUE rb_czmq_loop_register(VALUE obj, VALUE socket, VALUE event)
+static VALUE rb_czmq_loop_register(VALUE obj, VALUE pollable)
 {
-    int rc, evt;
-    zmq_pollitem_t *pollitem = NULL;
-    zmq_sock_wrapper *sock = NULL;
+    int rc;
     errno = 0;
     ZmqGetLoop(obj);
-    GetZmqSocket(socket);
-    ZmqAssertSocketNotPending(sock, "socket in a pending state (not bound or connected) and cannot be registered with the event loop!");
-    ZmqSockGuardCrossThread(sock);
-    Check_Type(event, T_FIXNUM);
-    evt = FIX2INT(event);
-    if (evt != ZMQ_POLLIN && evt != ZMQ_POLLOUT)
-        rb_raise(rb_eZmqError, "invalid socket event: Only ZMQ::POLLIN and ZMQ::POLLOUT events are supported!");
-    pollitem = ruby_xmalloc(sizeof(zmq_pollitem_t));
-    pollitem->socket = sock->socket;
-    pollitem->events |= evt;
-    rc = zloop_poller(loop->loop, pollitem, rb_czmq_loop_socket_callback, (void *)sock);
+    pollable = rb_czmq_pollitem_coerce(pollable);
+    ZmqGetPollitem(pollable);
+    rc = zloop_poller(loop->loop, pollitem->item, rb_czmq_loop_pollitem_callback, (void *)pollitem);
     ZmqAssert(rc);
-    /* Do not block on socket close */
-    zsockopt_set_linger(sock->socket, 1);
    /* Let socket be verbose if loop is verbose */
-    if (loop->verbose == TRUE) sock->verbose = loop->verbose;
+/*    if (loop->verbose == TRUE) sock->verbose = loop->verbose; */
     return Qtrue;
 }
 
 /*
  *  call-seq:
- *     loop.remove(sock)    =>  nil
+ *     loop.remove(item)    =>  nil
  *
  *  Removes a previously registered poll item from the reactor loop.
  *
  * === Examples
- *     loop = ZMQ::Loop.new                =>   ZMQ::Loop
- *     loop.register(sock, ZMQ::POLLIN)    =>   true
- *     loop.remove(sock)
+ *     loop = ZMQ::Loop.new                        =>   ZMQ::Loop
+ *     item = ZMQ::Pollitem.new(sock, ZMQ::POLLIN) =>   ZMQ::Pollitem
+ *     loop.register(item)                         =>   true
+ *     loop.remove(item)                           =>   nil
  *
 */
 
-static VALUE rb_czmq_loop_remove(VALUE obj, VALUE socket)
+static VALUE rb_czmq_loop_remove(VALUE obj, VALUE pollable)
 {
-    zmq_pollitem_t *pollitem = NULL;
-    zmq_sock_wrapper *sock = NULL;
     errno = 0;
     ZmqGetLoop(obj);
-    GetZmqSocket(socket);
-    ZmqAssertSocketNotPending(sock, "socket in a pending state (not bound or connected) and cannot be unregistered from the event loop!");
-    ZmqSockGuardCrossThread(sock);
-    pollitem = ruby_xmalloc(sizeof(zmq_pollitem_t));
-    pollitem->socket = sock->socket;
-    pollitem->events |= ZMQ_POLLIN | ZMQ_POLLOUT;
-    zloop_poller_end(loop->loop, pollitem);
+    pollable = rb_czmq_pollitem_coerce(pollable);
+    ZmqGetPollitem(pollable);
+    zloop_poller_end(loop->loop, pollitem->item);
     return Qnil;
 }
 
@@ -458,7 +442,7 @@ void _init_rb_czmq_loop()
     rb_define_method(rb_cZmqLoop, "running?", rb_czmq_loop_running_p, 0);
     rb_define_method(rb_cZmqLoop, "destroy", rb_czmq_loop_destroy, 0);
     rb_define_method(rb_cZmqLoop, "verbose=", rb_czmq_loop_set_verbose, 1);
-    rb_define_method(rb_cZmqLoop, "register", rb_czmq_loop_register, 2);
+    rb_define_method(rb_cZmqLoop, "register", rb_czmq_loop_register, 1);
     rb_define_method(rb_cZmqLoop, "remove", rb_czmq_loop_remove, 1);
     rb_define_method(rb_cZmqLoop, "register_timer", rb_czmq_loop_register_timer, 1);
     rb_define_method(rb_cZmqLoop, "cancel_timer", rb_czmq_loop_cancel_timer, 1);

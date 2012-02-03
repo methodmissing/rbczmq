@@ -25,6 +25,22 @@ class TestZmqPollitem < ZmqTestCase
     ctx.destroy
   end
 
+  def test_handler
+    pollitem = ZMQ::Pollitem.new(STDIN, ZMQ::POLLIN)
+    assert_nil pollitem.handler
+    handler = Module.new
+    pollitem.handler = handler
+    assert_equal handler, pollitem.handler
+  end
+
+  def test_coerce
+    pollitem = ZMQ::Pollitem.new(STDIN)
+    assert_equal pollitem, ZMQ::Pollitem.coerce(pollitem)
+    coerced = ZMQ::Pollitem.coerce(STDIN)
+    assert_instance_of ZMQ::Pollitem, coerced
+    assert_equal STDIN, coerced.pollable
+  end
+
   def test_alloc_failures
     ctx = ZMQ::Context.new
     rep = ctx.socket(:REP)

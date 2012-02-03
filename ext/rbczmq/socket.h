@@ -56,7 +56,6 @@ typedef struct {
     zlist_t *frame_buffer;
     zlist_t *msg_buffer;
 #endif
-    VALUE handler;
     VALUE endpoint;
     VALUE thread;
     VALUE recv_timeout;
