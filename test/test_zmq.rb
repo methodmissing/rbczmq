@@ -12,7 +12,7 @@ class TestZmq < ZmqTestCase
   end
 
   def test_now
-    assert_instance_of Fixnum, ZMQ.now
+    assert [Bignum, Fixnum].include?(ZMQ.now.class)
   end
 
   def test_log
