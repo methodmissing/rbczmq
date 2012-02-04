@@ -99,6 +99,19 @@ VALUE rb_czmq_poller_new(VALUE obj)
 }
 
 /*
+ * :nodoc:
+ *  Polls a set of sockets / IOs while the GIL is released.
+ *
+*/
+static VALUE rb_czmq_nogvl_poll(void *ptr)
+{
+    struct nogvl_poll_args *args = ptr;
+    int rc;
+    rc = zmq_poll(args->items, args->nitems, args->timeout);
+    return (VALUE)rc;
+}
+
+/*
  *  call-seq:
  *     poller.poll(1)    =>  Fixnum
  *
@@ -122,6 +135,7 @@ VALUE rb_czmq_poller_poll(int argc, VALUE *argv, VALUE obj)
 {
     VALUE tmout;
     size_t timeout;
+    struct nogvl_poll_args args;
     int rc;
     ZmqGetPoller(obj);
     rb_scan_args(argc, argv, "01", &tmout);
@@ -134,7 +148,12 @@ VALUE rb_czmq_poller_poll(int argc, VALUE *argv, VALUE obj)
     }
     timeout = (size_t)(((TYPE(tmout) == T_FIXNUM) ? FIX2LONG(tmout) : RFLOAT_VALUE(tmout)) * 1000); 
     if (timeout < 0) timeout = -1;
-    rc = zmq_poll(poller->pollset, poller->poll_size, (long)timeout);
+
+    args.items = poller->pollset;
+    args.nitems = poller->poll_size;
+    args.timeout = (long)timeout;
+
+    rc = (int)rb_thread_blocking_region(rb_czmq_nogvl_poll, (void *)&args, RUBY_UBF_IO, 0);
     ZmqAssert(rc);
     if (rc == 0) {
         rb_ary_clear(poller->readables);

@@ -17,6 +17,12 @@ typedef struct {
     Data_Get_Struct(obj, zmq_poll_wrapper, poller); \
     if (!poller) rb_raise(rb_eTypeError, "uninitialized ZMQ poller!");
 
+struct nogvl_poll_args {
+    zmq_pollitem_t *items;
+    int nitems;
+    long timeout;
+};
+
 void _init_rb_czmq_poller();
 
 #endif

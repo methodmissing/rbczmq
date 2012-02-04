@@ -247,11 +247,12 @@ Running tests
 * Fix Rubinius linking wrong libzmq
 * Regen gh-pages branch to reflect ZMQ::Poller changes
 * Do not clobber local scope from macros (James's commit in master)
-* Release GIL for poller + reactor loop
 * Let ZMQ::Pollitem support BasicSocket as well
 * Revisit ZMQ::Handler#send && ZMQ::Handler#recv
 * Verbose mode for ZMQ::Poller and let ZMQ::Pollitem be aware of verbose pollables as well
 * Handle examples/../lib/zmq/loop.rb:69: [BUG] Segmentation fault
+* Support installation without vendor'ed libs as well
+* Incorporate examples into CI as well
 
 == Contact, feedback and bugs
 
