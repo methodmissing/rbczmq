@@ -51,6 +51,7 @@ class Consumer
     @thread = nil
     @connect = Proc.new do
       @socket = ctx.socket(:SUB)
+      @socket.subscribe("")
       # verbose output
       @socket.verbose = true
       @socket.subscribe(topic)

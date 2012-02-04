@@ -67,6 +67,7 @@ class Consumer
   attr_reader :thread
   def initialize(ctx, endpoint, topic = "")
     @socket = ctx.socket(:SUB)
+    @socket.subscribe("")
     @socket.connect(endpoint)
     # verbose output
     @socket.verbose = true

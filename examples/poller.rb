@@ -13,6 +13,7 @@ poller = ZMQ::Poller.new
 
 5.times do
   sub = ctx.connect(:SUB, 'inproc://example.poller')
+  sub.subscribe("")
   subscribers << sub
   poller.register_readable(sub)
 end

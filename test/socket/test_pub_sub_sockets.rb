@@ -7,6 +7,7 @@ class TestPubSubSockets < ZmqTestCase
     ctx = ZMQ::Context.new
     pub = ctx.bind(:PUB, "inproc://test.pub-sub-flow")
     sub = ctx.connect(:SUB, "inproc://test.pub-sub-flow")
+    sub.subscribe("")
     pub.send("a")
     assert_equal "a", sub.recv
   ensure
@@ -17,6 +18,7 @@ class TestPubSubSockets < ZmqTestCase
     ctx = ZMQ::Context.new
     pub = ctx.bind(:PUB, "inproc://test.pub-sub-transfer")
     sub = ctx.connect(:SUB, "inproc://test.pub-sub-transfer")
+    sub.subscribe("")
     pub.send("message")
     assert_equal "message", sub.recv
 
@@ -61,6 +63,7 @@ class TestPubSubSockets < ZmqTestCase
     5.times do |i|
       threads << Thread.new do
         sub = ctx.connect(:SUB, "inproc://test.pub-sub-distribution")
+        sub.subscribe("")
         messages = []
         5.times do
           messages << sub.recv
