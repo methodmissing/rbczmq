@@ -194,7 +194,7 @@ VALUE rb_czmq_poller_register(VALUE obj, VALUE pollable)
     rb_ary_push(poller->pollables, pollable);
     poller->poll_size++;
     poller->dirty = TRUE;
-    return Qtrue;
+    return pollable;
 }
 
 /*
@@ -224,7 +224,7 @@ VALUE rb_czmq_poller_remove(VALUE obj, VALUE pollable)
             rb_ary_delete(poller->pollables, rpollable);
             poller->poll_size--;
             poller->dirty = TRUE;
-            return Qtrue;
+            return rpollable;
         }
     }
     return Qfalse;
