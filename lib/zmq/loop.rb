@@ -62,7 +62,7 @@ class ZMQ::Loop
   #
   def self.register_readable(pollable, handler = ZMQ::DefaultHandler, *args)
     pollitem = ZMQ::Pollitem.new(pollable, ZMQ::POLLIN)
-    pollitem.handler = handler.new(pollable, *args) if handler
+    pollitem.handler = handler.new(pollitem, *args) if handler
     assert_handler_for_event(pollitem, :on_readable)
     instance.register(pollitem)
   end
@@ -75,7 +75,7 @@ class ZMQ::Loop
   #
   def self.register_writable(pollable, handler = ZMQ::DefaultHandler, *args)
     pollitem = ZMQ::Pollitem.new(pollable, ZMQ::POLLOUT)
-    pollitem.handler = handler.new(pollable, *args) if handler
+    pollitem.handler = handler.new(pollitem, *args) if handler
     assert_handler_for_event(pollitem, :on_writable)
     instance.register(pollitem)
   end

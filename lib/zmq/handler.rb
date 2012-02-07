@@ -2,17 +2,17 @@
 
 class ZMQ::Handler
 
-  # The ZMQ::Socket or IO instance wrapped by this handler.
-  attr_reader :pollable
+  # The ZMQ::Pollitem instance wrapped by this handler.
+  attr_reader :pollitem
 
-  # A ZMQ::Socket or IO instance is compulsary on init, with support for optional arguments if a subclasses do require them.
+  # A ZMQ::Pollitem instance is compulsary on init, with support for optional arguments if a subclasses do require them.
   #
   # pub = ctx.bind(:PUB, "tcp://127.0.0.1:5000") # lower level API
   # item = ZMQ::Pollitem.new(pub)
   # item.handler = ZMQ::Handler.new(pub)
   #
   # class ProducerHandler < ZMQ::Handler
-  #   def initialize(pollable, producer)
+  #   def initialize(item, producer)
   #     super
   #     @producer = producer
   #   end
@@ -24,12 +24,9 @@ class ZMQ::Handler
   #
   # ZMQ::Loop.bind(:PUB, "tcp://127.0.0.1:5000", ProducerHandler, producer) # higher level API
   #
-  def initialize(pollable, *args)
-    # XXX: shouldn't leak into handlers
-    unless ZMQ::Socket === pollable || IO === pollable
-      raise TypeError.new("#{pollable.inspect} is not a valid ZMQ::Socket instance")
-    end
-    @pollable = pollable
+  def initialize(pollitem, *args)
+    raise TypeError.new("#{pollitem.inspect} is not a valid ZMQ::Pollitem instance") unless ZMQ::Pollitem === pollitem
+    @pollitem = pollitem
   end
 
   # Callback invoked from ZMQ::Loop handlers when the pollable item is ready for reading. Subclasses are expected to implement
@@ -66,27 +63,14 @@ class ZMQ::Handler
   end
 
   # API that allows handlers to send data regardless of the underlying pollable item type (ZMQ::Socket or IO).
-  # XXX: Expose Pollitem#send(data) instead ?
   #
-  def send(data)
-    case pollable
-    when IO
-      pollable.write_nonblock(data)
-    when ZMQ::Socket
-      pollable.send(data)
-    end
+  def send(*args)
+    pollitem.send(*args)
   end
 
   # API that allows handlers to receive data regardless of the underlying pollable item type (ZMQ::Socket or IO).
-  # XXX: Expose Pollitem#send(data) instead ?
   #
   def recv
-    case pollable
-    when IO
-      # XXX assumed page size
-      pollable.read_nonblock(4096)
-    when ZMQ::Socket
-      pollable.recv_nonblock
-    end
+    pollitem.recv
   end
 end
