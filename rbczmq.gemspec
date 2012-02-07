@@ -7,8 +7,8 @@ Gem::Specification.new do |s|
   s.version = ZMQ::VERSION
   s.summary = "Ruby extension for CZMQ - High-level C Binding for ØMQ (http://czmq.zeromq.org)"
   s.description = "Ruby extension for CZMQ - High-level C Binding for ØMQ (http://czmq.zeromq.org)"
-  s.authors = ["Lourens Naudé"]
-  s.email = ["lourens@methodmissing.com"]
+  s.authors = ["Lourens Naudé", "James Tucker"]
+  s.email = ["lourens@methodmissing.com", "jftucker@gmail.com"]
   s.homepage = "http://github.com/methodmissing/rbczmq"
   s.date = Time.now.utc.strftime('%Y-%m-%d')
   s.platform = Gem::Platform::RUBY

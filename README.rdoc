@@ -1,6 +1,6 @@
 = rbczmq - binding for the high level ZeroMQ C API
 
-(c) 2011 Lourens Naudé (methodmissing), with API guidance from the czmq (http://czmq.zeromq.org/) project.
+(c) 2011 Lourens Naudé (methodmissing), James Tucker (raggi) with API guidance from the czmq (http://czmq.zeromq.org/) project.
 
   http://github.com/methodmissing/rbczmq
 
