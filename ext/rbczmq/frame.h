@@ -7,7 +7,7 @@
     ZmqAssertFrame(obj); \
     Data_Get_Struct(obj, zframe_t, frame); \
     if (!frame) rb_raise(rb_eTypeError, "uninitialized ZMQ frame!"); \
-    if (!(st_lookup(frames_map, (st_data_t)frame, 0))) rb_raise(rb_eZmqError, "object %p has been destroyed by the ZMQ framework", (void *)obj);
+    if (!(st_lookup(frames_map, (st_data_t)frame, 0))) rb_raise(rb_eZmqError, "ZMQ::Frame instance %p has been destroyed by the ZMQ framework", (void *)obj);
 
 #define ZmqRegisterFrame(fr) \
     zframe_freefn((fr), rb_czmq_frame_freed); \

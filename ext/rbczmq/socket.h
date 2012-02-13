@@ -33,7 +33,7 @@ typedef struct {
     ZmqAssertSocket(obj); \
     Data_Get_Struct(obj, zmq_sock_wrapper, sock); \
     if (!sock) rb_raise(rb_eTypeError, "uninitialized ZMQ socket!"); \
-    if (sock->flags & ZMQ_SOCKET_DESTROYED) rb_raise(rb_eZmqError, "object %p has been destroyed by the ZMQ framework", (void *)obj);
+    if (sock->flags & ZMQ_SOCKET_DESTROYED) rb_raise(rb_eZmqError, "ZMQ::Socket instance %p has been destroyed by the ZMQ framework", (void *)obj);
 
 #define ZmqDumpFrame(method, frame) \
   do { \

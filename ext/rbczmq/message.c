@@ -563,6 +563,32 @@ static VALUE rb_czmq_message_equals(VALUE obj, VALUE other_message)
     return rb_czmq_message_eql_p(obj, other_message);
 }
 
+/*
+ *  call-seq:
+ *     msg.to_a    =>  Array
+ *
+ *  Returns an Array of all frames this message is composed of.
+ *
+ * === Examples
+ *     ZMQ::Message.new.to_a                 =>   []
+ *     msg = ZMQ::Message("header", "body")  =>   ZMQ::Message
+ *     msg.to_a                              =>   [ZMQ::Frame("header"), ZMQ::Frame("body")]
+ *
+*/
+
+static VALUE rb_czmq_message_to_a(VALUE obj)
+{
+    VALUE ary;
+    ZmqGetMessage(obj);
+    ary = rb_ary_new2(zmsg_size(message->message));
+    zframe_t *frame = zmsg_first(message->message);
+    while (frame) {
+        rb_ary_push(ary, rb_czmq_alloc_frame(zframe_dup(frame)));
+        frame = zmsg_next(message->message);
+    }
+    return ary;
+}
+
 void _init_rb_czmq_message()
 {
     rb_cZmqMessage = rb_define_class_under(rb_mZmq, "Message", rb_cObject);
@@ -590,4 +616,5 @@ void _init_rb_czmq_message()
     rb_define_method(rb_cZmqMessage, "encode", rb_czmq_message_encode, 0);
     rb_define_method(rb_cZmqMessage, "eql?", rb_czmq_message_equals, 1);
     rb_define_method(rb_cZmqMessage, "==", rb_czmq_message_equals, 1);
+    rb_define_method(rb_cZmqMessage, "to_a", rb_czmq_message_to_a, 0);
 }

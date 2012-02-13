@@ -154,7 +154,7 @@ class TestZmqSocket < ZmqTestCase
       assert_equal ZMQ::Socket::PENDING, sock.state
     rescue => e
       assert_instance_of ZMQ::Error, e
-      assert_match(/object \w* has been destroyed by the ZMQ framework/, e.message)
+      assert_match(/ZMQ::Socket instance \w* has been destroyed by the ZMQ framework/, e.message)
     end
     sleep 0.2
     assert_raises Errno::ECONNREFUSED do

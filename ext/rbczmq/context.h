@@ -14,7 +14,7 @@ typedef struct {
     ZmqAssertContext(obj); \
     Data_Get_Struct(obj, zmq_ctx_wrapper, ctx); \
     if (!ctx) rb_raise(rb_eTypeError, "uninitialized ZMQ context!"); \
-    if (ctx->flags & ZMQ_CONTEXT_DESTROYED) rb_raise(rb_eZmqError, "object %p has been destroyed by the ZMQ framework", (void *)obj);
+    if (ctx->flags & ZMQ_CONTEXT_DESTROYED) rb_raise(rb_eZmqError, "ZMQ::Context instance %p has been destroyed by the ZMQ framework", (void *)obj);
 
 struct nogvl_socket_args {
     zctx_t *ctx;

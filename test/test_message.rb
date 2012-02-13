@@ -97,6 +97,12 @@ class TestZmqMessage < ZmqTestCase
     assert_equal ZMQ::Frame("body"), msg.last
   end
 
+  def test_to_a
+    assert_equal [], ZMQ::Message.new.to_a
+    msg = ZMQ::Message("header", "body")
+    assert_equal [ZMQ::Frame("header"), ZMQ::Frame("body")], msg.to_a
+  end
+
   def test_remove
     msg = ZMQ::Message.new
     header = ZMQ::Frame("header")

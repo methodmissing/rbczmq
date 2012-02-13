@@ -16,7 +16,7 @@ typedef struct {
     ZmqAssertLoop(obj); \
     Data_Get_Struct(obj, zmq_loop_wrapper, loop); \
     if (!loop) rb_raise(rb_eTypeError, "uninitialized ZMQ loop!"); \
-    if (loop->flags & ZMQ_LOOP_DESTROYED) rb_raise(rb_eZmqError, "object %p has been destroyed by the ZMQ framework", (void *)obj);
+    if (loop->flags & ZMQ_LOOP_DESTROYED) rb_raise(rb_eZmqError, "ZMQ::Loop instance %p has been destroyed by the ZMQ framework", (void *)obj);
 
 void _init_rb_czmq_loop();
 
