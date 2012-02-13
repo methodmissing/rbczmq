@@ -124,6 +124,10 @@
         
           <li><a href="../ZMQ/Message.html">ZMQ::Message</a></li>
         
+          <li><a href="../ZMQ/Poller.html">ZMQ::Poller</a></li>
+        
+          <li><a href="../ZMQ/Pollitem.html">ZMQ::Pollitem</a></li>
+        
           <li><a href="../ZMQ/Socket.html">ZMQ::Socket</a></li>
         
           <li><a href="../ZMQ/Socket/Dealer.html">ZMQ::Socket::Dealer</a></li>
@@ -206,7 +210,7 @@
             
             <div class="method-source-code" id="bind-source">
 <pre>
-<span class="ruby-comment"># File lib/zmq/context.rb, line 52</span>
+<span class="ruby-comment"># File lib/zmq/context.rb, line 16</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">bind</span>(<span class="ruby-identifier">sock_type</span>, <span class="ruby-identifier">endpoint</span>)
   <span class="ruby-identifier">s</span> = <span class="ruby-identifier">socket</span>(<span class="ruby-identifier">sock_type</span>)
   <span class="ruby-identifier">s</span>.<span class="ruby-identifier">bind</span>(<span class="ruby-identifier">endpoint</span>)
@@ -243,7 +247,7 @@
             
             <div class="method-source-code" id="connect-source">
 <pre>
-<span class="ruby-comment"># File lib/zmq/context.rb, line 62</span>
+<span class="ruby-comment"># File lib/zmq/context.rb, line 26</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">connect</span>(<span class="ruby-identifier">sock_type</span>, <span class="ruby-identifier">endpoint</span>)
   <span class="ruby-identifier">s</span> = <span class="ruby-identifier">socket</span>(<span class="ruby-identifier">sock_type</span>)
   <span class="ruby-identifier">s</span>.<span class="ruby-identifier">connect</span>(<span class="ruby-identifier">endpoint</span>)

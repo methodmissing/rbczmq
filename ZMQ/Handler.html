@@ -73,6 +73,10 @@
           
           <li><a href="#method-i-on_writable">#on_writable</a></li>
           
+          <li><a href="#method-i-recv">#recv</a></li>
+          
+          <li><a href="#method-i-send">#send</a></li>
+          
         </ul>
       </div>
       
@@ -127,6 +131,10 @@
           <li><a href="../ZMQ/Loop.html">ZMQ::Loop</a></li>
         
           <li><a href="../ZMQ/Message.html">ZMQ::Message</a></li>
+        
+          <li><a href="../ZMQ/Poller.html">ZMQ::Poller</a></li>
+        
+          <li><a href="../ZMQ/Pollitem.html">ZMQ::Pollitem</a></li>
         
           <li><a href="../ZMQ/Socket.html">ZMQ::Socket</a></li>
         
@@ -187,17 +195,18 @@
         <h3 class="section-header">Attributes</h3>
 
         
-        <div id="socket-attribute-method" class="method-detail">
-          <a name="socket"></a>
+        <div id="pollitem-attribute-method" class="method-detail">
+          <a name="pollitem"></a>
           
           <div class="method-heading attribute-method-heading">
-            <span class="method-name">socket</span><span
+            <span class="method-name">pollitem</span><span
               class="attribute-access-type">[R]</span>
           </div>
 
           <div class="method-description">
           
-          <p>The <a href="Socket.html">ZMQ::Socket</a> instance wrapped by this handler.</p>
+          <p>The <a href="Pollitem.html">ZMQ::Pollitem</a> instance wrapped by this
+handler.</p>
           
           </div>
         </div>
@@ -217,22 +226,23 @@
           
           <div class="method-heading">
             <span class="method-name">new</span><span
-              class="method-args">(socket, *args)</span>
+              class="method-args">(pollitem, *args)</span>
             <span class="method-click-advice">click to toggle source</span>
           </div>
           
 
           <div class="method-description">
             
-            <p>A <a href="Socket.html">ZMQ::Socket</a> instance is compulsary on init,
+            <p>A <a href="Pollitem.html">ZMQ::Pollitem</a> instance is compulsary on init,
 with support for optional arguments if a subclasses do require them.</p>
 
-<p>pub = ctx.bind(:PUB, “tcp://127.0.0.1:5000”) # lower level API pub.handler
-= <a href="Handler.html#method-c-new">ZMQ::Handler.new(pub)</a></p>
+<p>pub = ctx.bind(:PUB, “tcp://127.0.0.1:5000”) # lower level API item =
+ZMQ::Pollitem.new(pub) item.handler = <a
+href="Handler.html#method-c-new">ZMQ::Handler.new(pub)</a></p>
 
 <p>class ProducerHandler &lt; <a href="Handler.html">ZMQ::Handler</a></p>
 
-<pre>def initialize(socket, producer)
+<pre>def initialize(item, producer)
   super
   @producer = producer
 end
@@ -250,10 +260,10 @@ end</pre>
             
             <div class="method-source-code" id="new-source">
 <pre>
-<span class="ruby-comment"># File lib/zmq/handler.rb, line 61</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">initialize</span>(<span class="ruby-identifier">socket</span>, *<span class="ruby-identifier">args</span>)
-  <span class="ruby-identifier">raise</span> <span class="ruby-constant">TypeError</span>.<span class="ruby-identifier">new</span>(<span class="ruby-node">&quot;#{socket.inspect} is not a valid ZMQ::Socket instance&quot;</span>) <span class="ruby-keyword">unless</span> <span class="ruby-constant">ZMQ</span><span class="ruby-operator">::</span><span class="ruby-constant">Socket</span> <span class="ruby-operator">===</span> <span class="ruby-identifier">socket</span>
-  <span class="ruby-ivar">@socket</span> = <span class="ruby-identifier">socket</span>
+<span class="ruby-comment"># File lib/zmq/handler.rb, line 26</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">initialize</span>(<span class="ruby-identifier">pollitem</span>, *<span class="ruby-identifier">args</span>)
+  <span class="ruby-identifier">raise</span> <span class="ruby-constant">TypeError</span>.<span class="ruby-identifier">new</span>(<span class="ruby-node">&quot;#{pollitem.inspect} is not a valid ZMQ::Pollitem instance&quot;</span>) <span class="ruby-keyword">unless</span> <span class="ruby-constant">ZMQ</span><span class="ruby-operator">::</span><span class="ruby-constant">Pollitem</span> <span class="ruby-operator">===</span> <span class="ruby-identifier">pollitem</span>
+  <span class="ruby-ivar">@pollitem</span> = <span class="ruby-identifier">pollitem</span>
 <span class="ruby-keyword">end</span></pre>
             </div><!-- new-source -->
             
@@ -284,9 +294,9 @@ end</pre>
 
           <div class="method-description">
             
-            <p>Callback for error conditions such as socket errors on poll and exceptions
-raised in callbacks. Receives an exception instance as argument and raises
-by default.</p>
+            <p>Callback for error conditions such as pollable item errors on poll and
+exceptions raised in callbacks. Receives an exception instance as argument
+and raises by default.</p>
 
 <p>handler.on_error(err)  =&gt;  raise</p>
             
@@ -294,7 +304,7 @@ by default.</p>
             
             <div class="method-source-code" id="on_error-source">
 <pre>
-<span class="ruby-comment"># File lib/zmq/handler.rb, line 95</span>
+<span class="ruby-comment"># File lib/zmq/handler.rb, line 60</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">on_error</span>(<span class="ruby-identifier">exception</span>)
   <span class="ruby-identifier">raise</span> <span class="ruby-identifier">exception</span>
 <span class="ruby-keyword">end</span></pre>
@@ -322,13 +332,13 @@ by default.</p>
           <div class="method-description">
             
             <p>Callback invoked from <a href="Loop.html">ZMQ::Loop</a> handlers when the
-socket is ready for reading. Subclasses are expected to implement this
-contract as the default just raises NotImplementedError. It’s reccommended
-to read in a non-blocking manner from within this callback.</p>
+pollable item is ready for reading. Subclasses are expected to implement
+this contract as the default just raises NotImplementedError. It’s
+reccommended to read in a non-blocking manner from within this callback.</p>
 
 <p>def <a href="Handler.html#method-i-on_readable">on_readable</a></p>
 
-<pre>msgs &lt;&lt; socket.recv_nonblock</pre>
+<pre>msgs &lt;&lt; recv</pre>
 
 <p>end</p>
             
@@ -336,7 +346,7 @@ to read in a non-blocking manner from within this callback.</p>
             
             <div class="method-source-code" id="on_readable-source">
 <pre>
-<span class="ruby-comment"># File lib/zmq/handler.rb, line 74</span>
+<span class="ruby-comment"># File lib/zmq/handler.rb, line 39</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">on_readable</span>
   <span class="ruby-identifier">raise</span> <span class="ruby-constant">NotImplementedError</span>, <span class="ruby-node">&quot;ZMQ handlers are expected to implement an #on_readable contract&quot;</span>
 <span class="ruby-keyword">end</span></pre>
@@ -364,13 +374,14 @@ to read in a non-blocking manner from within this callback.</p>
           <div class="method-description">
             
             <p>Callback invoked from <a href="Loop.html">ZMQ::Loop</a> handlers when the
-socket is ready for writing. Subclasses are expected to implement this
-contract as the default just raises NotImplementedError. It’s reccommended
-to write data out as fast as possible from within this callback.</p>
+pollable item is ready for writing. Subclasses are expected to implement
+this contract as the default just raises NotImplementedError. It’s
+reccommended to write data out as fast as possible from within this
+callback.</p>
 
 <p>def <a href="Handler.html#method-i-on_writable">on_writable</a></p>
 
-<pre>socket.send buffer.shift</pre>
+<pre>send buffer.shift</pre>
 
 <p>end</p>
             
@@ -378,7 +389,7 @@ to write data out as fast as possible from within this callback.</p>
             
             <div class="method-source-code" id="on_writable-source">
 <pre>
-<span class="ruby-comment"># File lib/zmq/handler.rb, line 86</span>
+<span class="ruby-comment"># File lib/zmq/handler.rb, line 51</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">on_writable</span>
   <span class="ruby-identifier">raise</span> <span class="ruby-constant">NotImplementedError</span>, <span class="ruby-node">&quot;ZMQ handlers are expected to implement an #on_writable contract&quot;</span>
 <span class="ruby-keyword">end</span></pre>
@@ -390,6 +401,74 @@ to write data out as fast as possible from within this callback.</p>
 
           
         </div><!-- on_writable-method -->
+
+      
+        <div id="recv-method" class="method-detail ">
+          <a name="method-i-recv"></a>
+
+          
+          <div class="method-heading">
+            <span class="method-name">recv</span><span
+              class="method-args">()</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          
+
+          <div class="method-description">
+            
+            <p>API that allows handlers to receive data regardless of the underlying
+pollable item type (<a href="Socket.html">ZMQ::Socket</a> or IO).</p>
+            
+
+            
+            <div class="method-source-code" id="recv-source">
+<pre>
+<span class="ruby-comment"># File lib/zmq/handler.rb, line 72</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">recv</span>
+  <span class="ruby-identifier">pollitem</span>.<span class="ruby-identifier">recv</span>
+<span class="ruby-keyword">end</span></pre>
+            </div><!-- recv-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- recv-method -->
+
+      
+        <div id="send-method" class="method-detail ">
+          <a name="method-i-send"></a>
+
+          
+          <div class="method-heading">
+            <span class="method-name">send</span><span
+              class="method-args">(*args)</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          
+
+          <div class="method-description">
+            
+            <p>API that allows handlers to send data regardless of the underlying pollable
+item type (<a href="Socket.html">ZMQ::Socket</a> or IO).</p>
+            
+
+            
+            <div class="method-source-code" id="send-source">
+<pre>
+<span class="ruby-comment"># File lib/zmq/handler.rb, line 66</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">send</span>(*<span class="ruby-identifier">args</span>)
+  <span class="ruby-identifier">pollitem</span>.<span class="ruby-identifier">send</span>(*<span class="ruby-identifier">args</span>)
+<span class="ruby-keyword">end</span></pre>
+            </div><!-- send-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- send-method -->
 
       
       </div><!-- public-instance-method-details -->

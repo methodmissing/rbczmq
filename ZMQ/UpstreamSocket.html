@@ -116,6 +116,10 @@
         
           <li><a href="../ZMQ/Message.html">ZMQ::Message</a></li>
         
+          <li><a href="../ZMQ/Poller.html">ZMQ::Poller</a></li>
+        
+          <li><a href="../ZMQ/Pollitem.html">ZMQ::Pollitem</a></li>
+        
           <li><a href="../ZMQ/Socket.html">ZMQ::Socket</a></li>
         
           <li><a href="../ZMQ/Socket/Dealer.html">ZMQ::Socket::Dealer</a></li>
@@ -211,9 +215,9 @@ href="Socket/Pub.html">ZMQ::Socket::Pub</a></p>
             
             <div class="method-source-code" id="included-source">
 <pre>
-<span class="ruby-comment"># File lib/zmq/socket.rb, line 129</span>
+<span class="ruby-comment"># File lib/zmq/socket.rb, line 106</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">included</span>(<span class="ruby-identifier">sock</span>)
-  <span class="ruby-identifier">sock</span>.<span class="ruby-identifier">unsupported_api</span> <span class="ruby-value">:connect</span>, <span class="ruby-value">:recv</span>, <span class="ruby-value">:recv_nonblock</span>, <span class="ruby-value">:recv_frame</span>, <span class="ruby-value">:recv_frame_nonblock</span>, <span class="ruby-value">:recv_message</span>
+  <span class="ruby-identifier">sock</span>.<span class="ruby-identifier">unsupported_api</span> <span class="ruby-value">:recv</span>, <span class="ruby-value">:recv_nonblock</span>, <span class="ruby-value">:recv_frame</span>, <span class="ruby-value">:recv_frame_nonblock</span>, <span class="ruby-value">:recv_message</span>
 <span class="ruby-keyword">end</span></pre>
             </div><!-- included-source -->
             
@@ -250,7 +254,7 @@ href="Socket/Pub.html">ZMQ::Socket::Pub</a></p>
             
             <div class="method-source-code" id="poll_readable-3F-source">
 <pre>
-<span class="ruby-comment"># File lib/zmq/socket.rb, line 134</span>
+<span class="ruby-comment"># File lib/zmq/socket.rb, line 111</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">poll_readable?</span>
   <span class="ruby-keyword">false</span>
 <span class="ruby-keyword">end</span></pre>

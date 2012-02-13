@@ -79,6 +79,10 @@
           
           <li><span class="type">CLASS</span> <a href="ZMQ/Message.html">ZMQ::Message</a></li>
           
+          <li><span class="type">CLASS</span> <a href="ZMQ/Poller.html">ZMQ::Poller</a></li>
+          
+          <li><span class="type">CLASS</span> <a href="ZMQ/Pollitem.html">ZMQ::Pollitem</a></li>
+          
           <li><span class="type">CLASS</span> <a href="ZMQ/Socket.html">ZMQ::Socket</a></li>
           
           <li><span class="type">CLASS</span> <a href="ZMQ/Timer.html">ZMQ::Timer</a></li>
@@ -97,6 +101,8 @@
           
           <li><a href="#method-c-Message">::Message</a></li>
           
+          <li><a href="#method-c-Pollitem">::Pollitem</a></li>
+          
           <li><a href="#method-c-context">::context</a></li>
           
           <li><a href="#method-c-error">::error</a></li>
@@ -108,6 +114,8 @@
           <li><a href="#method-c-loop">::loop</a></li>
           
           <li><a href="#method-c-now">::now</a></li>
+          
+          <li><a href="#method-c-select">::select</a></li>
           
           <li><a href="#method-c-version">::version</a></li>
           
@@ -165,6 +173,10 @@
           <li><a href="./ZMQ/Loop.html">ZMQ::Loop</a></li>
         
           <li><a href="./ZMQ/Message.html">ZMQ::Message</a></li>
+        
+          <li><a href="./ZMQ/Poller.html">ZMQ::Poller</a></li>
+        
+          <li><a href="./ZMQ/Pollitem.html">ZMQ::Pollitem</a></li>
         
           <li><a href="./ZMQ/Socket.html">ZMQ::Socket</a></li>
         
@@ -224,6 +236,26 @@
         <dl>
         
           <dt><a name="DEALER">DEALER</a></dt>
+          
+          <dd class="description"></dd>
+          
+        
+          <dt><a name="EFSM">EFSM</a></dt>
+          
+          <dd class="description"></dd>
+          
+        
+          <dt><a name="EMTHREAD">EMTHREAD</a></dt>
+          
+          <dd class="description"></dd>
+          
+        
+          <dt><a name="ENOCOMPATPROTO">ENOCOMPATPROTO</a></dt>
+          
+          <dd class="description"></dd>
+          
+        
+          <dt><a name="ETERM">ETERM</a></dt>
           
           <dd class="description"></dd>
           
@@ -321,7 +353,7 @@
             
             <div class="method-source-code" id="Frame-source">
 <pre>
-<span class="ruby-comment"># File lib/zmq.rb, line 49</span>
+<span class="ruby-comment"># File lib/zmq.rb, line 18</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-constant">Frame</span>(<span class="ruby-identifier">data</span> = <span class="ruby-keyword">nil</span>)
   <span class="ruby-constant">ZMQ</span><span class="ruby-operator">::</span><span class="ruby-constant">Frame</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">data</span>)
 <span class="ruby-keyword">end</span></pre>
@@ -357,7 +389,7 @@ href="ZMQ/Message.html">ZMQ::Message</a></p>
             
             <div class="method-source-code" id="Message-source">
 <pre>
-<span class="ruby-comment"># File lib/zmq.rb, line 57</span>
+<span class="ruby-comment"># File lib/zmq.rb, line 26</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-constant">Message</span>(*<span class="ruby-identifier">parts</span>)
   <span class="ruby-identifier">m</span> = <span class="ruby-constant">ZMQ</span><span class="ruby-operator">::</span><span class="ruby-constant">Message</span>.<span class="ruby-identifier">new</span>
   <span class="ruby-identifier">parts</span>.<span class="ruby-identifier">each</span>{<span class="ruby-operator">|</span><span class="ruby-identifier">p</span><span class="ruby-operator">|</span> <span class="ruby-identifier">m</span>.<span class="ruby-identifier">addstr</span>(<span class="ruby-identifier">p</span>) }
@@ -371,6 +403,42 @@ href="ZMQ/Message.html">ZMQ::Message</a></p>
 
           
         </div><!-- Message-method -->
+
+      
+        <div id="Pollitem-method" class="method-detail ">
+          <a name="method-c-Pollitem"></a>
+
+          
+          <div class="method-heading">
+            <span class="method-name">Pollitem</span><span
+              class="method-args">(pollable, events = nil)</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          
+
+          <div class="method-description">
+            
+            <p>Sugaring for creating new poll items</p>
+
+<p>ZMQ::Pollitem(STDIN, ZMQ::POLLIN)  =&gt;  <a
+href="ZMQ/Pollitem.html">ZMQ::Pollitem</a></p>
+            
+
+            
+            <div class="method-source-code" id="Pollitem-source">
+<pre>
+<span class="ruby-comment"># File lib/zmq.rb, line 36</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-constant">Pollitem</span>(<span class="ruby-identifier">pollable</span>, <span class="ruby-identifier">events</span> = <span class="ruby-keyword">nil</span>)
+  <span class="ruby-constant">ZMQ</span><span class="ruby-operator">::</span><span class="ruby-constant">Pollitem</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">pollable</span>, <span class="ruby-identifier">events</span>)
+<span class="ruby-keyword">end</span></pre>
+            </div><!-- Pollitem-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- Pollitem-method -->
 
       
         <div id="context-method" class="method-detail ">
@@ -392,7 +460,7 @@ href="ZMQ/Message.html">ZMQ::Message</a></p>
             
             <div class="method-source-code" id="context-source">
 <pre>
-<span class="ruby-comment"># File lib/zmq.rb, line 65</span>
+<span class="ruby-comment"># File lib/zmq.rb, line 42</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">context</span>
   <span class="ruby-ivar">@__zmq_ctx_process</span>[<span class="ruby-constant">Process</span>.<span class="ruby-identifier">pid</span>]
 <span class="ruby-keyword">end</span></pre>
@@ -552,7 +620,7 @@ static VALUE rb_czmq_m_log(ZMQ_UNUSED VALUE obj, VALUE msg)
             
             <div class="method-source-code" id="loop-source">
 <pre>
-<span class="ruby-comment"># File lib/zmq.rb, line 73</span>
+<span class="ruby-comment"># File lib/zmq.rb, line 50</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">loop</span>
   <span class="ruby-ivar">@loop</span> <span class="ruby-operator">||=</span> <span class="ruby-constant">ZMQ</span><span class="ruby-operator">::</span><span class="ruby-constant">Loop</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">context</span>)
 <span class="ruby-keyword">end</span></pre>
@@ -604,6 +672,44 @@ static VALUE rb_czmq_m_now(ZMQ_UNUSED VALUE obj)
 
           
         </div><!-- now-method -->
+
+      
+        <div id="select-method" class="method-detail ">
+          <a name="method-c-select"></a>
+
+          
+          <div class="method-heading">
+            <span class="method-name">select</span><span
+              class="method-args">(read = [], write = [], error = [], timeout = nil)</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          
+
+          <div class="method-description">
+            
+            <p>API sugaring: IO.select compatible API, but for <a href="ZMQ.html">ZMQ</a>
+sockets.</p>
+            
+
+            
+            <div class="method-source-code" id="select-source">
+<pre>
+<span class="ruby-comment"># File lib/zmq.rb, line 56</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">select</span>(<span class="ruby-identifier">read</span> = [], <span class="ruby-identifier">write</span> = [], <span class="ruby-identifier">error</span> = [], <span class="ruby-identifier">timeout</span> = <span class="ruby-keyword">nil</span>)
+  <span class="ruby-identifier">poller</span> = <span class="ruby-constant">ZMQ</span><span class="ruby-operator">::</span><span class="ruby-constant">Poller</span>.<span class="ruby-identifier">new</span>
+  <span class="ruby-identifier">read</span>.<span class="ruby-identifier">each</span>{<span class="ruby-operator">|</span><span class="ruby-identifier">s</span><span class="ruby-operator">|</span> <span class="ruby-identifier">poller</span>.<span class="ruby-identifier">register_readable</span>(<span class="ruby-identifier">s</span>) } <span class="ruby-keyword">if</span> <span class="ruby-identifier">read</span>
+  <span class="ruby-identifier">write</span>.<span class="ruby-identifier">each</span>{<span class="ruby-operator">|</span><span class="ruby-identifier">s</span><span class="ruby-operator">|</span> <span class="ruby-identifier">poller</span>.<span class="ruby-identifier">register_writable</span>(<span class="ruby-identifier">s</span>) } <span class="ruby-keyword">if</span> <span class="ruby-identifier">write</span>
+  <span class="ruby-identifier">ready</span> = <span class="ruby-identifier">poller</span>.<span class="ruby-identifier">poll</span>(<span class="ruby-identifier">timeout</span>)
+  [<span class="ruby-identifier">poller</span>.<span class="ruby-identifier">readables</span>, <span class="ruby-identifier">poller</span>.<span class="ruby-identifier">writables</span>, []] <span class="ruby-keyword">if</span> <span class="ruby-identifier">ready</span>
+<span class="ruby-keyword">end</span></pre>
+            </div><!-- select-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- select-method -->
 
       
         <div id="version-method" class="method-detail ">

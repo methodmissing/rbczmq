@@ -1,0 +1,74 @@
+have_func: checking for rb_thread_blocking_region()... -------------------- yes
+
+"gcc-4.2 -o conftest -I/Users/lourens/.rvm/rubies/ruby-1.9.3-p0/include/ruby-1.9.1/x86_64-darwin11.0.1 -I/Users/lourens/.rvm/rubies/ruby-1.9.3-p0/include/ruby-1.9.1/ruby/backward -I/Users/lourens/.rvm/rubies/ruby-1.9.3-p0/include/ruby-1.9.1 -I. -D_XOPEN_SOURCE -D_DARWIN_C_SOURCE    -O3 -ggdb -Wextra -Wno-unused-parameter -Wno-parentheses -Wno-long-long -Wno-missing-field-initializers -Wpointer-arith -Wwrite-strings -Wdeclaration-after-statement -Wshorten-64-to-32 -Wimplicit-function-declaration  -fno-common -pipe conftest.c  -L. -L/Users/lourens/.rvm/rubies/ruby-1.9.3-p0/lib -L. -L/usr/local/lib     -lruby.1.9.1  -lpthread -ldl -lobjc "
+checked program was:
+/* begin */
+1: #include "ruby.h"
+2: 
+3: int main() {return 0;}
+/* end */
+
+"gcc-4.2 -o conftest -I/Users/lourens/.rvm/rubies/ruby-1.9.3-p0/include/ruby-1.9.1/x86_64-darwin11.0.1 -I/Users/lourens/.rvm/rubies/ruby-1.9.3-p0/include/ruby-1.9.1/ruby/backward -I/Users/lourens/.rvm/rubies/ruby-1.9.3-p0/include/ruby-1.9.1 -I. -D_XOPEN_SOURCE -D_DARWIN_C_SOURCE    -O3 -ggdb -Wextra -Wno-unused-parameter -Wno-parentheses -Wno-long-long -Wno-missing-field-initializers -Wpointer-arith -Wwrite-strings -Wdeclaration-after-statement -Wshorten-64-to-32 -Wimplicit-function-declaration  -fno-common -pipe conftest.c  -L. -L/Users/lourens/.rvm/rubies/ruby-1.9.3-p0/lib -L. -L/usr/local/lib     -lruby.1.9.1  -lpthread -ldl -lobjc "
+checked program was:
+/* begin */
+1: #include "ruby.h"
+2: 
+3: /*top*/
+4: int main() {return 0;}
+5: int t() { void ((*volatile p)()); p = (void ((*)()))rb_thread_blocking_region; return 0; }
+/* end */
+
+--------------------
+
+find_header: checking for zmq.h in /Users/lourens/projects/rbczmq/ext/zeromq/include... -------------------- yes
+
+"gcc-4.2 -E -I/Users/lourens/.rvm/rubies/ruby-1.9.3-p0/include/ruby-1.9.1/x86_64-darwin11.0.1 -I/Users/lourens/.rvm/rubies/ruby-1.9.3-p0/include/ruby-1.9.1/ruby/backward -I/Users/lourens/.rvm/rubies/ruby-1.9.3-p0/include/ruby-1.9.1 -I. -D_XOPEN_SOURCE -D_DARWIN_C_SOURCE    -O3 -ggdb -Wextra -Wno-unused-parameter -Wno-parentheses -Wno-long-long -Wno-missing-field-initializers -Wpointer-arith -Wwrite-strings -Wdeclaration-after-statement -Wshorten-64-to-32 -Wimplicit-function-declaration  -fno-common -pipe  conftest.c -o conftest.i"
+checked program was:
+/* begin */
+1: #include "ruby.h"
+2: 
+3: #include <zmq.h>
+/* end */
+
+--------------------
+
+find_header: checking for czmq.h in /Users/lourens/projects/rbczmq/ext/czmq/include... -------------------- yes
+
+"gcc-4.2 -E -I/Users/lourens/.rvm/rubies/ruby-1.9.3-p0/include/ruby-1.9.1/x86_64-darwin11.0.1 -I/Users/lourens/.rvm/rubies/ruby-1.9.3-p0/include/ruby-1.9.1/ruby/backward -I/Users/lourens/.rvm/rubies/ruby-1.9.3-p0/include/ruby-1.9.1 -I. -I/Users/lourens/projects/rbczmq/ext/zeromq/include -D_XOPEN_SOURCE -D_DARWIN_C_SOURCE    -O3 -ggdb -Wextra -Wno-unused-parameter -Wno-parentheses -Wno-long-long -Wno-missing-field-initializers -Wpointer-arith -Wwrite-strings -Wdeclaration-after-statement -Wshorten-64-to-32 -Wimplicit-function-declaration  -fno-common -pipe  conftest.c -o conftest.i"
+checked program was:
+/* begin */
+1: #include "ruby.h"
+2: 
+3: #include <czmq.h>
+/* end */
+
+--------------------
+
+have_library: checking for main() in -lzmq... -------------------- yes
+
+"gcc-4.2 -o conftest -I/Users/lourens/.rvm/rubies/ruby-1.9.3-p0/include/ruby-1.9.1/x86_64-darwin11.0.1 -I/Users/lourens/.rvm/rubies/ruby-1.9.3-p0/include/ruby-1.9.1/ruby/backward -I/Users/lourens/.rvm/rubies/ruby-1.9.3-p0/include/ruby-1.9.1 -I. -I/Users/lourens/projects/rbczmq/ext/zeromq/include -I/Users/lourens/projects/rbczmq/ext/czmq/include -D_XOPEN_SOURCE -D_DARWIN_C_SOURCE    -O3 -ggdb -Wextra -Wno-unused-parameter -Wno-parentheses -Wno-long-long -Wno-missing-field-initializers -Wpointer-arith -Wwrite-strings -Wdeclaration-after-statement -Wshorten-64-to-32 -Wimplicit-function-declaration  -fno-common -pipe conftest.c  -L. -L/Users/lourens/.rvm/rubies/ruby-1.9.3-p0/lib -L. -L/Users/lourens/projects/rbczmq/ext/rbczmq/dst/lib     -lruby.1.9.1 -lzmq  -lpthread -ldl -lobjc "
+checked program was:
+/* begin */
+1: #include "ruby.h"
+2: 
+3: /*top*/
+4: int main() {return 0;}
+5: int t() { void ((*volatile p)()); p = (void ((*)()))main; return 0; }
+/* end */
+
+--------------------
+
+have_library: checking for main() in -lczmq... -------------------- yes
+
+"gcc-4.2 -o conftest -I/Users/lourens/.rvm/rubies/ruby-1.9.3-p0/include/ruby-1.9.1/x86_64-darwin11.0.1 -I/Users/lourens/.rvm/rubies/ruby-1.9.3-p0/include/ruby-1.9.1/ruby/backward -I/Users/lourens/.rvm/rubies/ruby-1.9.3-p0/include/ruby-1.9.1 -I. -I/Users/lourens/projects/rbczmq/ext/zeromq/include -I/Users/lourens/projects/rbczmq/ext/czmq/include -D_XOPEN_SOURCE -D_DARWIN_C_SOURCE    -O3 -ggdb -Wextra -Wno-unused-parameter -Wno-parentheses -Wno-long-long -Wno-missing-field-initializers -Wpointer-arith -Wwrite-strings -Wdeclaration-after-statement -Wshorten-64-to-32 -Wimplicit-function-declaration  -fno-common -pipe conftest.c  -L. -L/Users/lourens/.rvm/rubies/ruby-1.9.3-p0/lib -L. -L/Users/lourens/projects/rbczmq/ext/rbczmq/dst/lib    -lzmq  -lruby.1.9.1 -lczmq -lzmq  -lpthread -ldl -lobjc "
+checked program was:
+/* begin */
+1: #include "ruby.h"
+2: 
+3: /*top*/
+4: int main() {return 0;}
+5: int t() { void ((*volatile p)()); p = (void ((*)()))main; return 0; }
+/* end */
+
+--------------------
+

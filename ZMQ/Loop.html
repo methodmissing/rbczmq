@@ -136,6 +136,10 @@
         
           <li><a href="../ZMQ/Message.html">ZMQ::Message</a></li>
         
+          <li><a href="../ZMQ/Poller.html">ZMQ::Poller</a></li>
+        
+          <li><a href="../ZMQ/Pollitem.html">ZMQ::Pollitem</a></li>
+        
           <li><a href="../ZMQ/Socket.html">ZMQ::Socket</a></li>
         
           <li><a href="../ZMQ/Socket/Dealer.html">ZMQ::Socket::Dealer</a></li>
@@ -222,7 +226,7 @@
             
             <div class="method-source-code" id="add_oneshot_timer-source">
 <pre>
-<span class="ruby-comment"># File lib/zmq/loop.rb, line 121</span>
+<span class="ruby-comment"># File lib/zmq/loop.rb, line 88</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">add_oneshot_timer</span>(<span class="ruby-identifier">delay</span>, <span class="ruby-identifier">p</span> = <span class="ruby-keyword">nil</span>, &amp;<span class="ruby-identifier">blk</span>)
   <span class="ruby-identifier">add_timer</span>(<span class="ruby-identifier">delay</span>, <span class="ruby-value">1</span>, <span class="ruby-identifier">p</span>, &amp;<span class="ruby-identifier">blk</span>)
 <span class="ruby-keyword">end</span></pre>
@@ -261,7 +265,7 @@
             
             <div class="method-source-code" id="add_periodic_timer-source">
 <pre>
-<span class="ruby-comment"># File lib/zmq/loop.rb, line 131</span>
+<span class="ruby-comment"># File lib/zmq/loop.rb, line 98</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">add_periodic_timer</span>(<span class="ruby-identifier">delay</span>, <span class="ruby-identifier">p</span> = <span class="ruby-keyword">nil</span>, &amp;<span class="ruby-identifier">blk</span>)
   <span class="ruby-identifier">add_timer</span>(<span class="ruby-identifier">delay</span>, <span class="ruby-value">0</span>, <span class="ruby-identifier">p</span>, &amp;<span class="ruby-identifier">blk</span>)
 <span class="ruby-keyword">end</span></pre>
@@ -300,7 +304,7 @@
             
             <div class="method-source-code" id="add_timer-source">
 <pre>
-<span class="ruby-comment"># File lib/zmq/loop.rb, line 141</span>
+<span class="ruby-comment"># File lib/zmq/loop.rb, line 108</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">add_timer</span>(<span class="ruby-identifier">delay</span>, <span class="ruby-identifier">times</span>, <span class="ruby-identifier">p</span> = <span class="ruby-keyword">nil</span>, &amp;<span class="ruby-identifier">blk</span>)
   <span class="ruby-identifier">timer</span> = <span class="ruby-constant">ZMQ</span><span class="ruby-operator">::</span><span class="ruby-constant">Timer</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">delay</span>, <span class="ruby-identifier">times</span>, <span class="ruby-identifier">p</span>, &amp;<span class="ruby-identifier">blk</span>)
   <span class="ruby-identifier">instance</span>.<span class="ruby-identifier">register_timer</span>(<span class="ruby-identifier">timer</span>)
@@ -329,7 +333,8 @@
 
           <div class="method-description">
             
-            <p>A higher level API for socket bind and loop registration.</p>
+            <p>A higher level API for <a href="../ZMQ.html">ZMQ</a> socket bind and loop
+registration.</p>
 
 <p><a href="Loop.html#method-c-run">ZMQ::Loop.run</a> do</p>
 
@@ -341,7 +346,7 @@
             
             <div class="method-source-code" id="bind-source">
 <pre>
-<span class="ruby-comment"># File lib/zmq/loop.rb, line 76</span>
+<span class="ruby-comment"># File lib/zmq/loop.rb, line 41</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">bind</span>(<span class="ruby-identifier">socket</span>, <span class="ruby-identifier">address</span>, <span class="ruby-identifier">handler</span> = <span class="ruby-constant">ZMQ</span><span class="ruby-operator">::</span><span class="ruby-constant">DefaultHandler</span>, *<span class="ruby-identifier">args</span>)
   <span class="ruby-identifier">attach</span>(<span class="ruby-identifier">socket</span>, <span class="ruby-value">:bind</span>, <span class="ruby-identifier">address</span>, <span class="ruby-identifier">handler</span>, *<span class="ruby-identifier">args</span>)
 <span class="ruby-keyword">end</span></pre>
@@ -368,7 +373,8 @@
 
           <div class="method-description">
             
-            <p>A higher level API for socket bind and loop registration.</p>
+            <p>A higher level API for <a href="../ZMQ.html">ZMQ</a> socket bind and loop
+registration.</p>
 
 <p><a href="Loop.html#method-c-run">ZMQ::Loop.run</a> do</p>
 
@@ -381,7 +387,7 @@ ZL.connect(sub, &quot;inproc://fanout&quot;, Consumer)</pre>
             
             <div class="method-source-code" id="connect-source">
 <pre>
-<span class="ruby-comment"># File lib/zmq/loop.rb, line 87</span>
+<span class="ruby-comment"># File lib/zmq/loop.rb, line 52</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">connect</span>(<span class="ruby-identifier">socket</span>, <span class="ruby-identifier">address</span>, <span class="ruby-identifier">handler</span> = <span class="ruby-constant">ZMQ</span><span class="ruby-operator">::</span><span class="ruby-constant">DefaultHandler</span>, *<span class="ruby-identifier">args</span>)
   <span class="ruby-identifier">attach</span>(<span class="ruby-identifier">socket</span>, <span class="ruby-value">:connect</span>, <span class="ruby-identifier">address</span>, <span class="ruby-identifier">handler</span>, *<span class="ruby-identifier">args</span>)
 <span class="ruby-keyword">end</span></pre>
@@ -401,14 +407,14 @@ ZL.connect(sub, &quot;inproc://fanout&quot;, Consumer)</pre>
           
           <div class="method-heading">
             <span class="method-name">register_readable</span><span
-              class="method-args">(socket, handler = ZMQ::DefaultHandler, *args)</span>
+              class="method-args">(pollable, handler = ZMQ::DefaultHandler, *args)</span>
             <span class="method-click-advice">click to toggle source</span>
           </div>
           
 
           <div class="method-description">
             
-            <p>Registers a given <a href="Socket.html">ZMQ::Socket</a> instance for
+            <p>Registers a given <a href="Socket.html">ZMQ::Socket</a> or IO instance for
 readable events notification.</p>
 
 <p><a href="Loop.html#method-c-run">ZMQ::Loop.run</a> do</p>
@@ -421,11 +427,12 @@ readable events notification.</p>
             
             <div class="method-source-code" id="register_readable-source">
 <pre>
-<span class="ruby-comment"># File lib/zmq/loop.rb, line 97</span>
-<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">register_readable</span>(<span class="ruby-identifier">socket</span>, <span class="ruby-identifier">handler</span> = <span class="ruby-constant">ZMQ</span><span class="ruby-operator">::</span><span class="ruby-constant">DefaultHandler</span>, *<span class="ruby-identifier">args</span>)
-  <span class="ruby-identifier">socket</span>.<span class="ruby-identifier">handler</span> = <span class="ruby-identifier">handler</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">socket</span>, *<span class="ruby-identifier">args</span>) <span class="ruby-keyword">if</span> <span class="ruby-identifier">handler</span>
-  <span class="ruby-identifier">assert_handler_for_event</span>(<span class="ruby-identifier">socket</span>, <span class="ruby-value">:on_readable</span>)
-  <span class="ruby-identifier">instance</span>.<span class="ruby-identifier">register_socket</span>(<span class="ruby-identifier">socket</span>, <span class="ruby-constant">ZMQ</span><span class="ruby-operator">::</span><span class="ruby-constant">POLLIN</span>)
+<span class="ruby-comment"># File lib/zmq/loop.rb, line 62</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">register_readable</span>(<span class="ruby-identifier">pollable</span>, <span class="ruby-identifier">handler</span> = <span class="ruby-constant">ZMQ</span><span class="ruby-operator">::</span><span class="ruby-constant">DefaultHandler</span>, *<span class="ruby-identifier">args</span>)
+  <span class="ruby-identifier">pollitem</span> = <span class="ruby-constant">ZMQ</span><span class="ruby-operator">::</span><span class="ruby-constant">Pollitem</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">pollable</span>, <span class="ruby-constant">ZMQ</span><span class="ruby-operator">::</span><span class="ruby-constant">POLLIN</span>)
+  <span class="ruby-identifier">pollitem</span>.<span class="ruby-identifier">handler</span> = <span class="ruby-identifier">handler</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">pollitem</span>, *<span class="ruby-identifier">args</span>) <span class="ruby-keyword">if</span> <span class="ruby-identifier">handler</span>
+  <span class="ruby-identifier">assert_handler_for_event</span>(<span class="ruby-identifier">pollitem</span>, <span class="ruby-value">:on_readable</span>)
+  <span class="ruby-identifier">instance</span>.<span class="ruby-identifier">register</span>(<span class="ruby-identifier">pollitem</span>)
 <span class="ruby-keyword">end</span></pre>
             </div><!-- register_readable-source -->
             
@@ -443,14 +450,14 @@ readable events notification.</p>
           
           <div class="method-heading">
             <span class="method-name">register_writable</span><span
-              class="method-args">(socket, handler = ZMQ::DefaultHandler, *args)</span>
+              class="method-args">(pollable, handler = ZMQ::DefaultHandler, *args)</span>
             <span class="method-click-advice">click to toggle source</span>
           </div>
           
 
           <div class="method-description">
             
-            <p>Registers a given <a href="Socket.html">ZMQ::Socket</a> instance for
+            <p>Registers a given <a href="Socket.html">ZMQ::Socket</a> or IO instance for
 writable events notification.</p>
 
 <p><a href="Loop.html#method-c-run">ZMQ::Loop.run</a> do</p>
@@ -463,11 +470,12 @@ writable events notification.</p>
             
             <div class="method-source-code" id="register_writable-source">
 <pre>
-<span class="ruby-comment"># File lib/zmq/loop.rb, line 109</span>
-<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">register_writable</span>(<span class="ruby-identifier">socket</span>, <span class="ruby-identifier">handler</span> = <span class="ruby-constant">ZMQ</span><span class="ruby-operator">::</span><span class="ruby-constant">DefaultHandler</span>, *<span class="ruby-identifier">args</span>)
-  <span class="ruby-identifier">socket</span>.<span class="ruby-identifier">handler</span> = <span class="ruby-identifier">handler</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">socket</span>, *<span class="ruby-identifier">args</span>) <span class="ruby-keyword">if</span> <span class="ruby-identifier">handler</span>
-  <span class="ruby-identifier">assert_handler_for_event</span>(<span class="ruby-identifier">socket</span>, <span class="ruby-value">:on_writable</span>)
-  <span class="ruby-identifier">instance</span>.<span class="ruby-identifier">register_socket</span>(<span class="ruby-identifier">socket</span>, <span class="ruby-constant">ZMQ</span><span class="ruby-operator">::</span><span class="ruby-constant">POLLOUT</span>)
+<span class="ruby-comment"># File lib/zmq/loop.rb, line 75</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">register_writable</span>(<span class="ruby-identifier">pollable</span>, <span class="ruby-identifier">handler</span> = <span class="ruby-constant">ZMQ</span><span class="ruby-operator">::</span><span class="ruby-constant">DefaultHandler</span>, *<span class="ruby-identifier">args</span>)
+  <span class="ruby-identifier">pollitem</span> = <span class="ruby-constant">ZMQ</span><span class="ruby-operator">::</span><span class="ruby-constant">Pollitem</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">pollable</span>, <span class="ruby-constant">ZMQ</span><span class="ruby-operator">::</span><span class="ruby-constant">POLLOUT</span>)
+  <span class="ruby-identifier">pollitem</span>.<span class="ruby-identifier">handler</span> = <span class="ruby-identifier">handler</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">pollitem</span>, *<span class="ruby-identifier">args</span>) <span class="ruby-keyword">if</span> <span class="ruby-identifier">handler</span>
+  <span class="ruby-identifier">assert_handler_for_event</span>(<span class="ruby-identifier">pollitem</span>, <span class="ruby-value">:on_writable</span>)
+  <span class="ruby-identifier">instance</span>.<span class="ruby-identifier">register</span>(<span class="ruby-identifier">pollitem</span>)
 <span class="ruby-keyword">end</span></pre>
             </div><!-- register_writable-source -->
             
@@ -492,7 +500,7 @@ writable events notification.</p>
 
           <div class="method-description">
             
-            <p>Start the reactor. Takes control of the thread and returns when :</p>
+            <p>Start the reactor. Takes control of the current thread and returns when :</p>
 <ul><li>
 <p>the 0MQ context is terminated or</p>
 </li><li>
@@ -514,7 +522,7 @@ href="Loop.html#method-c-run">ZMQ::Loop.run</a>(&amp;proc)</p>
             
             <div class="method-source-code" id="run-source">
 <pre>
-<span class="ruby-comment"># File lib/zmq/loop.rb, line 64</span>
+<span class="ruby-comment"># File lib/zmq/loop.rb, line 29</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">run</span>(<span class="ruby-identifier">proc</span> = <span class="ruby-keyword">nil</span>, &amp;<span class="ruby-identifier">blk</span>)
   <span class="ruby-keyword">self</span>.<span class="ruby-identifier">instance</span> = <span class="ruby-constant">ZMQ</span><span class="ruby-operator">::</span><span class="ruby-constant">Loop</span>.<span class="ruby-identifier">new</span>
   (<span class="ruby-identifier">proc</span> <span class="ruby-operator">||</span> <span class="ruby-identifier">blk</span>).<span class="ruby-identifier">call</span>

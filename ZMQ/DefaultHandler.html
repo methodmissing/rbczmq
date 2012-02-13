@@ -124,6 +124,10 @@
         
           <li><a href="../ZMQ/Message.html">ZMQ::Message</a></li>
         
+          <li><a href="../ZMQ/Poller.html">ZMQ::Poller</a></li>
+        
+          <li><a href="../ZMQ/Pollitem.html">ZMQ::Pollitem</a></li>
+        
           <li><a href="../ZMQ/Socket.html">ZMQ::Socket</a></li>
         
           <li><a href="../ZMQ/Socket/Dealer.html">ZMQ::Socket::Dealer</a></li>
@@ -198,19 +202,19 @@
 
           <div class="method-description">
             
-            <p>A default / blanket socket callback handler for when a socket is registered
-on a <a href="Loop.html">ZMQ::Loop</a> instance.</p>
+            <p>A default / blanket pollitem callback handler for when a socket or IO is
+registered on a <a href="Loop.html">ZMQ::Loop</a> instance.</p>
 
-<p>XXX: Likely a massive fail for some socket pairs as a default - look into
-removing this.</p>
+<p>XXX: Likely a massive fail for some socket / IO pairs as a default - look
+into removing this.</p>
             
 
             
             <div class="method-source-code" id="on_readable-source">
 <pre>
-<span class="ruby-comment"># File lib/zmq/default_handler.rb, line 44</span>
+<span class="ruby-comment"># File lib/zmq/default_handler.rb, line 8</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">on_readable</span>
-  <span class="ruby-identifier">p</span> <span class="ruby-identifier">socket</span>.<span class="ruby-identifier">recv_nonblock</span>
+  <span class="ruby-identifier">p</span> <span class="ruby-identifier">recv</span>
 <span class="ruby-keyword">end</span></pre>
             </div><!-- on_readable-source -->
             
@@ -241,9 +245,9 @@ removing this.</p>
             
             <div class="method-source-code" id="on_writable-source">
 <pre>
-<span class="ruby-comment"># File lib/zmq/default_handler.rb, line 48</span>
+<span class="ruby-comment"># File lib/zmq/default_handler.rb, line 12</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">on_writable</span>
-  <span class="ruby-identifier">socket</span>.<span class="ruby-identifier">send</span>(<span class="ruby-string">&quot;&quot;</span>)
+  <span class="ruby-identifier">send</span>(<span class="ruby-string">&quot;&quot;</span>)
 <span class="ruby-keyword">end</span></pre>
             </div><!-- on_writable-source -->
             

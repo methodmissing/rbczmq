@@ -1,0 +1,10 @@
+prefix=/Users/lourens/projects/rbczmq/ext/rbczmq/dst
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: libzmq
+Description: 0MQ c++ library
+Version: 2.1.11
+Libs: -L${libdir} -lzmq
+Cflags: -I${includedir}

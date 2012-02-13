@@ -94,6 +94,8 @@
         <h3 class="section-header">Methods</h3>
         <ul class="link-list">
           
+          <li><a href="#method-c-handle_fsm_errors">::handle_fsm_errors</a></li>
+          
           <li><a href="#method-c-unsupported_api">::unsupported_api</a></li>
           
           <li><a href="#method-i-affinity">#affinity</a></li>
@@ -115,10 +117,6 @@
           <li><a href="#method-i-events">#events</a></li>
           
           <li><a href="#method-i-fd">#fd</a></li>
-          
-          <li><a href="#method-i-handler">#handler</a></li>
-          
-          <li><a href="#method-i-handler-3D">#handler=</a></li>
           
           <li><a href="#method-i-hwm">#hwm</a></li>
           
@@ -271,6 +269,10 @@
         
           <li><a href="../ZMQ/Message.html">ZMQ::Message</a></li>
         
+          <li><a href="../ZMQ/Poller.html">ZMQ::Poller</a></li>
+        
+          <li><a href="../ZMQ/Pollitem.html">ZMQ::Pollitem</a></li>
+        
           <li><a href="../ZMQ/Socket.html">ZMQ::Socket</a></li>
         
           <li><a href="../ZMQ/Socket/Dealer.html">ZMQ::Socket::Dealer</a></li>
@@ -332,6 +334,41 @@
         <h3 class="section-header">Public Class Methods</h3>
 
       
+        <div id="handle_fsm_errors-method" class="method-detail ">
+          <a name="method-c-handle_fsm_errors"></a>
+
+          
+          <div class="method-heading">
+            <span class="method-name">handle_fsm_errors</span><span
+              class="method-args">(error, *methods)</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          
+
+          <div class="method-description">
+            
+            
+            
+
+            
+            <div class="method-source-code" id="handle_fsm_errors-source">
+<pre>
+<span class="ruby-comment"># File lib/zmq/socket.rb, line 11</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">handle_fsm_errors</span>(<span class="ruby-identifier">error</span>, *<span class="ruby-identifier">methods</span>)
+  <span class="ruby-identifier">methods</span>.<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">m</span><span class="ruby-operator">|</span>
+    <span class="ruby-identifier">class_eval</span> <span class="ruby-string">        def #{m}(*args);          super        rescue SystemCallError =&gt; e          raise(ZMQ::Error, &quot;#{error} Please assert that you're not sending / receiving out of band data when using the REQ / REP socket pairs.&quot;) if e.errno == ZMQ::EFSM          raise        end</span>, <span class="ruby-keyword">__FILE__</span>, <span class="ruby-keyword">__LINE__</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+            </div><!-- handle_fsm_errors-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- handle_fsm_errors-method -->
+
+      
         <div id="unsupported_api-method" class="method-detail ">
           <a name="method-c-unsupported_api"></a>
 
@@ -351,7 +388,7 @@
             
             <div class="method-source-code" id="unsupported_api-source">
 <pre>
-<span class="ruby-comment"># File lib/zmq/socket.rb, line 39</span>
+<span class="ruby-comment"># File lib/zmq/socket.rb, line 3</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">unsupported_api</span>(*<span class="ruby-identifier">methods</span>)
   <span class="ruby-identifier">methods</span>.<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">m</span><span class="ruby-operator">|</span>
     <span class="ruby-identifier">class_eval</span> <span class="ruby-string">        def #{m}(*args); raise(ZMQ::Error, &quot;API #{m} not supported for #{const_get(:TYPE_STR)} sockets!&quot;);  end</span>, <span class="ruby-keyword">__FILE__</span>, <span class="ruby-keyword">__LINE__</span>
@@ -403,6 +440,7 @@ sock.affinity  =&gt;  0</pre>
 <pre>
 static VALUE rb_czmq_socket_opt_affinity(VALUE obj)
 {
+    zmq_sock_wrapper *sock = NULL;
     GetZmqSocket(obj);
     return INT2NUM(zsockopt_affinity(sock-&gt;socket));
 }</pre>
@@ -446,6 +484,7 @@ sock.affinity = 1  =&gt;  nil</pre>
 <pre>
 static VALUE rb_czmq_socket_set_opt_affinity(VALUE obj, VALUE value)
 {
+    zmq_sock_wrapper *sock = NULL;
     ZmqSetSockOpt(obj, zsockopt_set_affinity, &quot;AFFINITY&quot;, value);
 }</pre>
             </div><!-- affinity-3D-source -->
@@ -488,6 +527,7 @@ sock.backlog  =&gt;  100</pre>
 <pre>
 static VALUE rb_czmq_socket_opt_backlog(VALUE obj)
 {
+    zmq_sock_wrapper *sock = NULL;
     GetZmqSocket(obj);
     return INT2NUM(zsockopt_backlog(sock-&gt;socket));
 }</pre>
@@ -531,6 +571,7 @@ sock.backlog = 200  =&gt;  nil</pre>
 <pre>
 static VALUE rb_czmq_socket_set_opt_backlog(VALUE obj, VALUE value)
 {
+    zmq_sock_wrapper *sock = NULL;
     ZmqSetSockOpt(obj, zsockopt_set_backlog, &quot;BACKLOG&quot;, value);
 }</pre>
             </div><!-- backlog-3D-source -->
@@ -576,6 +617,7 @@ static VALUE rb_czmq_socket_bind(VALUE obj, VALUE endpoint)
 {
     struct nogvl_conn_args args;
     int rc;
+    zmq_sock_wrapper *sock = NULL;
     GetZmqSocket(obj);
     ZmqSockGuardCrossThread(sock);
     Check_Type(endpoint, T_STRING);
@@ -628,8 +670,12 @@ This is a lower level API.</pre>
 <pre>
 static VALUE rb_czmq_socket_close(VALUE obj)
 {
+    zmq_sock_wrapper *sock = NULL;
     GetZmqSocket(obj);
     ZmqSockGuardCrossThread(sock);
+    /* This is useless for production / real use cases as we can't query the state again OR assume
+    anything about the underlying connection. Merely doing the right thing. */
+    sock-&gt;state = ZMQ_SOCKET_PENDING;
     rb_czmq_free_sock(sock);
     return Qnil;
 }</pre>
@@ -677,6 +723,7 @@ static VALUE rb_czmq_socket_connect(VALUE obj, VALUE endpoint)
 {
     struct nogvl_conn_args args;
     int rc;
+    zmq_sock_wrapper *sock = NULL;
     GetZmqSocket(obj);
     ZmqSockGuardCrossThread(sock);
     Check_Type(endpoint, T_STRING);
@@ -732,6 +779,7 @@ sock.endpoint    =&gt;  &quot;inproc://test&quot;</pre>
 <pre>
 static VALUE rb_czmq_socket_endpoint(VALUE obj)
 {
+    zmq_sock_wrapper *sock = NULL;
     GetZmqSocket(obj);
     return sock-&gt;endpoint;
 }</pre>
@@ -775,6 +823,7 @@ sock.events =&gt; ZMQ::POLLIN</pre>
 <pre>
 static VALUE rb_czmq_socket_opt_events(VALUE obj)
 {
+    zmq_sock_wrapper *sock = NULL;
     GetZmqSocket(obj);
     return INT2NUM(zsockopt_events(sock-&gt;socket));
 }</pre>
@@ -821,6 +870,7 @@ sock.fd       =&gt;   4</pre>
 <pre>
 static VALUE rb_czmq_socket_fd(VALUE obj)
 {
+    zmq_sock_wrapper *sock = NULL;
     GetZmqSocket(obj);
     if (sock-&gt;state == ZMQ_SOCKET_PENDING) return INT2NUM(-1);
     return INT2NUM(zsockopt_fd(sock-&gt;socket));
@@ -837,94 +887,6 @@ static VALUE rb_czmq_socket_fd(VALUE obj)
 
           
         </div><!-- fd-method -->
-
-      
-        <div id="handler-method" class="method-detail ">
-          <a name="method-i-handler"></a>
-
-          
-          
-          <div class="method-heading">
-            <span class="method-callseq">handler =>  Object or nil</span>
-            
-            <span class="method-click-advice">click to toggle source</span>
-            
-          </div>
-          
-          
-
-          <div class="method-description">
-            
-            <pre>Returns the callback handler currently associated with this socket.</pre>
-
-<h3>Examples</h3>
-
-<pre>ctx = ZMQ::Context.new
-sock = ctx.socket(:REP)
-sock.handler = MyFrameHandler
-sock.handler   =&gt;   MyFrameHandler</pre>
-            
-
-            
-            <div class="method-source-code" id="handler-source">
-<pre>
-static VALUE rb_czmq_socket_handler(VALUE obj)
-{
-    GetZmqSocket(obj);
-    return sock-&gt;handler;
-}</pre>
-            </div><!-- handler-source -->
-            
-          </div>
-
-          
-
-          
-        </div><!-- handler-method -->
-
-      
-        <div id="handler-3D-method" class="method-detail ">
-          <a name="method-i-handler-3D"></a>
-
-          
-          
-          <div class="method-heading">
-            <span class="method-callseq">handler = MyFrameHandler =>  nil</span>
-            
-            <span class="method-click-advice">click to toggle source</span>
-            
-          </div>
-          
-          
-
-          <div class="method-description">
-            
-            <pre>Associates a callback handler with this socket.</pre>
-
-<h3>Examples</h3>
-
-<pre>ctx = ZMQ::Context.new
-sock = ctx.socket(:REP)
-sock.handler = MyFrameHandler =&gt; nil</pre>
-            
-
-            
-            <div class="method-source-code" id="handler-3D-source">
-<pre>
-static VALUE rb_czmq_socket_set_handler(VALUE obj, VALUE handler)
-{
-    GetZmqSocket(obj);
-    sock-&gt;handler = handler;
-    return Qnil;
-}</pre>
-            </div><!-- handler-3D-source -->
-            
-          </div>
-
-          
-
-          
-        </div><!-- handler-3D-method -->
 
       
         <div id="hwm-method" class="method-detail ">
@@ -957,6 +919,7 @@ sock.hwm  =&gt;  0</pre>
 <pre>
 static VALUE rb_czmq_socket_opt_hwm(VALUE obj)
 {
+    zmq_sock_wrapper *sock = NULL;
     GetZmqSocket(obj);
     return INT2NUM(zsockopt_hwm(sock-&gt;socket));
 }</pre>
@@ -1001,6 +964,7 @@ sock.hwm  =&gt;  100</pre>
 <pre>
 static VALUE rb_czmq_socket_set_opt_hwm(VALUE obj, VALUE value)
 {
+    zmq_sock_wrapper *sock = NULL;
     ZmqSetSockOpt(obj, zsockopt_set_hwm, &quot;HWM&quot;, value);
 }</pre>
             </div><!-- hwm-3D-source -->
@@ -1044,6 +1008,7 @@ sock.identity = &quot;anonymous&quot;  =&gt;  nil</pre>
 static VALUE rb_czmq_socket_set_opt_identity(VALUE obj, VALUE value)
 {
     char *val;
+    zmq_sock_wrapper *sock = NULL;
     GetZmqSocket(obj);
     ZmqSockGuardCrossThread(sock);
     Check_Type(value, T_STRING);
@@ -1095,6 +1060,7 @@ sock.linger  =&gt;  -1</pre>
 <pre>
 static VALUE rb_czmq_socket_opt_linger(VALUE obj)
 {
+    zmq_sock_wrapper *sock = NULL;
     GetZmqSocket(obj);
     return INT2NUM(zsockopt_linger(sock-&gt;socket));
 }</pre>
@@ -1138,6 +1104,7 @@ sock.linger = 1000  =&gt;  nil</pre>
 <pre>
 static VALUE rb_czmq_socket_set_opt_linger(VALUE obj, VALUE value)
 {
+    zmq_sock_wrapper *sock = NULL;
     ZmqSetSockOpt(obj, zsockopt_set_linger, &quot;LINGER&quot;, value);
 }</pre>
             </div><!-- linger-3D-source -->
@@ -1180,6 +1147,7 @@ sock.mcast_loop = false  =&gt;  nil</pre>
 <pre>
 static VALUE rb_czmq_socket_set_opt_mcast_loop(VALUE obj, VALUE value)
 {
+    zmq_sock_wrapper *sock = NULL;
     ZmqSetBooleanSockOpt(obj, zsockopt_set_mcast_loop, &quot;MCAST_LOOP&quot;, value);
 }</pre>
             </div><!-- mcast_loop-3D-source -->
@@ -1222,6 +1190,7 @@ sock.mcast_loop?  =&gt;  true</pre>
 <pre>
 static VALUE rb_czmq_socket_opt_mcast_loop(VALUE obj)
 {
+    zmq_sock_wrapper *sock = NULL;
     GetZmqSocket(obj);
     return (zsockopt_mcast_loop(sock-&gt;socket) == 1) ? Qtrue : Qfalse;
 }</pre>
@@ -1254,7 +1223,7 @@ static VALUE rb_czmq_socket_opt_mcast_loop(VALUE obj)
             
             <div class="method-source-code" id="poll_readable-3F-source">
 <pre>
-<span class="ruby-comment"># File lib/zmq/socket.rb, line 91</span>
+<span class="ruby-comment"># File lib/zmq/socket.rb, line 68</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">poll_readable?</span>
   <span class="ruby-keyword">true</span>
 <span class="ruby-keyword">end</span></pre>
@@ -1287,7 +1256,7 @@ static VALUE rb_czmq_socket_opt_mcast_loop(VALUE obj)
             
             <div class="method-source-code" id="poll_writable-3F-source">
 <pre>
-<span class="ruby-comment"># File lib/zmq/socket.rb, line 96</span>
+<span class="ruby-comment"># File lib/zmq/socket.rb, line 73</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">poll_writable?</span>
   <span class="ruby-keyword">true</span>
 <span class="ruby-keyword">end</span></pre>
@@ -1331,6 +1300,7 @@ sock.rate  =&gt;  40000</pre>
 <pre>
 static VALUE rb_czmq_socket_opt_rate(VALUE obj)
 {
+    zmq_sock_wrapper *sock = NULL;
     GetZmqSocket(obj);
     return INT2NUM(zsockopt_rate(sock-&gt;socket));
 }</pre>
@@ -1374,6 +1344,7 @@ sock.rate = 50000  =&gt;  nil</pre>
 <pre>
 static VALUE rb_czmq_socket_set_opt_rate(VALUE obj, VALUE value)
 {
+    zmq_sock_wrapper *sock = NULL;
     ZmqSetSockOpt(obj, zsockopt_set_rate, &quot;RATE&quot;, value);
 }</pre>
             </div><!-- rate-3D-source -->
@@ -1416,6 +1387,7 @@ sock.rcvbuf  =&gt;  0</pre>
 <pre>
 static VALUE rb_czmq_socket_opt_rcvbuf(VALUE obj)
 {
+    zmq_sock_wrapper *sock = NULL;
     GetZmqSocket(obj);
     return INT2NUM(zsockopt_rcvbuf(sock-&gt;socket));
 }</pre>
@@ -1459,6 +1431,7 @@ sock.rcvbuf = 1000  =&gt;  nil</pre>
 <pre>
 static VALUE rb_czmq_socket_set_opt_rcvbuf(VALUE obj, VALUE value)
 {
+    zmq_sock_wrapper *sock = NULL;
     ZmqSetSockOpt(obj, zsockopt_set_rcvbuf, &quot;RCVBUF&quot;, value);
 }</pre>
             </div><!-- rcvbuf-3D-source -->
@@ -1501,6 +1474,7 @@ sock.rcvmore =&gt;  true</pre>
 <pre>
 static VALUE rb_czmq_socket_opt_rcvmore(VALUE obj)
 {
+    zmq_sock_wrapper *sock = NULL;
     GetZmqSocket(obj);
     return (zsockopt_rcvmore(sock-&gt;socket) == 1) ? Qtrue : Qfalse;
 }</pre>
@@ -1537,7 +1511,7 @@ edge-triggered notifications.</p>
             
             <div class="method-source-code" id="readable-3F-source">
 <pre>
-<span class="ruby-comment"># File lib/zmq/socket.rb, line 52</span>
+<span class="ruby-comment"># File lib/zmq/socket.rb, line 29</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">readable?</span>
   (<span class="ruby-identifier">events</span> &amp; <span class="ruby-constant">ZMQ</span><span class="ruby-operator">::</span><span class="ruby-constant">POLLIN</span>) <span class="ruby-operator">==</span> <span class="ruby-constant">ZMQ</span><span class="ruby-operator">::</span><span class="ruby-constant">POLLIN</span>
 <span class="ruby-keyword">end</span></pre>
@@ -1581,6 +1555,7 @@ sock.reconnect_ivl  =&gt;  100</pre>
 <pre>
 static VALUE rb_czmq_socket_opt_reconnect_ivl(VALUE obj)
 {
+    zmq_sock_wrapper *sock = NULL;
     GetZmqSocket(obj);
     return INT2NUM(zsockopt_reconnect_ivl(sock-&gt;socket));
 }</pre>
@@ -1624,6 +1599,7 @@ sock.reconnect_ivl = 200  =&gt;  nil</pre>
 <pre>
 static VALUE rb_czmq_socket_set_opt_reconnect_ivl(VALUE obj, VALUE value)
 {
+    zmq_sock_wrapper *sock = NULL;
     ZmqSetSockOpt(obj, zsockopt_set_reconnect_ivl, &quot;RECONNECT_IVL&quot;, value);
 }</pre>
             </div><!-- reconnect_ivl-3D-source -->
@@ -1666,6 +1642,7 @@ sock.reconnect_ivl_max  =&gt;  0</pre>
 <pre>
 static VALUE rb_czmq_socket_opt_reconnect_ivl_max(VALUE obj)
 {
+    zmq_sock_wrapper *sock = NULL;
     GetZmqSocket(obj);
     return INT2NUM(zsockopt_reconnect_ivl_max(sock-&gt;socket));
 }</pre>
@@ -1709,6 +1686,7 @@ sock.reconnect_ivl_max = 5  =&gt;  nil</pre>
 <pre>
 static VALUE rb_czmq_socket_set_opt_reconnect_ivl_max(VALUE obj, VALUE value)
 {
+    zmq_sock_wrapper *sock = NULL;
     ZmqSetSockOpt(obj, zsockopt_set_reconnect_ivl_max, &quot;RECONNECT_IVL_MAX&quot;, value);
 }</pre>
             </div><!-- reconnect_ivl_max-3D-source -->
@@ -1751,6 +1729,7 @@ sock.recovery_ivl  =&gt;  10</pre>
 <pre>
 static VALUE rb_czmq_socket_opt_recovery_ivl(VALUE obj)
 {
+    zmq_sock_wrapper *sock = NULL;
     GetZmqSocket(obj);
     return INT2NUM(zsockopt_recovery_ivl(sock-&gt;socket));
 }</pre>
@@ -1794,6 +1773,7 @@ sock.recovery_ivl = 20  =&gt;  nil</pre>
 <pre>
 static VALUE rb_czmq_socket_set_opt_recovery_ivl(VALUE obj, VALUE value)
 {
+    zmq_sock_wrapper *sock = NULL;
     ZmqSetSockOpt(obj, zsockopt_set_recovery_ivl, &quot;RECOVERY_IVL&quot;, value);
 }</pre>
             </div><!-- recovery_ivl-3D-source -->
@@ -1836,6 +1816,7 @@ sock.recovery_ivl_msec  =&gt;  -1</pre>
 <pre>
 static VALUE rb_czmq_socket_opt_recovery_ivl_msec(VALUE obj)
 {
+    zmq_sock_wrapper *sock = NULL;
     GetZmqSocket(obj);
     return INT2NUM(zsockopt_recovery_ivl_msec(sock-&gt;socket));
 }</pre>
@@ -1879,6 +1860,7 @@ sock.recovery_ivl_msec = 20  =&gt;  nil</pre>
 <pre>
 static VALUE rb_czmq_socket_set_opt_recovery_ivl_msec(VALUE obj, VALUE value)
 {
+    zmq_sock_wrapper *sock = NULL;
     ZmqSetSockOpt(obj, zsockopt_set_recovery_ivl_msec, &quot;RECOVERY_IVL_MSEC&quot;, value);
 }</pre>
             </div><!-- recovery_ivl_msec-3D-source -->
@@ -1924,16 +1906,20 @@ static VALUE rb_czmq_socket_recv(VALUE obj)
 {
     char *str = NULL;
     struct nogvl_recv_args args;
+    VALUE result = Qnil;
+    zmq_sock_wrapper *sock = NULL;
     GetZmqSocket(obj);
     ZmqAssertSocketNotPending(sock, &quot;can only receive on a bound or connected socket!&quot;);
     ZmqSockGuardCrossThread(sock);
     args.socket = sock;
     str = (char *)rb_thread_blocking_region(rb_czmq_nogvl_recv, (void *)&amp;args, RUBY_UBF_IO, 0);
-    if (str == NULL) return Qnil;
+    if (str == NULL) return result;
     ZmqAssertSysError();
     if (sock-&gt;verbose)
         zclock_log (&quot;I: %s socket %p: recv \&quot;%s\&quot;&quot;, zsocket_type_str(sock-&gt;socket), sock-&gt;socket, str);
-    return ZmqEncode(rb_str_new2(str));
+    result = ZmqEncode(rb_str_new2(str));
+    free(str);
+    return result;
 }</pre>
             </div><!-- recv-source -->
             
@@ -1980,6 +1966,7 @@ static VALUE rb_czmq_socket_recv_frame(VALUE obj)
     struct nogvl_recv_args args;
     char print_prefix[255];
     char *cur_time = NULL;
+    zmq_sock_wrapper *sock = NULL;
     GetZmqSocket(obj);
     ZmqAssertSocketNotPending(sock, &quot;can only receive on a bound or connected socket!&quot;);
     ZmqSockGuardCrossThread(sock);
@@ -2037,6 +2024,7 @@ static VALUE rb_czmq_socket_recv_frame_nonblock(VALUE obj)
     char print_prefix[255];
     char *cur_time = NULL;
     errno = 0;
+    zmq_sock_wrapper *sock = NULL;
     GetZmqSocket(obj);
     ZmqAssertSocketNotPending(sock, &quot;can only receive on a bound or connected socket!&quot;);
     ZmqSockGuardCrossThread(sock);
@@ -2091,6 +2079,7 @@ static VALUE rb_czmq_socket_recv_message(VALUE obj)
 {
     zmsg_t *message = NULL;
     struct nogvl_recv_args args;
+    zmq_sock_wrapper *sock = NULL;
     GetZmqSocket(obj);
     ZmqAssertSocketNotPending(sock, &quot;can only receive on a bound or connected socket!&quot;);
     ZmqSockGuardCrossThread(sock);
@@ -2143,15 +2132,19 @@ static VALUE rb_czmq_socket_recv_nonblock(VALUE obj)
 {
     char *str = NULL;
     errno = 0;
+    VALUE result = Qnil;
+    zmq_sock_wrapper *sock = NULL;
     GetZmqSocket(obj);
     ZmqAssertSocketNotPending(sock, &quot;can only receive on a bound or connected socket!&quot;);
     ZmqSockGuardCrossThread(sock);
     str = zstr_recv_nowait(sock-&gt;socket);
-    if (str == NULL) return Qnil;
+    if (str == NULL) return result;
     ZmqAssertSysError();
     if (sock-&gt;verbose)
         zclock_log (&quot;I: %s socket %p: recv_nonblock \&quot;%s\&quot;&quot;, zsocket_type_str(sock-&gt;socket), sock-&gt;socket, str);
-    return ZmqEncode(rb_str_new2(str));
+    result = ZmqEncode(rb_str_new2(str));
+    free(str);
+    return result;
 }</pre>
             </div><!-- recv_nonblock-source -->
             
@@ -2194,6 +2187,7 @@ sock.recv_timeout   =&gt;   5</pre>
 <pre>
 static VALUE rb_czmq_socket_recv_timeout(VALUE obj)
 {
+    zmq_sock_wrapper *sock = NULL;
     GetZmqSocket(obj);
     return sock-&gt;recv_timeout;
 }</pre>
@@ -2237,6 +2231,7 @@ sock.recv_timeout = 5 =&gt; nil</pre>
 <pre>
 static VALUE rb_czmq_socket_set_recv_timeout(VALUE obj, VALUE timeout)
 {
+    zmq_sock_wrapper *sock = NULL;
     GetZmqSocket(obj);
     if (TYPE(timeout) != T_FIXNUM &amp;&amp; TYPE(timeout) != T_FLOAT) rb_raise(rb_eTypeError, &quot;wrong timeout type %s (expected Fixnum or Float)&quot;, RSTRING_PTR(rb_obj_as_string(timeout)));
     sock-&gt;recv_timeout = timeout;
@@ -2285,6 +2280,7 @@ static VALUE rb_czmq_socket_send(VALUE obj, VALUE msg)
 {
     int rc;
     struct nogvl_send_args args;
+    zmq_sock_wrapper *sock = NULL;
     GetZmqSocket(obj);
     ZmqAssertSocketNotPending(sock, &quot;can only send on a bound or connected socket!&quot;);
     ZmqSockGuardCrossThread(sock);
@@ -2348,6 +2344,7 @@ static VALUE rb_czmq_socket_send_frame(int argc, VALUE *argv, VALUE obj)
     char *cur_time = NULL;
     zframe_t *print_frame = NULL;
     int rc, flgs;
+    zmq_sock_wrapper *sock = NULL;
     GetZmqSocket(obj);
     ZmqAssertSocketNotPending(sock, &quot;can only send on a bound or connected socket!&quot;);
     ZmqSockGuardCrossThread(sock);
@@ -2419,6 +2416,7 @@ static VALUE rb_czmq_socket_send_message(VALUE obj, VALUE message_obj)
 {
     struct nogvl_send_message_args args;
     zmsg_t *print_message = NULL;
+    zmq_sock_wrapper *sock = NULL;
     GetZmqSocket(obj);
     ZmqAssertSocketNotPending(sock, &quot;can only send on a bound or connected socket!&quot;);
     ZmqSockGuardCrossThread(sock);
@@ -2472,6 +2470,7 @@ sock.send_timeout   =&gt;   5</pre>
 <pre>
 static VALUE rb_czmq_socket_send_timeout(VALUE obj)
 {
+    zmq_sock_wrapper *sock = NULL;
     GetZmqSocket(obj);
     return sock-&gt;send_timeout;
 }</pre>
@@ -2515,6 +2514,7 @@ sock.send_timeout = 5 =&gt; nil</pre>
 <pre>
 static VALUE rb_czmq_socket_set_send_timeout(VALUE obj, VALUE timeout)
 {
+    zmq_sock_wrapper *sock = NULL;
     GetZmqSocket(obj);
     if (TYPE(timeout) != T_FIXNUM &amp;&amp; TYPE(timeout) != T_FLOAT) rb_raise(rb_eTypeError, &quot;wrong timeout type %s (expected Fixnum or Float)&quot;, RSTRING_PTR(rb_obj_as_string(timeout)));
     sock-&gt;send_timeout = timeout;
@@ -2564,6 +2564,7 @@ static VALUE rb_czmq_socket_sendm(VALUE obj, VALUE msg)
 {
     int rc;
     struct nogvl_send_args args;
+    zmq_sock_wrapper *sock = NULL;
     GetZmqSocket(obj);
     ZmqAssertSocketNotPending(sock, &quot;can only send on a bound or connected socket!&quot;);
     ZmqSockGuardCrossThread(sock);
@@ -2616,6 +2617,7 @@ sock.sndbuf  =&gt;  0</pre>
 <pre>
 static VALUE rb_czmq_socket_opt_sndbuf(VALUE obj)
 {
+    zmq_sock_wrapper *sock = NULL;
     GetZmqSocket(obj);
     return INT2NUM(zsockopt_sndbuf(sock-&gt;socket));
 }</pre>
@@ -2659,6 +2661,7 @@ sock.sndbuf = 1000  =&gt;  nil</pre>
 <pre>
 static VALUE rb_czmq_socket_set_opt_sndbuf(VALUE obj, VALUE value)
 {
+    zmq_sock_wrapper *sock = NULL;
     ZmqSetSockOpt(obj, zsockopt_set_sndbuf, &quot;SNDBUF&quot;, value);
 }</pre>
             </div><!-- sndbuf-3D-source -->
@@ -2703,6 +2706,7 @@ sock.state       =&gt;   ZMQ::Socket::BOUND</pre>
 <pre>
 static VALUE rb_czmq_socket_state(VALUE obj)
 {
+    zmq_sock_wrapper *sock = NULL;
     GetZmqSocket(obj);
     return INT2NUM(sock-&gt;state);
 }</pre>
@@ -2746,6 +2750,7 @@ sock.subscribe &quot;ruby&quot;  =&gt;  nil</pre>
 <pre>
 static VALUE rb_czmq_socket_set_opt_subscribe(VALUE obj, VALUE value)
 {
+    zmq_sock_wrapper *sock = NULL;
     ZmqSetStringSockOpt(obj, zsockopt_set_subscribe, &quot;SUBSCRIBE&quot;, value, {
        ZmqAssertSockOptFor(ZMQ_SUB)
     });
@@ -2790,6 +2795,7 @@ sock.swap  =&gt;  0</pre>
 <pre>
 static VALUE rb_czmq_socket_opt_swap(VALUE obj)
 {
+    zmq_sock_wrapper *sock = NULL;
     GetZmqSocket(obj);
     return INT2NUM(zsockopt_swap(sock-&gt;socket));
 }</pre>
@@ -2833,6 +2839,7 @@ sock.swap = 100  =&gt;  nil</pre>
 <pre>
 static VALUE rb_czmq_socket_set_opt_swap(VALUE obj, VALUE value)
 {
+    zmq_sock_wrapper *sock = NULL;
     ZmqSetSockOpt(obj, zsockopt_set_swap, &quot;SWAP&quot;, value);
 }</pre>
             </div><!-- swap-3D-source -->
@@ -2896,7 +2903,7 @@ socket bound to tcp://127.0.0.1:5000”</p>
             
             <div class="method-source-code" id="to_s-source">
 <pre>
-<span class="ruby-comment"># File lib/zmq/socket.rb, line 79</span>
+<span class="ruby-comment"># File lib/zmq/socket.rb, line 56</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">to_s</span>
   <span class="ruby-keyword">case</span> <span class="ruby-identifier">state</span>
   <span class="ruby-keyword">when</span> <span class="ruby-constant">BOUND</span>
@@ -2938,7 +2945,7 @@ socket bound to tcp://127.0.0.1:5000”</p>
             
             <div class="method-source-code" id="type_str-source">
 <pre>
-<span class="ruby-comment"># File lib/zmq/socket.rb, line 70</span>
+<span class="ruby-comment"># File lib/zmq/socket.rb, line 47</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">type_str</span>
   <span class="ruby-keyword">self</span>.<span class="ruby-identifier">class</span>.<span class="ruby-identifier">const_get</span>(<span class="ruby-value">:TYPE_STR</span>)
 <span class="ruby-keyword">end</span></pre>
@@ -2982,6 +2989,7 @@ sock.unsubscribe &quot;ruby&quot;  =&gt;  nil</pre>
 <pre>
 static VALUE rb_czmq_socket_set_opt_unsubscribe(VALUE obj, VALUE value)
 {
+    zmq_sock_wrapper *sock = NULL;
     ZmqSetStringSockOpt(obj, zsockopt_set_unsubscribe, &quot;UNSUBSCRIBE&quot;, value, {
        ZmqAssertSockOptFor(ZMQ_SUB)
     });
@@ -3027,6 +3035,7 @@ sock.verbose = true    =&gt;  nil</pre>
 static VALUE rb_czmq_socket_set_verbose(VALUE obj, VALUE level)
 {
     Bool vlevel;
+    zmq_sock_wrapper *sock = NULL;
     GetZmqSocket(obj);
     vlevel = (level == Qtrue) ? TRUE : FALSE;
     sock-&gt;verbose = vlevel;
@@ -3064,7 +3073,7 @@ conjunction with the ZMQ_FD socket option for edge-triggered notifications.</p>
             
             <div class="method-source-code" id="writable-3F-source">
 <pre>
-<span class="ruby-comment"># File lib/zmq/socket.rb, line 61</span>
+<span class="ruby-comment"># File lib/zmq/socket.rb, line 38</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">writable?</span>
   (<span class="ruby-identifier">events</span> &amp; <span class="ruby-constant">ZMQ</span><span class="ruby-operator">::</span><span class="ruby-constant">POLLOUT</span>) <span class="ruby-operator">==</span> <span class="ruby-constant">ZMQ</span><span class="ruby-operator">::</span><span class="ruby-constant">POLLOUT</span>
 <span class="ruby-keyword">end</span></pre>

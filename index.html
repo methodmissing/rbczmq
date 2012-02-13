@@ -25,10 +25,13 @@
   <div id="main">
     
 
-<p>© 2011 Lourens Naudé (methodmissing), with API guidance from the czmq (<a
+<p>© 2011 Lourens Naudé (methodmissing), James Tucker (raggi) with API
+guidance from the czmq (<a
 href="http://czmq.zeromq.org/">czmq.zeromq.org/</a>) project.</p>
 
 <pre>http://github.com/methodmissing/rbczmq</pre>
+
+<h4>NOT YET PRODUCTION READY, BUT ALMOST</h4>
 
 <h2>About ZeroMQ</h2>
 
@@ -80,6 +83,85 @@ higher level protocols and constructs.</p>
 <p>Enforce well known best practices such as restricting socket interactions
 to within the thread the socket was created in etc.</p>
 </li></ul>
+
+<h2>Performance</h2>
+
+<p>ZeroMQ can have higher throughput than TCP in most cases by using a message
+batching technique. Please have a look through the Performance section in
+the ZeroMQ FAQ (<a
+href="http://www.zeromq.org/area:faq#toc2">www.zeromq.org/area:faq#toc2</a>)
+for further implementation details.</p>
+
+<p>Some notes about these benchmarks :</p>
+<ul><li>
+<p>Messages go through the full network stack on localhost (TCP/IP transport)</p>
+</li><li>
+<p>The sender and receiver endpoints are Ruby processes which coerce
+transferred data to native String objects on both ends.</p>
+</li><li>
+<p>There’s thus a definite method dispatch cost in addition to intermittent
+pauses from the Garbage Collector</p>
+</li><li>
+<p>It’s still plenty fast for most soft real-time applications and we’re able
+to push in excess of 1 gigabits/s with the 1024 byte payloads. A language
+with automatic memory management cannot easily comply to hard real-time
+guarantees anyways.</p>
+</li></ul>
+
+<h3>TCP/IP loopback, 100k messages, 100 byte payloads</h3>
+
+<pre>Lourenss-MacBook-Air:rbczmq lourens$ MSG_COUNT=100000 MSG_SIZE=100 ruby perf/pair.rb
+Local pids: 2042
+Remote pid: 2043
+Sent 100000 messages in 0.3933s ...
+[2043] Memory used before: 1128kb
+[2043] Memory used after: 3012kb
+[2042] Memory used before: 1120kb
+====== [2042] transfer stats ======
+message encoding: string
+message size: 100 [B]
+message count: 100000
+mean throughput: 227978 [msg/s]
+mean throughput: 182.383 [Mb/s]
+[2042] Memory used after: 22432kb</pre>
+
+<h3>TCP/IP loopback, 100k messages, 1024 byte payloads</h3>
+
+<pre>Lourenss-MacBook-Air:rbczmq lourens$ MSG_COUNT=100000 MSG_SIZE=1024 ruby perf/pair.rb
+Local pids: 2027
+Remote pid: 2028
+Sent 100000 messages in 0.641198s ...
+[2028] Memory used before: 1120kb
+[2028] Memory used after: 12776kb
+[2027] Memory used before: 1144kb
+====== [2027] transfer stats ======
+message encoding: string
+message size: 1024 [B]
+message count: 100000
+mean throughput: 160756 [msg/s]
+mean throughput: 1316.919 [Mb/s]
+[2027] Memory used after: 189004kb</pre>
+
+<h3>TCP/IP loopback, 100k messages, 2048 byte payloads</h3>
+
+<pre>Lourenss-MacBook-Air:rbczmq lourens$ MSG_COUNT=100000 MSG_SIZE=2048 ruby perf/pair.rb
+Local pids: 2034
+Remote pid: 2035
+Sent 100000 messages in 0.94703s ...
+[2035] Memory used before: 1140kb
+[2035] Memory used after: 7212kb
+[2034] Memory used before: 1128kb
+====== [2034] transfer stats ======
+message encoding: string
+message size: 2048 [B]
+message count: 100000
+mean throughput: 123506 [msg/s]
+mean throughput: 2023.528 [Mb/s]
+[2034] Memory used after: 277712kb</pre>
+
+<p>Have a play around with the performance runner and other socket pairs as
+well - <a
+href="https://github.com/methodmissing/rbczmq/tree/master/perf">github.com/methodmissing/rbczmq/tree/master/perf</a></p>
 
 <h2>Usage</h2>
 
@@ -241,8 +323,7 @@ rake</pre>
 <ul><li>
 <p>ZMQ::Message#save &amp;&amp; ZMQ::Message.load</p>
 </li><li>
-<p><a href="ZMQ/Socket.html#method-i-handler">ZMQ::Socket#handler</a> = x.
-Assert handler interface here instead ???</p>
+<p>ZMQ::Socket#handler = x. Assert handler interface here instead ???</p>
 </li><li>
 <p>Callback handler for <a href="ZMQ/Socket.html">ZMQ::Socket</a> useful
 beyond just <a href="ZMQ/Loop.html">ZMQ::Loop</a> ?</p>
@@ -256,20 +337,50 @@ href="http://developer.apple.com/library/mac/#documentation/Darwin/Reference/Man
 </li><li>
 <p>czmq send methods aren’t non-blocking by default</p>
 </li><li>
-<p>Catch EFSM for REQ/REP pairs and raise in a format better suited for the
-user</p>
-</li><li>
 <p>Enforce socket timeouts</p>
 </li><li>
 <p>Look into handling signals properly</p>
-</li><li>
-<p>ZMQ.poll implementation</p>
 </li><li>
 <p>Revisit the <a href="ZMQ/Loop.html">ZMQ::Loop</a> API</p>
 </li><li>
 <p>Restrict pair sockets to inproc transport only</p>
 </li><li>
 <p>Revisit JRuby C API support</p>
+</li><li>
+<p>Push gem out to rubygems.org</p>
+</li><li>
+<p>RDOC fail on mixed C and Ruby source files that document that same
+constants</p>
+</li><li>
+<p>GC guards to prevent recycling objects being sent / received.</p>
+</li><li>
+<p>Sockets can bind &amp;&amp; connect to multiple endpoints - account for
+that</p>
+</li><li>
+<p>Try to catch socket setup that’ll have the context ripped out by the GC eg.
+ZMQ::Context.new.socket(:PUSH)</p>
+</li><li>
+<p>Watch out for further cases where REQ / REP pairs could raise EFSM</p>
+</li><li>
+<p>Fix Rubinius linking wrong libzmq</p>
+</li><li>
+<p>Regen gh-pages branch to reflect <a href="ZMQ/Poller.html">ZMQ::Poller</a>
+changes</p>
+</li><li>
+<p>Do not clobber local scope from macros (James’s commit in master)</p>
+</li><li>
+<p>Let <a href="ZMQ/Pollitem.html">ZMQ::Pollitem</a> support BasicSocket as
+well</p>
+</li><li>
+<p>Verbose mode for <a href="ZMQ/Poller.html">ZMQ::Poller</a> and let <a
+href="ZMQ/Pollitem.html">ZMQ::Pollitem</a> be aware of verbose pollables as
+well</p>
+</li><li>
+<p>Handle examples/../lib/zmq/loop.rb:69: [BUG] Segmentation fault</p>
+</li><li>
+<p>Support installation without vendor’ed libs as well</p>
+</li><li>
+<p>Incorporate examples into CI as well</p>
 </li></ul>
 
 <h2>Contact, feedback and bugs</h2>
@@ -315,6 +426,10 @@ href="https://github.com/methodmissing/rbczmq/issues">github.com/methodmissing/r
     
     <li class="class"><a href="ZMQ/Message.html">ZMQ::Message</a></li>
     
+    <li class="class"><a href="ZMQ/Poller.html">ZMQ::Poller</a></li>
+    
+    <li class="class"><a href="ZMQ/Pollitem.html">ZMQ::Pollitem</a></li>
+    
     <li class="class"><a href="ZMQ/Socket.html">ZMQ::Socket</a></li>
     
     <li class="class"><a href="ZMQ/Socket/Dealer.html">ZMQ::Socket::Dealer</a></li>
@@ -352,6 +467,8 @@ href="https://github.com/methodmissing/rbczmq/issues">github.com/methodmissing/r
     
       <li><a href="ZMQ.html#method-c-Message">::Message &mdash; ZMQ</a></li>
     
+      <li><a href="ZMQ.html#method-c-Pollitem">::Pollitem &mdash; ZMQ</a></li>
+    
       <li><a href="ZMQ/Loop.html#method-c-add_oneshot_timer">::add_oneshot_timer &mdash; ZMQ::Loop</a></li>
     
       <li><a href="ZMQ/Loop.html#method-c-add_oneshot_timer">::add_oneshot_timer &mdash; ZMQ::Loop</a></li>
@@ -386,9 +503,11 @@ href="https://github.com/methodmissing/rbczmq/issues">github.com/methodmissing/r
     
       <li><a href="ZMQ.html#method-c-error">::error &mdash; ZMQ</a></li>
     
-      <li><a href="ZMQ/DownstreamSocket.html#method-c-included">::included &mdash; ZMQ::DownstreamSocket</a></li>
+      <li><a href="ZMQ/Socket.html#method-c-handle_fsm_errors">::handle_fsm_errors &mdash; ZMQ::Socket</a></li>
     
       <li><a href="ZMQ/UpstreamSocket.html#method-c-included">::included &mdash; ZMQ::UpstreamSocket</a></li>
+    
+      <li><a href="ZMQ/DownstreamSocket.html#method-c-included">::included &mdash; ZMQ::DownstreamSocket</a></li>
     
       <li><a href="ZMQ.html#method-c-interrupted-3F">::interrupted? &mdash; ZMQ</a></li>
     
@@ -396,9 +515,9 @@ href="https://github.com/methodmissing/rbczmq/issues">github.com/methodmissing/r
     
       <li><a href="ZMQ.html#method-c-loop">::loop &mdash; ZMQ</a></li>
     
-      <li><a href="ZMQ/Handler.html#method-c-new">::new &mdash; ZMQ::Handler</a></li>
-    
       <li><a href="ZMQ/Timer.html#method-c-new">::new &mdash; ZMQ::Timer</a></li>
+    
+      <li><a href="ZMQ/Handler.html#method-c-new">::new &mdash; ZMQ::Handler</a></li>
     
       <li><a href="ZMQ.html#method-c-now">::now &mdash; ZMQ</a></li>
     
@@ -420,6 +539,8 @@ href="https://github.com/methodmissing/rbczmq/issues">github.com/methodmissing/r
     
       <li><a href="ZMQ/Loop.html#method-c-run">::run &mdash; ZMQ::Loop</a></li>
     
+      <li><a href="ZMQ.html#method-c-select">::select &mdash; ZMQ</a></li>
+    
       <li><a href="ZMQ/Socket.html#method-c-unsupported_api">::unsupported_api &mdash; ZMQ::Socket</a></li>
     
       <li><a href="ZMQ.html#method-c-version">::version &mdash; ZMQ</a></li>
@@ -432,9 +553,9 @@ href="https://github.com/methodmissing/rbczmq/issues">github.com/methodmissing/r
     
       <li><a href="ZMQ/Socket.html#method-i-backlog-3D">#backlog= &mdash; ZMQ::Socket</a></li>
     
-      <li><a href="ZMQ/Socket.html#method-i-bind">#bind &mdash; ZMQ::Socket</a></li>
-    
       <li><a href="ZMQ/Context.html#method-i-bind">#bind &mdash; ZMQ::Context</a></li>
+    
+      <li><a href="ZMQ/Socket.html#method-i-bind">#bind &mdash; ZMQ::Socket</a></li>
     
       <li><a href="ZMQ/Timer.html#method-i-call">#call &mdash; ZMQ::Timer</a></li>
     
@@ -442,9 +563,9 @@ href="https://github.com/methodmissing/rbczmq/issues">github.com/methodmissing/r
     
       <li><a href="ZMQ/Socket.html#method-i-close">#close &mdash; ZMQ::Socket</a></li>
     
-      <li><a href="ZMQ/Socket.html#method-i-connect">#connect &mdash; ZMQ::Socket</a></li>
-    
       <li><a href="ZMQ/Context.html#method-i-connect">#connect &mdash; ZMQ::Context</a></li>
+    
+      <li><a href="ZMQ/Socket.html#method-i-connect">#connect &mdash; ZMQ::Socket</a></li>
     
       <li><a href="ZMQ/Socket.html#method-i-endpoint">#endpoint &mdash; ZMQ::Socket</a></li>
     
@@ -453,10 +574,6 @@ href="https://github.com/methodmissing/rbczmq/issues">github.com/methodmissing/r
       <li><a href="ZMQ/Socket.html#method-i-fd">#fd &mdash; ZMQ::Socket</a></li>
     
       <li><a href="ZMQ/Timer.html#method-i-fire">#fire &mdash; ZMQ::Timer</a></li>
-    
-      <li><a href="ZMQ/Socket.html#method-i-handler">#handler &mdash; ZMQ::Socket</a></li>
-    
-      <li><a href="ZMQ/Socket.html#method-i-handler-3D">#handler= &mdash; ZMQ::Socket</a></li>
     
       <li><a href="ZMQ/Socket.html#method-i-hwm">#hwm &mdash; ZMQ::Socket</a></li>
     
@@ -472,25 +589,27 @@ href="https://github.com/methodmissing/rbczmq/issues">github.com/methodmissing/r
     
       <li><a href="ZMQ/Socket.html#method-i-mcast_loop-3F">#mcast_loop? &mdash; ZMQ::Socket</a></li>
     
-      <li><a href="ZMQ/Timer.html#method-i-on_error">#on_error &mdash; ZMQ::Timer</a></li>
-    
       <li><a href="ZMQ/Handler.html#method-i-on_error">#on_error &mdash; ZMQ::Handler</a></li>
+    
+      <li><a href="ZMQ/Timer.html#method-i-on_error">#on_error &mdash; ZMQ::Timer</a></li>
     
       <li><a href="ZMQ/DefaultHandler.html#method-i-on_readable">#on_readable &mdash; ZMQ::DefaultHandler</a></li>
     
       <li><a href="ZMQ/Handler.html#method-i-on_readable">#on_readable &mdash; ZMQ::Handler</a></li>
     
+      <li><a href="ZMQ/DefaultHandler.html#method-i-on_writable">#on_writable &mdash; ZMQ::DefaultHandler</a></li>
+    
       <li><a href="ZMQ/Handler.html#method-i-on_writable">#on_writable &mdash; ZMQ::Handler</a></li>
     
-      <li><a href="ZMQ/DefaultHandler.html#method-i-on_writable">#on_writable &mdash; ZMQ::DefaultHandler</a></li>
+      <li><a href="ZMQ/Poller.html#method-i-poll_nonblock">#poll_nonblock &mdash; ZMQ::Poller</a></li>
     
       <li><a href="ZMQ/Socket.html#method-i-poll_readable-3F">#poll_readable? &mdash; ZMQ::Socket</a></li>
     
       <li><a href="ZMQ/UpstreamSocket.html#method-i-poll_readable-3F">#poll_readable? &mdash; ZMQ::UpstreamSocket</a></li>
     
-      <li><a href="ZMQ/Socket.html#method-i-poll_writable-3F">#poll_writable? &mdash; ZMQ::Socket</a></li>
-    
       <li><a href="ZMQ/DownstreamSocket.html#method-i-poll_writable-3F">#poll_writable? &mdash; ZMQ::DownstreamSocket</a></li>
+    
+      <li><a href="ZMQ/Socket.html#method-i-poll_writable-3F">#poll_writable? &mdash; ZMQ::Socket</a></li>
     
       <li><a href="ZMQ/Socket.html#method-i-rate">#rate &mdash; ZMQ::Socket</a></li>
     
@@ -520,6 +639,10 @@ href="https://github.com/methodmissing/rbczmq/issues">github.com/methodmissing/r
     
       <li><a href="ZMQ/Socket.html#method-i-recovery_ivl_msec-3D">#recovery_ivl_msec= &mdash; ZMQ::Socket</a></li>
     
+      <li><a href="ZMQ/Pollitem.html#method-i-recv">#recv &mdash; ZMQ::Pollitem</a></li>
+    
+      <li><a href="ZMQ/Handler.html#method-i-recv">#recv &mdash; ZMQ::Handler</a></li>
+    
       <li><a href="ZMQ/Socket.html#method-i-recv">#recv &mdash; ZMQ::Socket</a></li>
     
       <li><a href="ZMQ/Socket.html#method-i-recv_frame">#recv_frame &mdash; ZMQ::Socket</a></li>
@@ -533,6 +656,14 @@ href="https://github.com/methodmissing/rbczmq/issues">github.com/methodmissing/r
       <li><a href="ZMQ/Socket.html#method-i-recv_timeout">#recv_timeout &mdash; ZMQ::Socket</a></li>
     
       <li><a href="ZMQ/Socket.html#method-i-recv_timeout-3D">#recv_timeout= &mdash; ZMQ::Socket</a></li>
+    
+      <li><a href="ZMQ/Poller.html#method-i-register_readable">#register_readable &mdash; ZMQ::Poller</a></li>
+    
+      <li><a href="ZMQ/Poller.html#method-i-register_writable">#register_writable &mdash; ZMQ::Poller</a></li>
+    
+      <li><a href="ZMQ/Pollitem.html#method-i-send">#send &mdash; ZMQ::Pollitem</a></li>
+    
+      <li><a href="ZMQ/Handler.html#method-i-send">#send &mdash; ZMQ::Handler</a></li>
     
       <li><a href="ZMQ/Socket.html#method-i-send">#send &mdash; ZMQ::Socket</a></li>
     
@@ -566,23 +697,23 @@ href="https://github.com/methodmissing/rbczmq/issues">github.com/methodmissing/r
     
       <li><a href="ZMQ/Socket.html#method-i-to_s">#to_s &mdash; ZMQ::Socket</a></li>
     
-      <li><a href="ZMQ/Socket/Rep.html#method-i-type">#type &mdash; ZMQ::Socket::Rep</a></li>
-    
       <li><a href="ZMQ/Socket/Sub.html#method-i-type">#type &mdash; ZMQ::Socket::Sub</a></li>
-    
-      <li><a href="ZMQ/Socket/Router.html#method-i-type">#type &mdash; ZMQ::Socket::Router</a></li>
-    
-      <li><a href="ZMQ/Socket/Dealer.html#method-i-type">#type &mdash; ZMQ::Socket::Dealer</a></li>
-    
-      <li><a href="ZMQ/Socket/Req.html#method-i-type">#type &mdash; ZMQ::Socket::Req</a></li>
-    
-      <li><a href="ZMQ/Socket/Pair.html#method-i-type">#type &mdash; ZMQ::Socket::Pair</a></li>
-    
-      <li><a href="ZMQ/Socket/Pub.html#method-i-type">#type &mdash; ZMQ::Socket::Pub</a></li>
     
       <li><a href="ZMQ/Socket/Pull.html#method-i-type">#type &mdash; ZMQ::Socket::Pull</a></li>
     
+      <li><a href="ZMQ/Socket/Pub.html#method-i-type">#type &mdash; ZMQ::Socket::Pub</a></li>
+    
+      <li><a href="ZMQ/Socket/Pair.html#method-i-type">#type &mdash; ZMQ::Socket::Pair</a></li>
+    
+      <li><a href="ZMQ/Socket/Dealer.html#method-i-type">#type &mdash; ZMQ::Socket::Dealer</a></li>
+    
       <li><a href="ZMQ/Socket/Push.html#method-i-type">#type &mdash; ZMQ::Socket::Push</a></li>
+    
+      <li><a href="ZMQ/Socket/Router.html#method-i-type">#type &mdash; ZMQ::Socket::Router</a></li>
+    
+      <li><a href="ZMQ/Socket/Rep.html#method-i-type">#type &mdash; ZMQ::Socket::Rep</a></li>
+    
+      <li><a href="ZMQ/Socket/Req.html#method-i-type">#type &mdash; ZMQ::Socket::Req</a></li>
     
       <li><a href="ZMQ/Socket.html#method-i-type_str">#type_str &mdash; ZMQ::Socket</a></li>
     

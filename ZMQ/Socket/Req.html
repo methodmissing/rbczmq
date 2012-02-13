@@ -127,6 +127,10 @@
         
           <li><a href="../../ZMQ/Message.html">ZMQ::Message</a></li>
         
+          <li><a href="../../ZMQ/Poller.html">ZMQ::Poller</a></li>
+        
+          <li><a href="../../ZMQ/Pollitem.html">ZMQ::Pollitem</a></li>
+        
           <li><a href="../../ZMQ/Socket.html">ZMQ::Socket</a></li>
         
           <li><a href="../../ZMQ/Socket/Dealer.html">ZMQ::Socket::Dealer</a></li>
@@ -256,7 +260,7 @@ becomes available for sending; messages are not discarded.</p>
             
             <div class="method-source-code" id="send_frame-source">
 <pre>
-<span class="ruby-comment"># File lib/zmq/socket/req.rb, line 65</span>
+<span class="ruby-comment"># File lib/zmq/socket/req.rb, line 32</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">send_frame</span>(<span class="ruby-identifier">frame</span>, <span class="ruby-identifier">flags</span> = <span class="ruby-value">0</span>)
   <span class="ruby-identifier">raise</span> <span class="ruby-constant">ZMQ</span><span class="ruby-operator">::</span><span class="ruby-constant">Error</span>, <span class="ruby-string">&quot;cannot send multiple frames on REQ sockets&quot;</span> <span class="ruby-keyword">if</span> (<span class="ruby-identifier">flags</span> &amp; <span class="ruby-constant">ZMQ</span><span class="ruby-operator">::</span><span class="ruby-constant">Frame</span><span class="ruby-operator">::</span><span class="ruby-constant">MORE</span>) <span class="ruby-operator">==</span> <span class="ruby-constant">ZMQ</span><span class="ruby-operator">::</span><span class="ruby-constant">Frame</span><span class="ruby-operator">::</span><span class="ruby-constant">MORE</span>
   <span class="ruby-keyword">super</span>
@@ -290,7 +294,7 @@ becomes available for sending; messages are not discarded.</p>
             
             <div class="method-source-code" id="type-source">
 <pre>
-<span class="ruby-comment"># File lib/zmq/socket/req.rb, line 61</span>
+<span class="ruby-comment"># File lib/zmq/socket/req.rb, line 25</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">type</span>
   <span class="ruby-constant">ZMQ</span><span class="ruby-operator">::</span><span class="ruby-constant">REQ</span>
 <span class="ruby-keyword">end</span></pre>
