@@ -115,6 +115,22 @@ static VALUE rb_czmq_m_error(ZMQ_UNUSED VALUE obj)
     return rb_exc_new2(rb_eZmqError, zmq_strerror(zmq_errno()));
 }
 
+/*
+ *  call-seq:
+ *     ZMQ.errno    =>  Fixnum
+ *
+ *  Returns the last known ZMQ errno (if any) as a Fixnum.
+ *
+ * === Examples
+ *     ZMQ.errorno    =>  0
+ *
+*/
+
+static VALUE rb_czmq_m_errno(ZMQ_UNUSED VALUE obj)
+{
+    return INT2NUM(zmq_errno());
+}
+
 void Init_rbczmq_ext()
 {
     frames_map = st_init_numtable();
@@ -132,6 +148,7 @@ void Init_rbczmq_ext()
     rb_define_module_function(rb_mZmq, "now", rb_czmq_m_now, 0);
     rb_define_module_function(rb_mZmq, "log", rb_czmq_m_log, 1);
     rb_define_module_function(rb_mZmq, "error", rb_czmq_m_error, 0);
+    rb_define_module_function(rb_mZmq, "errno", rb_czmq_m_errno, 0);
 
     rb_define_const(rb_mZmq, "POLLIN", INT2NUM(ZMQ_POLLIN));
     rb_define_const(rb_mZmq, "POLLOUT", INT2NUM(ZMQ_POLLOUT));

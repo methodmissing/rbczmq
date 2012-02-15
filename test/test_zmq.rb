@@ -24,6 +24,11 @@ class TestZmq < ZmqTestCase
     assert expected.any?{|c| c === ZMQ.error }
   end
 
+  def test_errno
+    assert_instance_of Fixnum, ZMQ.errno
+    assert_equal 0, ZMQ.errno
+  end
+
   def test_select
     ctx = ZMQ::Context.new
     poller = ZMQ::Poller.new
