@@ -234,7 +234,6 @@ Running tests
 * Handle GC issue with timers in loop callbacks
 * czmq send methods aren't non-blocking by default
 * Enforce socket timeouts
-* Look into handling signals properly
 * Revisit the ZMQ::Loop API
 * Restrict pair sockets to inproc transport only
 * Revisit JRuby C API support

@@ -2,6 +2,24 @@
 
 class ZMQ::Context
 
+  # Overload the libczmq handler installed for SIGINT and SIGTERM on context init. This ensures we fallback to the default
+  # Ruby signal handlers which is least likely to violate the principle of least surprise. As an alternative fallback, we
+  # expose ZMQ.interrupted! which reverts back to the libczmq default actions when called from a Ruby signal handler. The
+  # following restores the default libczmq behavior :
+  #
+  # def initialize(*args)
+  #   super
+  #   trap(:INT){ ZMQ.interrupted! }
+  #   trap(:TERM){ ZMQ.interrupted! }
+  # end
+  #
+
+  def initialize(*args)
+    super
+    trap(:INT, "DEFAULT")
+    trap(:TERM, "DEFAULT")
+  end
+
   # Before using any ØMQ library functions the caller must initialise a ØMQ context.
   #
   # The context manages open sockets and automatically closes these before termination. Other responsibilities include :

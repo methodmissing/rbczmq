@@ -122,7 +122,7 @@ static VALUE rb_czmq_m_error(ZMQ_UNUSED VALUE obj)
  *  Returns the last known ZMQ errno (if any) as a Fixnum.
  *
  * === Examples
- *     ZMQ.errorno    =>  0
+ *     ZMQ.errno    =>  0
  *
 */
 

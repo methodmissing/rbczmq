@@ -26,7 +26,6 @@ class TestZmq < ZmqTestCase
 
   def test_errno
     assert_instance_of Fixnum, ZMQ.errno
-    assert_equal 0, ZMQ.errno
   end
 
   def test_select
