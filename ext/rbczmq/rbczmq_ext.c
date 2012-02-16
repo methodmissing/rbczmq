@@ -131,6 +131,23 @@ static VALUE rb_czmq_m_errno(ZMQ_UNUSED VALUE obj)
     return INT2NUM(zmq_errno());
 }
 
+/*
+ *  call-seq:
+ *     ZMQ.interrupted!    =>  nil
+ *
+ *  Callback for Ruby signal handlers for terminating blocking functions and the reactor loop in libczmq.
+ *
+ * === Examples
+ *     ZMQ.interrupted!    =>  nil
+ *
+*/
+
+static VALUE rb_czmq_m_interrupted_bang(ZMQ_UNUSED VALUE obj)
+{
+    zctx_interrupted = 1;
+    return Qnil;
+}
+
 void Init_rbczmq_ext()
 {
     frames_map = st_init_numtable();
@@ -149,6 +166,7 @@ void Init_rbczmq_ext()
     rb_define_module_function(rb_mZmq, "log", rb_czmq_m_log, 1);
     rb_define_module_function(rb_mZmq, "error", rb_czmq_m_error, 0);
     rb_define_module_function(rb_mZmq, "errno", rb_czmq_m_errno, 0);
+    rb_define_module_function(rb_mZmq, "interrupted!", rb_czmq_m_interrupted_bang, 0);
 
     rb_define_const(rb_mZmq, "POLLIN", INT2NUM(ZMQ_POLLIN));
     rb_define_const(rb_mZmq, "POLLOUT", INT2NUM(ZMQ_POLLOUT));
