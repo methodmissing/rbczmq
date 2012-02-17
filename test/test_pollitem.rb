@@ -25,6 +25,15 @@ class TestZmqPollitem < ZmqTestCase
     ctx.destroy
   end
 
+  def test_verbose
+    ctx = ZMQ::Context.new
+    rep = ctx.bind(:REP, 'inproc://test.pollitem-verbose')
+    pollitem = ZMQ::Pollitem.new(rep, ZMQ::POLLIN)
+    pollitem.verbose = true
+  ensure
+    ctx.destroy
+  end
+
   def test_handler
     pollitem = ZMQ::Pollitem.new(STDIN, ZMQ::POLLIN)
     assert_nil pollitem.handler

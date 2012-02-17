@@ -247,8 +247,6 @@ Running tests
 * Regen gh-pages branch to reflect ZMQ::Poller changes
 * Do not clobber local scope from macros (James's commit in master)
 * Let ZMQ::Pollitem support BasicSocket as well
-* Verbose mode for ZMQ::Poller and let ZMQ::Pollitem be aware of verbose pollables as well
-* Handle examples/../lib/zmq/loop.rb:69: [BUG] Segmentation fault
 * Support installation without vendor'ed libs as well
 * Incorporate examples into CI as well
 

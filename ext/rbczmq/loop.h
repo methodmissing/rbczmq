@@ -18,6 +18,7 @@ typedef struct {
     if (!loop) rb_raise(rb_eTypeError, "uninitialized ZMQ loop!"); \
     if (loop->flags & ZMQ_LOOP_DESTROYED) rb_raise(rb_eZmqError, "ZMQ::Loop instance %p has been destroyed by the ZMQ framework", (void *)obj);
 
+VALUE rb_czmq_pollitem_set_verbose(VALUE obj, VALUE level);
 void _init_rb_czmq_loop();
 
 #endif

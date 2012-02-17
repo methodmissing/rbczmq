@@ -94,6 +94,7 @@ VALUE rb_czmq_poller_new(VALUE obj)
     poller->readables = rb_ary_new();
     poller->writables = rb_ary_new();
     poller->dirty = FALSE;
+    poller->verbose = FALSE;
     rb_obj_call_init(obj, 0, NULL);
     return obj;
 }
@@ -191,6 +192,8 @@ VALUE rb_czmq_poller_register(VALUE obj, VALUE pollable)
     ZmqGetPoller(obj);
     pollable = rb_czmq_pollitem_coerce(pollable);
     ZmqGetPollitem(pollable);
+    /* Let pollable item be verbose if poller is verbose */
+    if (poller->verbose == TRUE) rb_czmq_pollitem_set_verbose(pollable, Qtrue);
     rb_ary_push(poller->pollables, pollable);
     poller->poll_size++;
     poller->dirty = TRUE;
@@ -270,6 +273,27 @@ VALUE rb_czmq_poller_writables(VALUE obj)
     return poller->writables;
 }
 
+/*
+ *  call-seq:
+ *     poller.verbose = true    =>  nil
+ *
+ *  Logs poller activity to stdout - useful for debugging, but can be quite noisy with lots of activity.
+ *
+ * === Examples
+ *     poller = ZMQ::Poller.new    =>   ZMQ::Poller
+ *     poller.verbose = true   =>    nil
+ *
+*/
+
+static VALUE rb_czmq_poller_set_verbose(VALUE obj, VALUE level)
+{
+    Bool vlevel;
+    ZmqGetPoller(obj);
+    vlevel = (level == Qtrue) ? TRUE : FALSE;
+    poller->verbose = vlevel;
+    return Qnil;
+}
+
 void _init_rb_czmq_poller()
 {
     rb_cZmqPoller = rb_define_class_under(rb_mZmq, "Poller", rb_cObject);
@@ -280,4 +304,5 @@ void _init_rb_czmq_poller()
     rb_define_method(rb_cZmqPoller, "remove", rb_czmq_poller_remove, 1);
     rb_define_method(rb_cZmqPoller, "readables", rb_czmq_poller_readables, 0);
     rb_define_method(rb_cZmqPoller, "writables", rb_czmq_poller_writables, 0);
+    rb_define_method(rb_cZmqPoller, "verbose=", rb_czmq_poller_set_verbose, 1);
 }

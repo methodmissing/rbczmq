@@ -211,6 +211,32 @@ VALUE rb_czmq_pollitem_handler_equals(VALUE obj, VALUE handler)
     return Qnil;
 }
 
+/*
+ *  call-seq:
+ *     pollitem.verbose = true    =>  nil
+ *
+ *  Logs pollitem activity to stdout - useful for debugging, but can be quite noisy with lots of activity. Only applicable
+ *  to pollable items of type ZMQ::Socket.
+ *
+ * === Examples
+ *     item = ZMQ::Pollitem.new(sock)    =>   ZMQ::Pollitem
+ *     item.verbose = true   =>    nil
+ *
+*/
+
+VALUE rb_czmq_pollitem_set_verbose(VALUE obj, VALUE level)
+{
+    Bool vlevel;
+    zmq_sock_wrapper *sock = NULL;
+    ZmqGetPollitem(obj);
+    vlevel = (level == Qtrue) ? TRUE : FALSE;
+    if (rb_obj_is_kind_of(pollitem->socket, rb_cZmqSocket)) {
+        GetZmqSocket(pollitem->socket);
+        sock->verbose = vlevel;
+    }
+    return Qnil;
+}
+
 void _init_rb_czmq_pollitem()
 {
     rb_cZmqPollitem = rb_define_class_under(rb_mZmq, "Pollitem", rb_cObject);
@@ -221,4 +247,5 @@ void _init_rb_czmq_pollitem()
     rb_define_method(rb_cZmqPollitem, "events", rb_czmq_pollitem_events, 0);
     rb_define_method(rb_cZmqPollitem, "handler", rb_czmq_pollitem_handler, 0);
     rb_define_method(rb_cZmqPollitem, "handler=", rb_czmq_pollitem_handler_equals, 1);
+    rb_define_method(rb_cZmqPollitem, "verbose=", rb_czmq_pollitem_set_verbose, 1);
 }

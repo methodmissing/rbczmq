@@ -313,8 +313,8 @@ static VALUE rb_czmq_loop_register(VALUE obj, VALUE pollable)
     ZmqGetPollitem(pollable);
     rc = zloop_poller(loop->loop, pollitem->item, rb_czmq_loop_pollitem_callback, (void *)pollitem);
     ZmqAssert(rc);
-   /* Let socket be verbose if loop is verbose */
-/*    if (loop->verbose == TRUE) sock->verbose = loop->verbose; */
+    /* Let pollable be verbose if loop is verbose */
+    if (loop->verbose == TRUE) rb_czmq_pollitem_set_verbose(pollable, Qtrue);
     return Qtrue;
 }
 

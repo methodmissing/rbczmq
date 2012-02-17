@@ -8,9 +8,15 @@ class TestZmqPoller < ZmqTestCase
     assert_instance_of ZMQ::Poller, ZMQ::Poller.new
   end
 
+  def test_verbose
+    poller = ZMQ::Poller.new
+    poller.verbose = true
+  end
+
   def test_poll_sockets
     ctx = ZMQ::Context.new
     poller = ZMQ::Poller.new
+    poller.verbose = true
     assert_equal 0, poller.poll
     rep = ctx.socket(:REP)
     rep.linger = 0
