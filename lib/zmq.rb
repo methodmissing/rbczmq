@@ -10,6 +10,7 @@ rescue LoadError
 end
 
 require 'zmq/version' unless defined? ZMQ::VERSION
+require 'socket'
 
 module ZMQ
   # Sugaring for creating new ZMQ frames
