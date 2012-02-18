@@ -6,7 +6,7 @@ class ZMQ::Pollitem
   def send(*args)
     case pollable
     when BasicSocket
-      pollable.send(*args)
+      pollable.send(*args.shift, 0)
     when IO
       pollable.write_nonblock(*args)
     when ZMQ::Socket

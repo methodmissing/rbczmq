@@ -164,11 +164,24 @@ class TestZmqLoop < ZmqTestCase
   end
 
   def test_register_ios
+    r, w = IO.pipe
     ret = ZMQ::Loop.run do
-      r, w = IO.pipe
       ZL.register_readable(r, LoopBreaker)
       ZL.register_writable(w)
       w.write("message")
+    end
+    assert_equal(-1, ret)
+  end
+
+  def test_register_ruby_sockets
+    server = TCPServer.new("127.0.0.1", 0)
+    f, port, host, addr = server.addr
+    client = TCPSocket.new("127.0.0.1", port)
+    s = server.accept
+    ret = ZMQ::Loop.run do
+      ZL.register_readable(s, LoopBreaker)
+      ZL.register_writable(client)
+      client.send("message", 0)
     end
     assert_equal(-1, ret)
   end

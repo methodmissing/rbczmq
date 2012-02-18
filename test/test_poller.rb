@@ -75,14 +75,14 @@ class TestZmqPoller < ZmqTestCase
     client = TCPSocket.new("127.0.0.1", port)
     s = server.accept
 
-    poller.register(ZMQ::Pollitem(server))
-    poller.register(ZMQ::Pollitem(client))
+    poller.register(ZMQ::Pollitem(s, ZMQ::POLLIN))
+    poller.register(ZMQ::Pollitem(client, ZMQ::POLLOUT))
 
     client.send("message", 0)
     sleep 0.2
 
-    assert_equal 1, poller.poll(1)
-    assert_equal [], poller.readables
+    assert_equal 2, poller.poll(1)
+    assert_equal [s], poller.readables
     assert_equal [client], poller.writables
 
     assert_equal "message", s.recv_nonblock(7)
