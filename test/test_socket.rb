@@ -80,6 +80,18 @@ class TestZmqSocket < ZmqTestCase
     ctx.destroy
   end
 
+  def test_gc_context_reaped
+    pub = ZMQ::Context.new.socket(:PUB)
+    GC.start
+    pub.bind("inproc://test.socket-gc_context_reaped")
+    GC.start
+    pub.send("test")
+    GC.start
+    pub.close
+  ensure
+    ZMQ.context.destroy
+  end
+
   def test_bind
     ctx = ZMQ::Context.new
     sock = ctx.socket(:PAIR)
