@@ -5,6 +5,8 @@ class ZMQ::Pollitem
   #
   def send(*args)
     case pollable
+    when BasicSocket
+      pollable.send(*args)
     when IO
       pollable.write_nonblock(*args)
     when ZMQ::Socket
@@ -16,6 +18,9 @@ class ZMQ::Pollitem
   #
   def recv
     case pollable
+    when BasicSocket
+      # XXX assumed page size
+      pollable.recv_nonblock(4096)
     when IO
       # XXX assumed page size
       pollable.read_nonblock(4096)

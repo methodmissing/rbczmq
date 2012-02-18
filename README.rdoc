@@ -246,7 +246,6 @@ Running tests
 * Fix Rubinius linking wrong libzmq
 * Regen gh-pages branch to reflect ZMQ::Poller changes
 * Do not clobber local scope from macros (James's commit in master)
-* Let ZMQ::Pollitem support BasicSocket as well
 * Support installation without vendor'ed libs as well
 * Incorporate examples into CI as well
 

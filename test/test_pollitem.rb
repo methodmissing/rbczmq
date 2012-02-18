@@ -25,6 +25,15 @@ class TestZmqPollitem < ZmqTestCase
     ctx.destroy
   end
 
+  def test_alloc_ruby_socket
+    srv = TCPServer.new("127.0.0.1", 0)
+    pollitem = ZMQ::Pollitem.new(srv, ZMQ::POLLIN)
+    assert_equal srv, pollitem.pollable
+    assert_equal ZMQ::POLLIN, pollitem.events
+  ensure
+    srv.close if srv
+  end
+
   def test_verbose
     ctx = ZMQ::Context.new
     rep = ctx.bind(:REP, 'inproc://test.pollitem-verbose')

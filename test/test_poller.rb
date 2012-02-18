@@ -68,6 +68,26 @@ class TestZmqPoller < ZmqTestCase
     assert_equal "message", r.read(7)
   end
 
+  def test_poll_ruby_sockets
+    poller = ZMQ::Poller.new
+    server = TCPServer.new("127.0.0.1", 0)
+    f, port, host, addr = server.addr
+    client = TCPSocket.new("127.0.0.1", port)
+    s = server.accept
+
+    poller.register(ZMQ::Pollitem(server))
+    poller.register(ZMQ::Pollitem(client))
+
+    client.send("message", 0)
+    sleep 0.2
+
+    assert_equal 1, poller.poll(1)
+    assert_equal [], poller.readables
+    assert_equal [client], poller.writables
+
+    assert_equal "message", s.recv_nonblock(7)
+  end
+
   def test_register
     ctx = ZMQ::Context.new
     rep = ctx.bind(:REP, 'inproc://test.poller-register')
