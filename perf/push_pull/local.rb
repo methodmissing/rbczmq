@@ -2,10 +2,10 @@
 
 ctx = ZMQ::Context.new
 pull = ctx.socket(:PULL)
-pull.connect(Runner::ENDPOINT)
+pull.connect($runner.endpoint)
 
 messages, start_time = 0, nil
-while (case Runner.encoding
+while (case $runner.encoding
   when :string
     pull.recv
   when :frame
@@ -15,7 +15,7 @@ while (case Runner.encoding
   end) do
   start_time ||= Time.now
   messages += 1
-  break if messages == Runner.process_msg_count
+  break if messages == $runner.process_msg_count
 end
 
-Runner.stats(start_time)
+$runner.stats(start_time)

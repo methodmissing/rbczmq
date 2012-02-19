@@ -1,14 +1,14 @@
 # encoding: utf-8
 
-ctx = ZMQ::Context.new
+ctx = ZMQ.context
 pair = ctx.socket(:PAIR);
-pair.bind(Runner::ENDPOINT);
+pair.bind($runner.endpoint);
 
-msg = Runner.payload
+msg = $runner.payload
 
 start_time = Time.now
-Runner.msg_count.times do
-  case Runner.encoding
+$runner.msg_count.times do
+  case $runner.encoding
   when :string
     pair.send(msg)
   when :frame
@@ -22,4 +22,4 @@ Runner.msg_count.times do
   end
 end
 
-puts "Sent #{Runner.msg_count} messages in %ss ..." % (Time.now - start_time)
+puts "Sent #{$runner.msg_count} messages in %ss ..." % (Time.now - start_time)

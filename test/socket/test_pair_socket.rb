@@ -11,4 +11,14 @@ class TestPairSocket < ZmqTestCase
   ensure
     ctx.destroy
   end
+
+  def test_inproc_only_transport
+    ctx = ZMQ::Context.new
+    sock = ctx.socket(:PAIR)
+    assert_raises ZMQ::Error do
+      sock.bind("tcp://127.0.0.1:*")
+    end
+  ensure
+    ctx.destroy
+  end
 end

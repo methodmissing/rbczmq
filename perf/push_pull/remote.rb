@@ -2,13 +2,13 @@
 
 ctx = ZMQ::Context.new
 push = ctx.socket(:PUSH);
-push.bind(Runner::ENDPOINT);
+push.bind($runner.endpoint);
 
-msg = Runner.payload
+msg = $runner.payload
 
 start_time = Time.now
-Runner.msg_count.times do
-  case Runner.encoding
+$runner.msg_count.times do
+  case $runner.encoding
   when :string
     push.send(msg)
   when :frame
@@ -22,4 +22,4 @@ Runner.msg_count.times do
   end
 end
 
-puts "Sent #{Runner.msg_count} messages in %ss ..." % (Time.now - start_time)
+puts "Sent #{$runner.msg_count} messages in %ss ..." % (Time.now - start_time)

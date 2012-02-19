@@ -2,12 +2,12 @@
 
 ctx = ZMQ::Context.new
 req = ctx.socket(:REQ)
-req.connect(Runner::ENDPOINT)
+req.connect($runner.endpoint)
 
-msg = Runner.payload
+msg = $runner.payload
 
 messages, start_time = 0, nil
-while (case Runner.encoding
+while (case $runner.encoding
        when :string
          req.send(msg)
        when :frame
@@ -21,7 +21,7 @@ while (case Runner.encoding
        end) do
   start_time ||= Time.now
   messages += 1
-  case Runner.encoding
+  case $runner.encoding
     when :string
       req.recv
     when :frame
@@ -29,7 +29,7 @@ while (case Runner.encoding
     when :message
       req.recv_message
     end
-  break if messages == Runner.msg_count
+  break if messages == $runner.msg_count
 end
 
-Runner.stats(start_time)
+$runner.stats(start_time)

@@ -94,7 +94,7 @@ class TestZmqSocket < ZmqTestCase
 
   def test_bind
     ctx = ZMQ::Context.new
-    sock = ctx.socket(:PAIR)
+    sock = ctx.socket(:REP)
     assert(sock.state & ZMQ::Socket::PENDING)
     port = sock.bind("tcp://127.0.0.1:*")
     assert sock.fd != -1
@@ -124,23 +124,23 @@ class TestZmqSocket < ZmqTestCase
   def test_to_s
     ctx = ZMQ::Context.new
     sock = ctx.socket(:PAIR)
-    rep = ctx.socket(:PAIR)
+    rep = ctx.socket(:REP)
     port = rep.bind("tcp://127.0.0.1:*")
-    req = ctx.socket(:PAIR)
+    req = ctx.socket(:REQ)
     assert(req.state & ZMQ::Socket::PENDING)
     req.connect("tcp://127.0.0.1:#{port}")
     assert_equal "PAIR socket", sock.to_s
-    assert_equal "PAIR socket bound to tcp://127.0.0.1:*", rep.to_s
-    assert_equal "PAIR socket connected to tcp://127.0.0.1:#{port}", req.to_s
+    assert_equal "REP socket bound to tcp://127.0.0.1:*", rep.to_s
+    assert_equal "REQ socket connected to tcp://127.0.0.1:#{port}", req.to_s
   ensure
     ctx.destroy
   end
 
   def test_endpoint
     ctx = ZMQ::Context.new
-    rep = ctx.socket(:PAIR)
+    rep = ctx.socket(:REP)
     port = rep.bind("tcp://127.0.0.1:*")
-    req = ctx.socket(:PAIR)
+    req = ctx.socket(:REQ)
     req.connect("tcp://127.0.0.1:#{port}")
     assert_equal "tcp://127.0.0.1:*", rep.endpoint
     assert_equal "tcp://127.0.0.1:#{port}", req.endpoint
@@ -206,9 +206,9 @@ class TestZmqSocket < ZmqTestCase
 
   def test_receive_nonblock
     ctx = ZMQ::Context.new
-    rep = ctx.socket(:PAIR)
+    rep = ctx.socket(:REP)
     port = rep.bind("tcp://127.0.0.1:*")
-    req = ctx.socket(:PAIR)
+    req = ctx.socket(:REQ)
     req.connect("tcp://127.0.0.1:#{port}")
     assert req.send("ping")
     assert_equal nil, rep.recv_nonblock
@@ -236,22 +236,22 @@ class TestZmqSocket < ZmqTestCase
 
   def test_send_receive_frame
     ctx = ZMQ::Context.new
-    rep = ctx.socket(:PAIR)
+    rep = ctx.socket(:REP)
     port = rep.bind("tcp://127.0.0.1:*")
-    req = ctx.socket(:PAIR)
+    req = ctx.socket(:REQ)
     req.connect("tcp://127.0.0.1:#{port}")
     ping = ZMQ::Frame("ping")
     assert req.send_frame(ping)
     assert_equal ZMQ::Frame("ping"), rep.recv_frame
     assert rep.send_frame(ZMQ::Frame("pong"))
     assert_equal ZMQ::Frame("pong"), req.recv_frame
-    assert rep.send_frame(ZMQ::Frame("pong"))
-    frame = req.recv_frame_nonblock
+    assert req.send_frame(ZMQ::Frame("pong"))
+    frame = rep.recv_frame_nonblock
     if frame
       assert_equal ZMQ::Frame("pong"), frame
     else
       sleep 0.3
-      assert_equal ZMQ::Frame("pong"), req.recv_frame_nonblock
+      assert_equal ZMQ::Frame("pong"), rep.recv_frame_nonblock
     end
   ensure
     ctx.destroy

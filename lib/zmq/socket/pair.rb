@@ -21,6 +21,17 @@ class ZMQ::Socket::Pair
 # [ZMQ::Socket#hwm option action] Block
 
   TYPE_STR = "PAIR"
+  REXP_INPROC = /inproc:\/\//
+
+  def bind(endpoint)
+    raise(ZMQ::Error, "PAIR sockets can only listen using the inproc:// transport") unless endpoint =~ REXP_INPROC
+    super
+  end
+
+  def connect(endpoint)
+    raise(ZMQ::Error, "PAIR sockets can only connect using the inproc:// transport") unless endpoint =~ REXP_INPROC
+    super
+  end
 
   def type
     ZMQ::PAIR

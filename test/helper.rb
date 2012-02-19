@@ -3,7 +3,6 @@
 require 'test/unit'
 require 'zmq'
 require 'stringio'
-require 'socket'
 
 Thread.abort_on_exception = true
 

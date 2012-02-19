@@ -3,4 +3,5 @@
 $:.unshift('.')
 require File.join(File.dirname(__FILE__), 'runner')
 
-Runner.start(:pair, ENV["MSG_COUNT"], ENV["MSG_SIZE"], ENV["MSG_ENCODING"])
+$runner = ThreadRunner.new(ENV["MSG_COUNT"], ENV["MSG_SIZE"], ENV["MSG_ENCODING"])
+$runner.start(:pair)
