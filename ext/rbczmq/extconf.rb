@@ -33,6 +33,63 @@ czmq_include_path = czmq_path + 'include'
 # Present on OS X and BSD systems, package install required on Linux
 fail("package uuid-dev required (apt-get install uuid-dev)") unless have_header('uuid/uuid.h')
 
+# Courtesy of EventMachine and @tmm1
+def check_libs libs = [], fatal = false
+  libs.all? { |lib| have_library(lib) || (abort("could not find library: #{lib}") if fatal) }
+end
+
+def check_heads heads = [], fatal = false
+  heads.all? { |head| have_header(head) || (abort("could not find header: #{head}") if fatal)}
+end
+
+case RUBY_PLATFORM
+when /mswin32/, /mingw32/, /bccwin32/
+  check_heads(%w[windows.h winsock.h], true)
+  check_libs(%w[kernel32 rpcrt4 gdi32], true)
+
+  if GNU_CHAIN
+    CONFIG['LDSHARED'] = "$(CXX) -shared -lstdc++"
+  else
+    $defs.push "-EHs"
+    $defs.push "-GR"
+  end
+
+when /solaris/
+  add_define 'OS_SOLARIS8'
+
+  if CONFIG['CC'] == 'cc' and `cc -flags 2>&1` =~ /Sun/ # detect SUNWspro compiler
+    # SUN CHAIN
+    add_define 'CC_SUNWspro'
+    $preload = ["\nCXX = CC"] # hack a CXX= line into the makefile
+    $CFLAGS = CONFIG['CFLAGS'] = "-KPIC"
+    CONFIG['CCDLFLAGS'] = "-KPIC"
+    CONFIG['LDSHARED'] = "$(CXX) -G -KPIC -lCstd"
+  else
+    # GNU CHAIN
+    # on Unix we need a g++ link, not gcc.
+    CONFIG['LDSHARED'] = "$(CXX) -shared"
+  end
+
+when /openbsd/
+  # OpenBSD branch contributed by Guillaume Sellier.
+
+  # on Unix we need a g++ link, not gcc. On OpenBSD, linking against libstdc++ have to be explicitly done for shared libs
+  CONFIG['LDSHARED'] = "$(CXX) -shared -lstdc++ -fPIC"
+  CONFIG['LDSHAREDXX'] = "$(CXX) -shared -lstdc++ -fPIC"
+
+when /darwin/
+  # on Unix we need a g++ link, not gcc.
+  # Ff line contributed by Daniel Harple.
+  CONFIG['LDSHARED'] = "$(CXX) " + CONFIG['LDSHARED'].split[1..-1].join(' ')
+
+when /aix/
+  CONFIG['LDSHARED'] = "$(CXX) -shared -Wl,-G -Wl,-brtl"
+
+else
+  # on Unix we need a g++ link, not gcc.
+  CONFIG['LDSHARED'] = "$(CXX) -shared"
+end
+
 # extract dependencies
 unless File.directory?(zmq_path) && File.directory?(czmq_path)
   fail "The 'tar' (creates and manipulates streaming archive files) utility is required to extract dependencies" if `which tar`.strip.empty?
@@ -63,19 +120,17 @@ have_func('rb_thread_blocking_region')
 $INCFLAGS << " -I#{zmq_include_path}" if find_header("zmq.h", zmq_include_path)
 $INCFLAGS << " -I#{czmq_include_path}" if find_header("czmq.h", czmq_include_path)
 
+$LIBPATH << libs_path.to_s
+
+# Special case to prevent Rubinius compile from linking system libzmq if present
 if defined?(RUBY_ENGINE) && RUBY_ENGINE =~ /rbx/
-  $LDFLAGS << " -L#{libs_path}"
-else
-  $LIBPATH << libs_path.to_s
+  dldpath = "LD_LIBRARY_PATH"
+  dldpath = "DYLD_LIBRARY_PATH" if RUBY_PLATFORM =~ /darwin/
+  ENV[dldpath] = "#{libs_path.to_s}:$LD_LIBRARY_PATH"
 end
 
 fail "Error compiling and linking libzmq" unless have_library("zmq")
 fail "Error compiling and linking libczmq" unless have_library("czmq")
-
-case RUBY_PLATFORM
-when /darwin/, /linux/, /freebsd/
-  CONFIG['LDSHARED'] = "$(CXX) " + CONFIG['LDSHARED'].split[1..-1].join(' ')
-end
 
 $defs << "-pedantic"
 

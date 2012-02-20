@@ -238,7 +238,6 @@ Running tests
 * GC guards to prevent recycling objects being sent / received.
 * Sockets can bind && connect to multiple endpoints - account for that
 * Watch out for further cases where REQ / REP pairs could raise EFSM
-* Fix Rubinius linking wrong libzmq
 * Do not clobber local scope from macros (James's commit in master)
 * Support installation without vendor'ed libs as well
 * Incorporate examples into CI as well
