@@ -1,4 +1,4 @@
-= rbczmq - binding for the high level ZeroMQ C API
+= rbczmq - binding for the high level ZeroMQ C API {<img src="https://secure.travis-ci.org/methodmissing/rbczmq.png" alt="Build Status" />}[http://travis-ci.org/methodmissing/rbczmq]
 
 (c) 2011 Lourens Naudé (methodmissing), James Tucker (raggi) with API guidance from the czmq (http://czmq.zeromq.org/) project.
 
