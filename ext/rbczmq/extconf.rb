@@ -124,9 +124,7 @@ $LIBPATH << libs_path.to_s
 
 # Special case to prevent Rubinius compile from linking system libzmq if present
 if defined?(RUBY_ENGINE) && RUBY_ENGINE =~ /rbx/
-  dldpath = "LD_LIBRARY_PATH"
-  dldpath = "DYLD_LIBRARY_PATH" if RUBY_PLATFORM =~ /darwin/
-  ENV[dldpath] = "#{libs_path.to_s}:$LD_LIBRARY_PATH"
+  CONFIG['LDSHARED'] = "#{CONFIG['LDSHARED']} -Wl,-rpath=#{libs_path.to_s}"
 end
 
 fail "Error compiling and linking libzmq" unless have_library("zmq")
