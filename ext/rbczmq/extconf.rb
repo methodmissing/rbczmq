@@ -123,7 +123,7 @@ $INCFLAGS << " -I#{czmq_include_path}" if find_header("czmq.h", czmq_include_pat
 $LIBPATH << libs_path.to_s
 
 # Special case to prevent Rubinius compile from linking system libzmq if present
-if defined?(RUBY_ENGINE) && RUBY_ENGINE =~ /rbx/
+if defined?(RUBY_ENGINE) && RUBY_ENGINE =~ /rbx/ && RUBY_PLATFORM =~ /linux/
   CONFIG['LDSHARED'] = "#{CONFIG['LDSHARED']} -Wl,-rpath=#{libs_path.to_s}"
 end
 
