@@ -16,6 +16,7 @@ true/*
 doc/*
 .DS_Store
 ext/zeromq
+ext/libxs
 ext/czmq
 pkg
 scratch

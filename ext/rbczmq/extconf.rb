@@ -23,9 +23,9 @@ cwd = Pathname(File.expand_path(File.dirname(__FILE__)))
 dst_path = cwd + 'dst'
 libs_path = dst_path + 'lib'
 vendor_path = cwd + '..'
-zmq_path = vendor_path + 'zeromq'
+libxs_path = vendor_path + 'libxs'
 czmq_path = vendor_path + 'czmq'
-zmq_include_path = zmq_path + 'include'
+libxs_include_path = libxs_path + 'include'
 czmq_include_path = czmq_path + 'include'
 
 # Fail early if we don't meet the following dependencies.
@@ -91,19 +91,19 @@ else
 end
 
 # extract dependencies
-unless File.directory?(zmq_path) && File.directory?(czmq_path)
+unless File.directory?(libxs_path) && File.directory?(czmq_path)
   fail "The 'tar' (creates and manipulates streaming archive files) utility is required to extract dependencies" if `which tar`.strip.empty?
   Dir.chdir(vendor_path) do
-    sys "tar xvzf zeromq.tar.gz", "Could not extract the ZeroMQ archive!"
+    sys "tar xvzf libxs.tar.gz", "Could not extract the libxs archive!"
     sys "tar xvzf czmq.tar.gz", "Could not extract the CZMQ archive!"
   end
 end
 
-# build libzmq
-lib = libs_path + "libzmq.#{LIBEXT}"
-Dir.chdir zmq_path do
-  sys "./autogen.sh", "ZeroMQ autogen failed!" unless File.exist?(zmq_path + 'configure')
-  sys "./configure --prefix=#{dst_path} --without-documentation --enable-shared && make && make install", "ZeroMQ compile error!"
+# build libxs
+lib = libs_path + "libxs.#{LIBEXT}"
+Dir.chdir libxs_path do
+  sys "./autogen.sh", "ZeroMQ autogen failed!" unless File.exist?(libxs_path + 'configure')
+  sys "./configure --enable-libzmq-compat --enable-debug --prefix=#{dst_path} --without-documentation --enable-shared && make && make install", "libxs compile error!"
 end unless File.exist?(lib)
 
 # build libczmq
@@ -117,7 +117,7 @@ dir_config('rbczmq')
 
 have_func('rb_thread_blocking_region')
 
-$INCFLAGS << " -I#{zmq_include_path}" if find_header("zmq.h", zmq_include_path)
+$INCFLAGS << " -I#{libxs_include_path}" if find_header("zmq.h", libxs_include_path)
 $INCFLAGS << " -I#{czmq_include_path}" if find_header("czmq.h", czmq_include_path)
 
 $LIBPATH << libs_path.to_s
