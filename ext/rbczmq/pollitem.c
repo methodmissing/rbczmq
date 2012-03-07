@@ -207,6 +207,9 @@ VALUE rb_czmq_pollitem_handler(VALUE obj)
 VALUE rb_czmq_pollitem_handler_equals(VALUE obj, VALUE handler)
 {
     ZmqGetPollitem(obj);
+    ZmqAssertHandler(obj, pollitem, handler, intern_error);
+    ZmqAssertHandler(obj, pollitem, handler, intern_readable);
+    ZmqAssertHandler(obj, pollitem, handler, intern_writable);
     pollitem->handler = handler;
     return Qnil;
 }

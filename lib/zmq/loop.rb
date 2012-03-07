@@ -63,7 +63,6 @@ class ZMQ::Loop
   def self.register_readable(pollable, handler = ZMQ::DefaultHandler, *args)
     pollitem = ZMQ::Pollitem.new(pollable, ZMQ::POLLIN)
     pollitem.handler = handler.new(pollitem, *args) if handler
-    assert_handler_for_event(pollitem, :on_readable)
     instance.register(pollitem)
   end
 
@@ -76,7 +75,6 @@ class ZMQ::Loop
   def self.register_writable(pollable, handler = ZMQ::DefaultHandler, *args)
     pollitem = ZMQ::Pollitem.new(pollable, ZMQ::POLLOUT)
     pollitem.handler = handler.new(pollitem, *args) if handler
-    assert_handler_for_event(pollitem, :on_writable)
     instance.register(pollitem)
   end
 
@@ -118,13 +116,6 @@ class ZMQ::Loop
     register_readable(socket, handler, args) if socket.poll_readable?
     register_writable(socket, handler, args) if socket.poll_writable?
     ret
-  end
-
-  def self.assert_handler_for_event(pollitem, cb)
-    unless pollitem.handler.respond_to?(cb)
-      pollitem.handler = nil
-      raise ZMQ::Error, "Pollable entity #{pollitem.pollable}'s handler #{pollitem.handler.class} expected to implement an #{cb} callback!"
-    end
   end
 end
 

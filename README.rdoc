@@ -233,13 +233,11 @@ Running tests
 * czmq send methods aren't non-blocking by default
 * Enforce socket timeouts
 * Revisit the ZMQ::Loop API
-* Push gem out to rubygems.org
 * RDOC fail on mixed C and Ruby source files that document that same constants
 * GC guards to prevent recycling objects being sent / received.
 * Sockets can bind && connect to multiple endpoints - account for that
 * Watch out for further cases where REQ / REP pairs could raise EFSM
 * Do not clobber local scope from macros (James's commit in master)
-* Support installation without vendor'ed libs as well
 * Incorporate examples into CI as well
 
 == Contact, feedback and bugs

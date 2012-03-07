@@ -1,10 +1,5 @@
 #include <rbczmq_ext.h>
 
-static VALUE intern_call;
-static VALUE intern_readable;
-static VALUE intern_writable;
-static VALUE intern_error;
-
 /*
  * :nodoc:
  *  Wraps rb_funcall to support callbacks with or without callbacks.
@@ -393,11 +388,6 @@ static VALUE rb_czmq_loop_cancel_timer(VALUE obj, VALUE tm)
 
 void _init_rb_czmq_loop()
 {
-    intern_call = rb_intern("call");
-    intern_readable = rb_intern("on_readable");
-    intern_writable = rb_intern("on_writable");
-    intern_error = rb_intern("on_error");
-
     rb_cZmqLoop = rb_define_class_under(rb_mZmq, "Loop", rb_cObject);
 
     rb_define_alloc_func(rb_cZmqLoop, rb_czmq_loop_new);

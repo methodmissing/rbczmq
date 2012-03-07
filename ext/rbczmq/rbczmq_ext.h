@@ -61,6 +61,11 @@ extern VALUE rb_cZmqPollitem;
 
 extern st_table *frames_map;
 
+extern VALUE intern_call;
+extern VALUE intern_readable;
+extern VALUE intern_writable;
+extern VALUE intern_error;
+
 #include <context.h>
 #include <socket.h>
 #include <frame.h>
