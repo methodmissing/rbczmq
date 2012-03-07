@@ -43,10 +43,20 @@ class TestZmqPollitem < ZmqTestCase
     ctx.destroy
   end
 
+  class TestHandler
+    def initialize(*args); end
+    def on_error(*args); end
+    def on_readable(*args); end
+    def on_writable(*args); end
+  end
+
   def test_handler
     pollitem = ZMQ::Pollitem.new(STDIN, ZMQ::POLLIN)
     assert_nil pollitem.handler
-    handler = Module.new
+    assert_raises ZMQ::Error do
+      pollitem.handler = Module.new
+    end
+    handler = TestHandler.new
     pollitem.handler = handler
     assert_equal handler, pollitem.handler
   end

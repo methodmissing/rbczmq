@@ -24,6 +24,11 @@ VALUE rb_cZmqPollitem;
 
 st_table *frames_map = NULL;
 
+VALUE intern_call;
+VALUE intern_readable;
+VALUE intern_writable;
+VALUE intern_error;
+
 #ifdef HAVE_RUBY_ENCODING_H
 rb_encoding *binary_encoding;
 #endif
@@ -151,6 +156,11 @@ static VALUE rb_czmq_m_interrupted_bang(ZMQ_UNUSED VALUE obj)
 void Init_rbczmq_ext()
 {
     frames_map = st_init_numtable();
+
+    intern_call = rb_intern("call");
+    intern_readable = rb_intern("on_readable");
+    intern_writable = rb_intern("on_writable");
+    intern_error = rb_intern("on_error");
 
 #ifdef HAVE_RUBY_ENCODING_H
     binary_encoding = rb_enc_find("binary");

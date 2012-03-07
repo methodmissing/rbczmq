@@ -1,7 +1,5 @@
 #include <rbczmq_ext.h>
 
-static VALUE intern_call;
-
 /*
  * :nodoc:
  *  GC mark callback
@@ -99,8 +97,6 @@ static VALUE rb_czmq_timer_cancel(VALUE obj)
 
 void _init_rb_czmq_timer()
 {
-    intern_call = rb_intern("call");
-
     rb_cZmqTimer = rb_define_class_under(rb_mZmq, "Timer", rb_cObject);
 
     rb_define_singleton_method(rb_cZmqTimer, "new", rb_czmq_timer_s_new, -1);
