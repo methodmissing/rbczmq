@@ -1,5 +1,7 @@
 # encoding: utf-8
 
+LIBXS_VERSION = "1.0.0"
+
 require 'mkmf'
 require 'pathname'
 
@@ -23,7 +25,7 @@ cwd = Pathname(File.expand_path(File.dirname(__FILE__)))
 dst_path = cwd + 'dst'
 libs_path = dst_path + 'lib'
 vendor_path = cwd + '..'
-libxs_path = vendor_path + 'libxs'
+libxs_path = vendor_path + "libxs-#{LIBXS_VERSION}"
 czmq_path = vendor_path + 'czmq'
 libxs_include_path = libxs_path + 'include'
 czmq_include_path = czmq_path + 'include'
@@ -94,7 +96,7 @@ end
 unless File.directory?(libxs_path) && File.directory?(czmq_path)
   fail "The 'tar' (creates and manipulates streaming archive files) utility is required to extract dependencies" if `which tar`.strip.empty?
   Dir.chdir(vendor_path) do
-    sys "tar xvzf libxs.tar.gz", "Could not extract the libxs archive!"
+    sys "tar xvzf libxs-#{LIBXS_VERSION}.tar.gz", "Could not extract the libxs archive!"
     sys "tar xvzf czmq.tar.gz", "Could not extract the CZMQ archive!"
   end
 end
@@ -103,7 +105,7 @@ end
 lib = libs_path + "libxs.#{LIBEXT}"
 Dir.chdir libxs_path do
   sys "./autogen.sh", "ZeroMQ autogen failed!" unless File.exist?(libxs_path + 'configure')
-  sys "./configure --enable-libzmq-compat --enable-debug --prefix=#{dst_path} --without-documentation --enable-shared && make && make install", "libxs compile error!"
+  sys "./configure --enable-libzmq --enable-debug --prefix=#{dst_path} --without-documentation --enable-shared && make && make install", "libxs compile error!"
 end unless File.exist?(lib)
 
 # build libczmq
