@@ -238,6 +238,7 @@ Running tests
 * Watch out for further cases where REQ / REP pairs could raise EFSM
 * Do not clobber local scope from macros (James's commit in master)
 * Incorporate examples into CI as well
+* Zero-copy semantics for frames
 
 == Contact, feedback and bugs
 

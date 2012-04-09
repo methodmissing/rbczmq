@@ -381,6 +381,7 @@ void _init_rb_czmq_frame()
 
     rb_define_const(rb_cZmqFrame, "MORE", INT2NUM(ZFRAME_MORE));
     rb_define_const(rb_cZmqFrame, "REUSE", INT2NUM(ZFRAME_REUSE));
+    rb_define_const(rb_cZmqFrame, "DONTWAIT", INT2NUM(ZFRAME_DONTWAIT));
 
     rb_define_singleton_method(rb_cZmqFrame, "new", rb_czmq_frame_s_new, -1);
     rb_define_method(rb_cZmqFrame, "destroy", rb_czmq_frame_destroy, 0);

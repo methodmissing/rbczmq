@@ -296,6 +296,25 @@ class TestZmqSocket < ZmqTestCase
     ctx.destroy
   end
 
+  def test_send_frame_dontwait
+    ctx = ZMQ::Context.new
+    rep = ctx.socket(:PAIR)
+    rep.bind("inproc://test.socket-send_frame_dontwait")
+    req = ctx.socket(:PAIR)
+    req.connect("inproc://test.socket-send_frame_dontwait")
+    5.times do |i|
+      frame = ZMQ::Frame("m#{i}")
+      req.send_frame(frame, ZMQ::Frame::DONTWAIT)
+    end
+    expected, frames = %w(m0 m1 m2 m3 m4), []
+    5.times do
+      frames << rep.recv_frame.data
+    end
+    assert_equal expected, frames
+  ensure
+    ctx.destroy
+  end
+
   def test_send_receive_message
     ctx = ZMQ::Context.new
     rep = ctx.socket(:PAIR)
