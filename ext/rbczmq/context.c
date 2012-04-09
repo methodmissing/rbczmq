@@ -174,6 +174,50 @@ static VALUE rb_czmq_ctx_set_linger(VALUE obj, VALUE linger)
 }
 
 /*
+ *  call-seq:
+ *     ctx.hwm    =>  Fixnum
+ *
+ *  Returns High Water Mark (HWM) option used for native thread creation (non-Ruby threads, ahead of time API addition)
+ *
+ * === Examples
+ *     ctx = ZMQ::Context.new
+ *     ctx.hwm    =>   1
+ *
+*/
+
+static VALUE rb_czmq_ctx_hwm(VALUE obj)
+{
+    errno = 0;
+    int wm;
+    ZmqGetContext(obj);
+    return INT2FIX(zctx_hwm(ctx->ctx));
+}
+
+/*
+ *  call-seq:
+ *     ctx.hwm = 100    =>  nil
+ *
+ *  Sets the High Water Mark (HWM) option used for native thread creation (non-Ruby threads, ahead of time API addition)
+ *
+ * === Examples
+ *     ctx = ZMQ::Context.new
+ *     ctx.hwm = 100    =>   nil
+ *
+*/
+
+static VALUE rb_czmq_ctx_set_hwm(VALUE obj, VALUE hwm)
+{
+    errno = 0;
+    int wm;
+    ZmqGetContext(obj);
+    Check_Type(hwm, T_FIXNUM);
+    wm = FIX2INT(hwm);
+    if (wm < 0) rb_raise(rb_eZmqError, "negative HWM values is not supported.");
+    zctx_set_hwm(ctx->ctx, wm);
+    return Qnil;
+}
+
+/*
  * :nodoc:
  *  Creates a new socket while the GIL is released.
  *
@@ -277,4 +321,6 @@ void _init_rb_czmq_context()
     rb_define_method(rb_cZmqContext, "iothreads=", rb_czmq_ctx_set_iothreads, 1);
     rb_define_method(rb_cZmqContext, "linger=", rb_czmq_ctx_set_linger, 1);
     rb_define_method(rb_cZmqContext, "socket", rb_czmq_ctx_socket, 1);
+    rb_define_method(rb_cZmqContext, "hwm", rb_czmq_ctx_hwm, 0);
+    rb_define_method(rb_cZmqContext, "hwm=", rb_czmq_ctx_set_hwm, 1);
 }

@@ -49,12 +49,26 @@ class TestZmqContext < ZmqTestCase
   def test_linger
     ctx = ZMQ::Context.new
     assert_raises TypeError do
-      ctx.linger = :invalid  
+      ctx.linger = :invalid 
     end
     ctx.linger = 10
     assert_raises ZMQ::Error do
       ctx.linger = -2
     end
+  ensure
+    ctx.destroy
+  end
+
+  def test_hwm
+    ctx = ZMQ::Context.new
+    assert_raises TypeError do
+      ctx.hwm = :invalid
+    end
+    ctx.hwm = 10
+    assert_raises ZMQ::Error do
+      ctx.hwm = -2
+    end
+    assert_equal 10, ctx.hwm
   ensure
     ctx.destroy
   end
