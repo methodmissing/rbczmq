@@ -1497,6 +1497,84 @@ static VALUE rb_czmq_socket_opt_events(VALUE obj)
     return INT2NUM(zsocket_events(sock->socket));
 }
 
+/*
+ *  call-seq:
+ *     sock.rcvtimeo =>  Fixnum
+ *
+ *  Returns the socket RCVTIMEO value.
+ *
+ * === Examples
+ *     ctx = ZMQ::Context.new
+ *     sock = ctx.socket(:REP)
+ *     sock.rcvtimeo  =>  -1
+ *
+*/
+
+static VALUE rb_czmq_socket_opt_rcvtimeo(VALUE obj)
+{
+    zmq_sock_wrapper *sock = NULL;
+    GetZmqSocket(obj);
+    return INT2NUM(zsocket_rcvtimeo(sock->socket));
+}
+
+/*
+ *  call-seq:
+ *     sock.rcvtimeout = 200 =>  nil
+ *
+ *  Sets the socket RCVTIMEO value.
+ *
+ * === Examples
+ *     ctx = ZMQ::Context.new
+ *     sock = ctx.socket(:REP)
+ *     sock.rcvtimeo = 200  =>  nil
+ *
+*/
+
+static VALUE rb_czmq_socket_set_opt_rcvtimeo(VALUE obj, VALUE value)
+{
+    zmq_sock_wrapper *sock = NULL;
+    ZmqSetSockOpt(obj, zsocket_set_rcvtimeo, "RCVTIMEO", value);
+}
+
+/*
+ *  call-seq:
+ *     sock.sndtimeo =>  Fixnum
+ *
+ *  Returns the socket SNDTIMEO value.
+ *
+ * === Examples
+ *     ctx = ZMQ::Context.new
+ *     sock = ctx.socket(:REP)
+ *     sock.sndtimeo  =>  -1
+ *
+*/
+
+static VALUE rb_czmq_socket_opt_sndtimeo(VALUE obj)
+{
+    zmq_sock_wrapper *sock = NULL;
+    GetZmqSocket(obj);
+    return INT2NUM(zsocket_sndtimeo(sock->socket));
+}
+
+/*
+ *  call-seq:
+ *     sock.sndtimeout = 200 =>  nil
+ *
+ *  Sets the socket SNDTIMEO value.
+ *
+ * === Examples
+ *     ctx = ZMQ::Context.new
+ *     sock = ctx.socket(:REP)
+ *     sock.sndtimeo = 200  =>  nil
+ *
+*/
+
+static VALUE rb_czmq_socket_set_opt_sndtimeo(VALUE obj, VALUE value)
+{
+    zmq_sock_wrapper *sock = NULL;
+    ZmqSetSockOpt(obj, zsocket_set_sndtimeo, "SNDTIMEO", value);
+}
+
 void _init_rb_czmq_socket()
 {
     rb_cZmqSocket = rb_define_class_under(rb_mZmq, "Socket", rb_cObject);
@@ -1567,4 +1645,8 @@ void _init_rb_czmq_socket()
     rb_define_method(rb_cZmqSocket, "unsubscribe", rb_czmq_socket_set_opt_unsubscribe, 1);
     rb_define_method(rb_cZmqSocket, "rcvmore?", rb_czmq_socket_opt_rcvmore, 0);
     rb_define_method(rb_cZmqSocket, "events", rb_czmq_socket_opt_events, 0);
+    rb_define_method(rb_cZmqSocket, "rcvtimeo", rb_czmq_socket_opt_rcvtimeo, 0);
+    rb_define_method(rb_cZmqSocket, "rcvtimeo=", rb_czmq_socket_set_opt_rcvtimeo, 1);
+    rb_define_method(rb_cZmqSocket, "sndtimeo", rb_czmq_socket_opt_sndtimeo, 0);
+    rb_define_method(rb_cZmqSocket, "sndtimeo=", rb_czmq_socket_set_opt_sndtimeo, 1);
 }

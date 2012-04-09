@@ -381,6 +381,14 @@ class TestZmqSocket < ZmqTestCase
     sock.reconnect_ivl_max = 5
     assert_equal 5, sock.reconnect_ivl_max
 
+    assert_equal -1, sock.rcvtimeo
+    sock.rcvtimeo = 200
+    assert_equal 200, sock.rcvtimeo
+
+    assert_equal -1, sock.sndtimeo
+    sock.sndtimeo = 200
+    assert_equal 200, sock.sndtimeo
+
     sock.identity = "anonymous"
     assert_raises ZMQ::Error do
       sock.identity = ""

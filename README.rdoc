@@ -231,7 +231,6 @@ Running tests
 * OS X leaks utility - http://developer.apple.com/library/mac/#documentation/Darwin/Reference/ManPages/man1/leaks.1.html
 * Handle GC issue with timers in loop callbacks
 * czmq send methods aren't non-blocking by default
-* Enforce socket timeouts
 * Revisit the ZMQ::Loop API
 * RDOC fail on mixed C and Ruby source files that document that same constants
 * GC guards to prevent recycling objects being sent / received.
