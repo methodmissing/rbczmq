@@ -53,7 +53,7 @@ typedef struct {
       rb_raise(rb_eZmqError, "Cross thread violation for %s socket %p: created in thread %p, invoked on thread %p", zsocket_type_str((sock)->socket), (void *)(sock), (void *)(sock)->thread, (void *)rb_thread_current());
 
 #define ZmqAssertSockOptFor(sock_type) \
-    if (zsockopt_type(sock->socket) != sock_type) \
+    if (zsocket_type(sock->socket) != sock_type) \
         rb_raise(rb_eZmqError, "Socket option not supported on a %s socket!", zsocket_type_str(sock->socket));
 
 #define CheckBoolean(arg) \
