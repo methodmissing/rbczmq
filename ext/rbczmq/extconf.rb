@@ -42,6 +42,8 @@ def check_heads heads = [], fatal = false
   heads.all? { |head| have_header(head) || (abort("could not find header: #{head}") if fatal)}
 end
 
+CZMQ_CFLAGS = []
+
 case RUBY_PLATFORM
 when /mswin32/, /mingw32/, /bccwin32/
   check_heads(%w[windows.h winsock.h], true)
@@ -85,6 +87,9 @@ when /darwin/
 when /aix/
   CONFIG['LDSHARED'] = "$(CXX) -shared -Wl,-G -Wl,-brtl"
 
+when /linux/
+  CZMQ_CFLAGS << "-fPIC"
+
 else
   # on Unix we need a g++ link, not gcc.
   CONFIG['LDSHARED'] = "$(CXX) -shared"
@@ -110,7 +115,7 @@ end unless File.exist?(lib)
 lib = libs_path + "libczmq.#{LIBEXT}"
 Dir.chdir czmq_path do
   sys "./autogen.sh", "CZMQ autogen failed!" unless File.exist?(czmq_path + 'configure')
-  sys "./configure LDFLAGS=-L#{libs_path} --prefix=#{dst_path} --with-libzmq=#{dst_path} --disable-shared && make all && make install", "CZMQ compile error!"
+  sys "./configure LDFLAGS=-L#{libs_path} CFLAGS=#{CZMQ_CFLAGS.join(" ")} --prefix=#{dst_path} --with-libzmq=#{dst_path} --disable-shared && make all && make install", "CZMQ compile error!"
 end unless File.exist?(lib)
 
 dir_config('rbczmq')
