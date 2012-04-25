@@ -63,6 +63,13 @@ module ZMQ
     [poller.readables, poller.writables, []] if ready
   end
 
+  def self.resolver
+    @resolver ||= begin
+      require 'resolv'
+      Resolv::DNS.new
+    end
+  end
+
   autoload :Handler, 'zmq/handler'
   autoload :DefaultHandler, 'zmq/default_handler'
 end

@@ -59,4 +59,9 @@ class TestZmq < ZmqTestCase
     assert_equal STDOUT, item.pollable
     assert_equal ZMQ::POLLIN, item.events
   end
+
+  def test_resolver
+    require 'resolv'
+    assert_instance_of Resolv::DNS, ZMQ.resolver
+  end
 end
