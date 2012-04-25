@@ -175,11 +175,7 @@ VALUE rb_czmq_nogvl_socket_bind(void *ptr)
     struct nogvl_conn_args *args = ptr;
     errno = 0;
     zmq_sock_wrapper *socket = args->socket;
-#ifdef HAVE_RB_THREAD_BLOCKING_REGION
     rc = zsocket_bind(socket->socket, args->endpoint);
-#else
-    rc = zsocket_bind(socket->socket, args->endpoint);
-#endif
     return (VALUE)rc;
 }
 
@@ -194,11 +190,7 @@ VALUE rb_czmq_nogvl_socket_connect(void *ptr)
     struct nogvl_conn_args *args = ptr;
     errno = 0;
     zmq_sock_wrapper *socket = args->socket;
-#ifdef HAVE_RB_THREAD_BLOCKING_REGION
     rc = zsocket_connect(socket->socket, args->endpoint);
-#else
-    rc = zsocket_connect(socket->socket, args->endpoint);
-#endif
     return (VALUE)rc;
 }
 
