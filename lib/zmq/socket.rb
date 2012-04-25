@@ -121,6 +121,8 @@ class ZMQ::Socket
     end
     return uri unless res
     "tcp://#{res.target}:#{res.port}"
+  rescue
+    uri
   end
 end
 
