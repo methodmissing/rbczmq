@@ -120,7 +120,7 @@ class ZMQ::Socket
       res = priority_peers.sort{|a,b| a.weight <=> b.weight }.last
     end
     return uri unless res
-    "tcp://#{Resolv.getaddress(res.target)}:#{res.port}"
+    "tcp://#{Resolv.getaddress(res.target.to_s)}:#{res.port}"
   rescue
     uri
   end
