@@ -3,6 +3,32 @@
 require File.join(File.dirname(__FILE__), 'helper')
 
 class TestZmqSocket < ZmqTestCase
+  def test_recv_timeout_fires
+    ctx = ZMQ::Context.new
+    rep = ctx.bind(:REP, "inproc://test.socket-recv-timeout-fires")
+    start = Time.now.to_f
+    rep.rcvtimeo = 300
+    rep.recv
+    elapsed = Time.now.to_f - start
+    assert_in_delta elapsed, 0.29, 0.32
+  ensure
+    ctx.destroy
+  end
+
+  def test_send_timeout_fires
+    ctx = ZMQ::Context.new
+    rep = ctx.socket(:REP)
+    rep.hwm = 1
+    rep.bind("inproc://test.socket-send-timeout-fires")
+    req = ctx.connect(:REQ, "inproc://test.socket-send-timeout-fires")
+    # Cannot test much other than normal transfer's not disrupted
+    req.sndtimeo = 100
+    req.send "msg"
+    assert_equal "msg", rep.recv
+  ensure
+    ctx.destroy
+  end
+
   def test_connect_no_io_thread
     ctx = ZMQ::Context.new(0)
     sock = ctx.socket(:REP)

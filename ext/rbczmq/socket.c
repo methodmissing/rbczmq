@@ -311,6 +311,8 @@ try_writable:
         return (VALUE)zstr_send_nowait(socket->socket, args->msg);
     } else {
         rb_thread_wait_fd(zsocket_fd(socket->socket));
+        if (zsocket_sndtimeo(socket->socket) != -1)
+            return (VALUE)zstr_send(socket->socket, args->msg);
         goto try_writable;
     }
 #endif
@@ -334,6 +336,8 @@ try_writable:
     if ((zsocket_events(socket->socket) & ZMQ_POLLOUT) == ZMQ_POLLOUT) {
         return (VALUE)zstr_sendm(socket->socket, args->msg);
     } else {
+        if (zsocket_sndtimeo(socket->socket) != -1)
+            return (VALUE)zstr_sendm(socket->socket, args->msg);
         rb_thread_wait_fd(zsocket_fd(socket->socket));
         goto try_writable;
     }
@@ -428,6 +432,8 @@ try_readable:
         return (VALUE)zlist_pop(socket->str_buffer);
      } else {
         rb_thread_wait_fd(zsocket_fd(socket->socket));
+        if (zsocket_rcvtimeo(socket->socket) != -1)
+            return zstr_recv(socket->socket);
         goto try_readable;
      }
 #endif
