@@ -3,9 +3,9 @@
 require File.join(File.dirname(__FILE__), 'helper')
 
 class TestZmqSocket < ZmqTestCase
-  def test_recv_timeout_fires
+  def test_recv_timeout
     ctx = ZMQ::Context.new
-    rep = ctx.bind(:REP, "inproc://test.socket-recv-timeout-fires")
+    rep = ctx.bind(:REP, "inproc://test.socket-recv-timeout")
     start = Time.now.to_f
     rep.rcvtimeo = 300
     rep.recv
@@ -15,12 +15,12 @@ class TestZmqSocket < ZmqTestCase
     ctx.destroy
   end
 
-  def test_send_timeout_fires
+  def test_send_timeout
     ctx = ZMQ::Context.new
     rep = ctx.socket(:REP)
     rep.hwm = 1
-    rep.bind("inproc://test.socket-send-timeout-fires")
-    req = ctx.connect(:REQ, "inproc://test.socket-send-timeout-fires")
+    rep.bind("inproc://test.socket-send-timeout")
+    req = ctx.connect(:REQ, "inproc://test.socket-send-timeout")
     # Cannot test much other than normal transfer's not disrupted
     req.sndtimeo = 100
     req.send "msg"
@@ -85,32 +85,6 @@ class TestZmqSocket < ZmqTestCase
     pull = ctx.socket(:PULL)
     assert_raises ZMQ::Error do
       pull.send("message")
-    end
-  ensure
-    ctx.destroy
-  end
-
-  def test_recv_timeout
-    ctx = ZMQ::Context.new
-    sock = ctx.socket(:REP)
-    assert_nil sock.recv_timeout
-    sock.recv_timeout = 10
-    assert_equal 10, sock.recv_timeout
-    assert_raises TypeError do
-      sock.recv_timeout = :x
-    end
-  ensure
-    ctx.destroy
-  end
-
-  def test_send_timeout
-    ctx = ZMQ::Context.new
-    sock = ctx.socket(:REP)
-    assert_nil sock.send_timeout
-    sock.send_timeout = 10
-    assert_equal 10, sock.send_timeout
-    assert_raises TypeError do
-      sock.send_timeout = :x
     end
   ensure
     ctx.destroy

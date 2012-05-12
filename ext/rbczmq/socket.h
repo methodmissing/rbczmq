@@ -22,11 +22,7 @@ typedef struct {
 #endif
     VALUE endpoint;
     VALUE thread;
-    VALUE recv_timeout;
-    VALUE send_timeout;
 } zmq_sock_wrapper;
-
-#define ZMQ_SOCKET_DEFAULT_TIMEOUT Qnil
 
 #define ZmqAssertSocket(obj) ZmqAssertType(obj, rb_cZmqSocket, "ZMQ::Socket")
 #define GetZmqSocket(obj) \

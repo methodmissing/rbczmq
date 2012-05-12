@@ -42,8 +42,6 @@ void rb_czmq_mark_sock(void *ptr)
             zclock_log ("I: %s socket %p, context %p: GC mark", zsocket_type_str(sock->socket), sock, sock->ctx);
         rb_gc_mark(sock->endpoint);
         rb_gc_mark(sock->thread);
-        rb_gc_mark(sock->recv_timeout);
-        rb_gc_mark(sock->send_timeout);
     }
 }
 
@@ -800,92 +798,6 @@ static VALUE rb_czmq_socket_recv_message(VALUE obj)
 
 /*
  *  call-seq:
- *     sock.recv_timeout = 5 =>  nil
- *
- *  Sets a receive timeout for this socket.
- *
- * === Examples
- *     ctx = ZMQ::Context.new
- *     sock = ctx.socket(:REP)
- *     sock.recv_timeout = 5 => nil
- *
-*/
-
-static VALUE rb_czmq_socket_set_recv_timeout(VALUE obj, VALUE timeout)
-{
-    zmq_sock_wrapper *sock = NULL;
-    GetZmqSocket(obj);
-    if (TYPE(timeout) != T_FIXNUM && TYPE(timeout) != T_FLOAT) rb_raise(rb_eTypeError, "wrong timeout type %s (expected Fixnum or Float)", RSTRING_PTR(rb_obj_as_string(timeout)));
-    sock->recv_timeout = timeout;
-    return Qnil;
-}
-
-/*
- *  call-seq:
- *     sock.recv_timeout =>  Fixnum or nil
- *
- *  Returns the recv timeout currently associated with this socket.
- *
- * === Examples
- *     ctx = ZMQ::Context.new
- *     sock = ctx.socket(:REP)
- *     sock.recv_timeout = 5
- *     sock.recv_timeout   =>   5
- *
-*/
-
-static VALUE rb_czmq_socket_recv_timeout(VALUE obj)
-{
-    zmq_sock_wrapper *sock = NULL;
-    GetZmqSocket(obj);
-    return sock->recv_timeout;
-}
-
-/*
- *  call-seq:
- *     sock.send_timeout = 5 =>  nil
- *
- *  Sets a send timeout for this socket.
- *
- * === Examples
- *     ctx = ZMQ::Context.new
- *     sock = ctx.socket(:REP)
- *     sock.send_timeout = 5 => nil
- *
-*/
-
-static VALUE rb_czmq_socket_set_send_timeout(VALUE obj, VALUE timeout)
-{
-    zmq_sock_wrapper *sock = NULL;
-    GetZmqSocket(obj);
-    if (TYPE(timeout) != T_FIXNUM && TYPE(timeout) != T_FLOAT) rb_raise(rb_eTypeError, "wrong timeout type %s (expected Fixnum or Float)", RSTRING_PTR(rb_obj_as_string(timeout)));
-    sock->send_timeout = timeout;
-    return Qnil;
-}
-
-/*
- *  call-seq:
- *     sock.send_timeout =>  Fixnum or nil
- *
- *  Returns the send timeout currently associated with this socket.
- *
- * === Examples
- *     ctx = ZMQ::Context.new
- *     sock = ctx.socket(:REP)
- *     sock.send_timeout = 5
- *     sock.send_timeout   =>   5
- *
-*/
-
-static VALUE rb_czmq_socket_send_timeout(VALUE obj)
-{
-    zmq_sock_wrapper *sock = NULL;
-    GetZmqSocket(obj);
-    return sock->send_timeout;
-}
-
-/*
- *  call-seq:
  *     sock.hwm =>  Fixnum
  *
  *  Returns the socket HWM (High Water Mark) value.
@@ -1615,10 +1527,6 @@ void _init_rb_czmq_socket()
     rb_define_method(rb_cZmqSocket, "recv_frame", rb_czmq_socket_recv_frame, 0);
     rb_define_method(rb_cZmqSocket, "recv_frame_nonblock", rb_czmq_socket_recv_frame_nonblock, 0);
     rb_define_method(rb_cZmqSocket, "recv_message", rb_czmq_socket_recv_message, 0);
-    rb_define_method(rb_cZmqSocket, "recv_timeout=", rb_czmq_socket_set_recv_timeout, 1);
-    rb_define_method(rb_cZmqSocket, "recv_timeout", rb_czmq_socket_recv_timeout, 0);
-    rb_define_method(rb_cZmqSocket, "send_timeout=", rb_czmq_socket_set_send_timeout, 1);
-    rb_define_method(rb_cZmqSocket, "send_timeout", rb_czmq_socket_send_timeout, 0);
 
     rb_define_method(rb_cZmqSocket, "hwm", rb_czmq_socket_opt_hwm, 0);
     rb_define_method(rb_cZmqSocket, "hwm=", rb_czmq_socket_set_opt_hwm, 1);

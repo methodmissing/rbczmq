@@ -303,8 +303,6 @@ static VALUE rb_czmq_ctx_socket(VALUE obj, VALUE type)
     sock->state = ZMQ_SOCKET_PENDING;
     sock->endpoint = Qnil;
     sock->thread = rb_thread_current();
-    sock->recv_timeout = ZMQ_SOCKET_DEFAULT_TIMEOUT;
-    sock->send_timeout = ZMQ_SOCKET_DEFAULT_TIMEOUT;
     rb_obj_call_init(socket, 0, NULL);
     return socket;
 }
