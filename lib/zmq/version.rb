@@ -1,5 +1,5 @@
 # encoding: utf-8
 
 module ZMQ
-  VERSION = "0.6"
+  VERSION = "0.7"
 end
