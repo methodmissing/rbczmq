@@ -23,8 +23,15 @@
 #define ZmqAssertSysError() if (zmq_errno() != 0 && zmq_errno() != EAGAIN) ZmqRaiseSysError();
 #define ZmqAssert(rc) \
     if (rc == -1) { \
-        ZmqAssertSysError(); \
         if (rc == ENOMEM) rb_memerror(); \
+        switch (zmq_errno()) { \
+        case EMTHREAD: \
+            rb_raise(rb_eZmqError, "There are no I/O thread available to complete this operation. Please initialize the ZMQ context with at least one I/O thread eg. ZMQ::Context.new(1)"); \
+            break; \
+        default : \
+            ZmqAssertSysError(); \
+            break; \
+        } \
         return Qfalse; \
     }
 #define ZmqAssertObjOnAlloc(obj, wrapper) \
