@@ -1,6 +1,8 @@
 # encoding: utf-8
 
 class ZMQ::Socket
+  PROTO_REXP = /^inproc|ipc|tcp|e?pgm:\/\//
+
   def self.unsupported_api(*methods)
     methods.each do |m|
       class_eval <<-"evl", __FILE__, __LINE__
@@ -73,6 +75,54 @@ class ZMQ::Socket
   # Poll all sockets for writable states by default
   def poll_writable?
     true
+  end
+
+  # Binds to a given endpoint. Attemps to resolve URIs without a protocol through DNS SRV records.
+  #
+  # socket = ctx.socket(:PUB)
+  # socket.bind "tcp://127.0.0.1:9000"
+  #
+  # socket.bind "collector.domain.com" # resolves 10.0.0.2:9000
+  #
+  def bind(uri)
+    uri = resolve(uri) if uri && uri !~ PROTO_REXP
+    real_bind(uri)
+  end
+
+  # Connects to a given endpoint. Attemps to resolve URIs without a protocol through DNS SRV records.
+  #
+  # socket = ctx.socket(:PUB)
+  # socket.connect "tcp://127.0.0.1:9000"
+  #
+  # socket.connect "collector.domain.com" # resolves 10.0.0.2:9000
+  #
+  def connect(uri)
+    uri = resolve(uri) if uri && uri !~ PROTO_REXP
+    real_connect(uri)
+  end
+
+  private
+  # Attempt to resolve DNS SRV records ( http://en.wikipedia.org/wiki/SRV_record ). Respects priority and weight
+  # to provide a combination of load balancing and backup.
+  def resolve(uri)
+    parts = uri.split('.')
+    service = parts.shift
+    domain = parts.join(".")
+    # ZeroMQ does not yet support udp, but may look into possibly supporting [e]pgm here
+    resources = ZMQ.resolver.getresources("_#{service}._tcp.#{domain}", Resolv::DNS::Resource::IN::SRV)
+    # lowest-numbered priority value is preferred
+    resources.sort!{|a,b| a.priority <=> b.priority }
+    res = resources.first
+    # detetermine if we should filter by weight as well (multiple records with equal priority)
+    priority_peers = resources.select{|r| res.priority == r.priority }
+    if priority_peers.size > 1
+      # highest weight preferred
+      res = priority_peers.sort{|a,b| a.weight <=> b.weight }.last
+    end
+    return uri unless res
+    "tcp://#{Resolv.getaddress(res.target.to_s)}:#{res.port}"
+  rescue
+    uri
   end
 end
 

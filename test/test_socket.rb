@@ -131,6 +131,20 @@ class TestZmqSocket < ZmqTestCase
     ctx.destroy
   end
 
+  def test_bind_connect_errors
+    ctx = ZMQ::Context.new
+    req = ctx.socket(:REQ)
+    rep = ctx.socket(:REP)
+    assert_raises Errno::EINVAL do
+      rep.bind "bad uri"
+    end
+    assert_raises Errno::EINVAL do
+      req.connect "bad uri"
+    end
+  ensure
+    ctx.destroy
+  end
+
   def test_to_s
     ctx = ZMQ::Context.new
     sock = ctx.socket(:PAIR)

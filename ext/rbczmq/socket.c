@@ -173,11 +173,7 @@ VALUE rb_czmq_nogvl_socket_bind(void *ptr)
     struct nogvl_conn_args *args = ptr;
     errno = 0;
     zmq_sock_wrapper *socket = args->socket;
-#ifdef HAVE_RB_THREAD_BLOCKING_REGION
     rc = zsocket_bind(socket->socket, args->endpoint);
-#else
-    rc = zsocket_bind(socket->socket, args->endpoint);
-#endif
     return (VALUE)rc;
 }
 
@@ -192,11 +188,7 @@ VALUE rb_czmq_nogvl_socket_connect(void *ptr)
     struct nogvl_conn_args *args = ptr;
     errno = 0;
     zmq_sock_wrapper *socket = args->socket;
-#ifdef HAVE_RB_THREAD_BLOCKING_REGION
     rc = zsocket_connect(socket->socket, args->endpoint);
-#else
-    rc = zsocket_connect(socket->socket, args->endpoint);
-#endif
     return (VALUE)rc;
 }
 
@@ -1513,8 +1505,8 @@ void _init_rb_czmq_socket()
     rb_define_method(rb_cZmqSocket, "close", rb_czmq_socket_close, 0);
     rb_define_method(rb_cZmqSocket, "endpoint", rb_czmq_socket_endpoint, 0);
     rb_define_method(rb_cZmqSocket, "state", rb_czmq_socket_state, 0);
-    rb_define_method(rb_cZmqSocket, "bind", rb_czmq_socket_bind, 1);
-    rb_define_method(rb_cZmqSocket, "connect", rb_czmq_socket_connect, 1);
+    rb_define_method(rb_cZmqSocket, "real_bind", rb_czmq_socket_bind, 1);
+    rb_define_method(rb_cZmqSocket, "real_connect", rb_czmq_socket_connect, 1);
     rb_define_method(rb_cZmqSocket, "fd", rb_czmq_socket_fd, 0);
     rb_define_alias(rb_cZmqSocket, "to_i", "fd");
     rb_define_method(rb_cZmqSocket, "verbose=", rb_czmq_socket_set_verbose, 1);
