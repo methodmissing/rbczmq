@@ -318,7 +318,7 @@ static VALUE rb_czmq_message_pushstr(VALUE obj, VALUE str)
     errno = 0;
     ZmqGetMessage(obj);
     Check_Type(str, T_STRING);
-    rc = zmsg_pushstr(message->message, StringValueCStr(str));
+    rc = zmsg_pushmem(message->message, StringValueCStr(str), RSTRING_LEN(str));
     ZmqAssert(rc);
     return Qtrue;
 }
@@ -341,7 +341,7 @@ static VALUE rb_czmq_message_addstr(VALUE obj, VALUE str)
     errno = 0;
     ZmqGetMessage(obj);
     Check_Type(str, T_STRING);
-    rc = zmsg_addstr(message->message, StringValueCStr(str));
+    rc = zmsg_addmem(message->message, StringValueCStr(str), RSTRING_LEN(str));
     ZmqAssert(rc);
     return Qtrue;
 }
