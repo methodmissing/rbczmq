@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    rbczmq (0.1)
+    rbczmq (0.7)
 
 GEM
   remote: http://rubygems.org/
