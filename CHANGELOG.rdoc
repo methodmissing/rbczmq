@@ -1,6 +1,7 @@
 = Changelog
 
-== HEAD
+== 0.8 (June 25, 2012)
+* Remove entries from the frames pointer map when managed frame objects are freed during GC
 * czmq's addstr and pushstr functions expect a format string, users of the library aren't (presently) expecting that (James Tucker)
 * Bumped czmq to upstream head (bugfixes and compat for the upcoming upgrade to libzmq 3.2)
 
