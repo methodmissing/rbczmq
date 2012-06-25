@@ -37,8 +37,12 @@ VALUE rb_czmq_alloc_frame(zframe_t *frame)
 */
 void rb_czmq_free_frame(zframe_t *frame)
 {
-    if (frame)
-        if (st_lookup(frames_map, (st_data_t)frame, 0)) zframe_destroy(&frame);
+    if (frame) {
+        if (st_lookup(frames_map, (st_data_t)frame, 0)) {
+            st_delete(frames_map, (st_data_t*)&frame, 0);
+            zframe_destroy(&frame);
+        }
+    }
 }
 
 /*
