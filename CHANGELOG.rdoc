@@ -1,0 +1,34 @@
+= Changelog
+
+== HEAD
+* czmq's addstr and pushstr functions expect a format string, users of the library aren't (presently) expecting that (James Tucker)
+* Bumped czmq to upstream head (bugfixes and compat for the upcoming upgrade to libzmq 3.2)
+
+== 0.7 (May 12, 2012)
+* Remove send && recv timeout accessors from the zmq_sock_wrapper struct - delegated to libzmq
+* Respect ZMQ_SNDTIMEO && ZMQ_RCVTIMEO socket options for all rewbies
+* Intercept EMTHREAD and raise a meaningful error for transports that require at least one I/O thread
+
+== 0.6 (May 10, 2012)
+* He who forgets to coerce to string shall release often
+
+== 0.5 (May 10, 2012)
+* Resolv SRV record targets as well
+
+== 0.4 (April 27, 2012)
+* Bumped czmq
+* Introduce initial support for endpoint resolution through DNS SRV records
+
+== 0.3 (April 18, 2012)
+* Compile czmq with -fPIC on linux
+
+== 0.2 (April 8, 2012)
+* Introduce support for sending frames non-blocking
+* Introduce a ZMQ::Context#hwm attribute
+* Introduce support for sndtimeo && rcvtimeo socket options
+* Bump to czmq && zeromq to release 2.2.1
+* Depend on libzmq 2.1.12
+* Include Travis CI build status in README
+
+== 0.1 ( February 21, 2012)
+* Initial public release

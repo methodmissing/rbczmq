@@ -4,8 +4,6 @@
 
   http://github.com/methodmissing/rbczmq
 
-==== NOT YET PRODUCTION READY, BUT ALMOST
-
 == About ZeroMQ
 
 In a nutshell, ZeroMQ is a hybrid networking library / concurrency framework. I quote the ØMQ Guide (http://zguide.zeromq.org/page:all) :
