@@ -92,15 +92,4 @@ static inline char *rb_czmq_formatted_current_time()
     return formatted;
 }
 
-struct nogvl_device_args {
-    int type;
-#ifndef HAVE_RB_THREAD_BLOCKING_REGION
-    zctx_t *ctx;
-#endif
-    zmq_sock_wrapper *in;
-    zmq_sock_wrapper *out;
-    int rc;
-};
-typedef struct nogvl_device_args nogvl_device_args_t;
-
 #endif
