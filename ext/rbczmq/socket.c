@@ -788,6 +788,8 @@ static VALUE rb_czmq_socket_recv_message(VALUE obj)
     return rb_czmq_alloc_message(message);
 }
 
+#if ZMQ_VERSION_MAJOR == 2
+
 /*
  *  call-seq:
  *     sock.hwm =>  Fixnum
@@ -866,6 +868,89 @@ static VALUE rb_czmq_socket_set_opt_swap(VALUE obj, VALUE value)
     zmq_sock_wrapper *sock = NULL;
     ZmqSetSockOpt(obj, zsocket_set_swap, "SWAP", value);
 }
+#endif
+
+#if ZMQ_VERSION_MAJOR == 3
+/*
+ *  call-seq:
+ *     sock.sndhwm =>  Fixnum
+ *
+ *  Returns the socket send HWM (High Water Mark) value.
+ *
+ * === Examples
+ *     ctx = ZMQ::Context.new
+ *     sock = ctx.socket(:REP)
+ *     sock.sndhwm  =>  0
+ *
+*/
+
+static VALUE rb_czmq_socket_opt_sndhwm(VALUE obj)
+{
+    zmq_sock_wrapper *sock = NULL;
+    GetZmqSocket(obj);
+    return INT2NUM(zsocket_sndhwm(sock->socket));
+}
+
+/*
+ *  call-seq:
+ *     sock.sndhwm = 100 =>  nil
+ *
+ *  Sets the socket send HWM (High Water Mark() value.
+ *
+ * === Examples
+ *     ctx = ZMQ::Context.new
+ *     sock = ctx.socket(:REP)
+ *     sock.sndhwm = 100  =>  nil
+ *     sock.sndhwm  =>  100
+ *
+*/
+
+static VALUE rb_czmq_socket_set_opt_sndhwm(VALUE obj, VALUE value)
+{
+    zmq_sock_wrapper *sock = NULL;
+    ZmqSetSockOpt(obj, zsocket_set_sndhwm, "SNDHWM", value);
+}
+
+/*
+ *  call-seq:
+ *     sock.rcvhwm =>  Fixnum
+ *
+ *  Returns the socket receive HWM (High Water Mark) value.
+ *
+ * === Examples
+ *     ctx = ZMQ::Context.new
+ *     sock = ctx.socket(:REP)
+ *     sock.sndhwm  =>  0
+ *
+*/
+
+static VALUE rb_czmq_socket_opt_rcvhwm(VALUE obj)
+{
+    zmq_sock_wrapper *sock = NULL;
+    GetZmqSocket(obj);
+    return INT2NUM(zsocket_rcvhwm(sock->socket));
+}
+
+/*
+ *  call-seq:
+ *     sock.rcvhwm = 100 =>  nil
+ *
+ *  Sets the socket receive HWM (High Water Mark() value.
+ *
+ * === Examples
+ *     ctx = ZMQ::Context.new
+ *     sock = ctx.socket(:REP)
+ *     sock.rcvhwm = 100  =>  nil
+ *     sock.rcvhwm  =>  100
+ *
+*/
+
+static VALUE rb_czmq_socket_set_opt_rcvhwm(VALUE obj, VALUE value)
+{
+    zmq_sock_wrapper *sock = NULL;
+    ZmqSetSockOpt(obj, zsocket_set_rcvhwm, "RCVHWM", value);
+}
+#endif
 
 /*
  *  call-seq:
@@ -984,6 +1069,7 @@ static VALUE rb_czmq_socket_set_opt_recovery_ivl(VALUE obj, VALUE value)
     ZmqSetSockOpt(obj, zsocket_set_recovery_ivl, "RECOVERY_IVL", value);
 }
 
+#if ZMQ_VERSION_MAJOR == 2
 /*
  *  call-seq:
  *     sock.recovery_ivl_msec =>  Fixnum
@@ -1061,6 +1147,7 @@ static VALUE rb_czmq_socket_set_opt_mcast_loop(VALUE obj, VALUE value)
     zmq_sock_wrapper *sock = NULL;
     ZmqSetBooleanSockOpt(obj, zsocket_set_mcast_loop, "MCAST_LOOP", value);
 }
+#endif
 
 /*
  *  call-seq:
@@ -1520,20 +1607,30 @@ void _init_rb_czmq_socket()
     rb_define_method(rb_cZmqSocket, "recv_frame_nonblock", rb_czmq_socket_recv_frame_nonblock, 0);
     rb_define_method(rb_cZmqSocket, "recv_message", rb_czmq_socket_recv_message, 0);
 
-    rb_define_method(rb_cZmqSocket, "hwm", rb_czmq_socket_opt_hwm, 0);
-    rb_define_method(rb_cZmqSocket, "hwm=", rb_czmq_socket_set_opt_hwm, 1);
+#if ZMQ_VERSION_MAJOR == 2
     rb_define_method(rb_cZmqSocket, "swap", rb_czmq_socket_opt_swap, 0);
     rb_define_method(rb_cZmqSocket, "swap=", rb_czmq_socket_set_opt_swap, 1);
+    rb_define_method(rb_cZmqSocket, "recovery_ivl_msec", rb_czmq_socket_opt_recovery_ivl_msec, 0);
+    rb_define_method(rb_cZmqSocket, "recovery_ivl_msec=", rb_czmq_socket_set_opt_recovery_ivl_msec, 1);
+    rb_define_method(rb_cZmqSocket, "mcast_loop?", rb_czmq_socket_opt_mcast_loop, 0);
+    rb_define_method(rb_cZmqSocket, "mcast_loop=", rb_czmq_socket_set_opt_mcast_loop, 1);
+    rb_define_method(rb_cZmqSocket, "hwm", rb_czmq_socket_opt_hwm, 0);
+    rb_define_method(rb_cZmqSocket, "hwm=", rb_czmq_socket_set_opt_hwm, 1);
+#endif
+
+#if ZMQ_VERSION_MAJOR == 3
+    rb_define_method(rb_cZmqSocket, "sndhwm", rb_czmq_socket_opt_sndhwm, 0);
+    rb_define_method(rb_cZmqSocket, "sndhwm=", rb_czmq_socket_set_opt_sndhwm, 1);
+    rb_define_method(rb_cZmqSocket, "rcvhwm", rb_czmq_socket_opt_rcvhwm, 0);
+    rb_define_method(rb_cZmqSocket, "rcvhwm=", rb_czmq_socket_set_opt_rcvhwm, 1);
+#endif
+
     rb_define_method(rb_cZmqSocket, "affinity", rb_czmq_socket_opt_affinity, 0);
     rb_define_method(rb_cZmqSocket, "affinity=", rb_czmq_socket_set_opt_affinity, 1);
     rb_define_method(rb_cZmqSocket, "rate", rb_czmq_socket_opt_rate, 0);
     rb_define_method(rb_cZmqSocket, "rate=", rb_czmq_socket_set_opt_rate, 1);
     rb_define_method(rb_cZmqSocket, "recovery_ivl", rb_czmq_socket_opt_recovery_ivl, 0);
     rb_define_method(rb_cZmqSocket, "recovery_ivl=", rb_czmq_socket_set_opt_recovery_ivl, 1);
-    rb_define_method(rb_cZmqSocket, "recovery_ivl_msec", rb_czmq_socket_opt_recovery_ivl_msec, 0);
-    rb_define_method(rb_cZmqSocket, "recovery_ivl_msec=", rb_czmq_socket_set_opt_recovery_ivl_msec, 1);
-    rb_define_method(rb_cZmqSocket, "mcast_loop?", rb_czmq_socket_opt_mcast_loop, 0);
-    rb_define_method(rb_cZmqSocket, "mcast_loop=", rb_czmq_socket_set_opt_mcast_loop, 1);
     rb_define_method(rb_cZmqSocket, "sndbuf", rb_czmq_socket_opt_sndbuf, 0);
     rb_define_method(rb_cZmqSocket, "sndbuf=", rb_czmq_socket_set_opt_sndbuf, 1);
     rb_define_method(rb_cZmqSocket, "rcvbuf", rb_czmq_socket_opt_rcvbuf, 0);

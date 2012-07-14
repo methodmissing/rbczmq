@@ -13,6 +13,14 @@ require 'zmq/version' unless defined? ZMQ::VERSION
 require 'socket'
 
 module ZMQ
+  def self.version3?
+    version[0] == 3
+  end
+
+  def self.version2?
+    !version3?
+  end
+
   # Sugaring for creating new ZMQ frames
   #
   # ZMQ::Frame("frame")  =>  ZMQ::Frame

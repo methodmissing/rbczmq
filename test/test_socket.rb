@@ -18,7 +18,11 @@ class TestZmqSocket < ZmqTestCase
   def test_send_timeout
     ctx = ZMQ::Context.new
     rep = ctx.socket(:REP)
-    rep.hwm = 1
+    if ZMQ.version3?
+      rep.sndhwm = 1
+    else
+      rep.hwm = 1
+    end
     rep.bind("inproc://test.socket-send-timeout")
     req = ctx.connect(:REQ, "inproc://test.socket-send-timeout")
     # Cannot test much other than normal transfer's not disrupted
@@ -372,33 +376,58 @@ class TestZmqSocket < ZmqTestCase
     ctx = ZMQ::Context.new
     sock = ctx.socket(:PAIR)
     sock.verbose = true
-    assert_equal 0, sock.hwm
-    sock.hwm = 1000
-    assert_equal 1000, sock.hwm
 
-    assert_equal 0, sock.swap
-    sock.swap = 1000
-    assert_equal 1000, sock.swap
+    if ZMQ.version3?
+      assert_equal 1000, sock.sndhwm
+      sock.sndhwm = 10000
+      assert_equal 10000, sock.sndhwm      
+
+      assert_equal 1000, sock.rcvhwm
+      sock.rcvhwm = 10000
+      assert_equal 10000, sock.rcvhwm
+    else
+      assert_equal 0, sock.hwm
+      sock.hwm = 1000
+      assert_equal 1000, sock.hwm
+
+      assert_equal 0, sock.swap
+      sock.swap = 1000
+      assert_equal 1000, sock.swap
+
+      assert_equal(-1, sock.recovery_ivl_msec)
+      sock.recovery_ivl_msec = 20
+      assert_equal 20, sock.recovery_ivl_msec
+    end
 
     assert_equal 0, sock.affinity
     sock.affinity = 1
     assert_equal 1, sock.affinity
 
-    assert_equal 40000, sock.rate
-    sock.rate = 50000
-    assert_equal 50000, sock.rate
+    if ZMQ.version3?
+      assert_equal 100, sock.rate
+      sock.rate = 50000
+      assert_equal 50000, sock.rate
+    else
+      assert_equal 40000, sock.rate
+      sock.rate = 50000
+      assert_equal 50000, sock.rate
+    end
 
-    assert_equal 10, sock.recovery_ivl
-    sock.recovery_ivl = 20
-    assert_equal 20, sock.recovery_ivl
+    if ZMQ.version3?
+      assert_equal 10000, sock.recovery_ivl
+      sock.recovery_ivl = 20
+      assert_equal 20, sock.recovery_ivl
+    else
+      assert_equal 10, sock.recovery_ivl
+      sock.recovery_ivl = 20
+      assert_equal 20, sock.recovery_ivl
+    end
 
-    assert_equal(-1, sock.recovery_ivl_msec)
-    sock.recovery_ivl_msec = 20
-    assert_equal 20, sock.recovery_ivl_msec
-
-    assert_equal true, sock.mcast_loop?
-    sock.mcast_loop = false
-    assert !sock.mcast_loop?
+    if ZMQ.version2?
+      assert_equal true, sock.mcast_loop?
+      sock.mcast_loop = false
+      assert !sock.mcast_loop?
+    end
 
     assert_equal 0, sock.sndbuf
     sock.sndbuf = 1000
