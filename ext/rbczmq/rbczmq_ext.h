@@ -14,7 +14,7 @@
 #define ZMQ_NOINLINE
 #endif
 
-#include <rbczmq_prelude.h>
+#include "rbczmq_prelude.h"
 
 #define ZmqRaiseSysError() { \
         printf("Sys error location: %s:%d\n", __FILE__,__LINE__); \
@@ -73,14 +73,14 @@ extern VALUE intern_readable;
 extern VALUE intern_writable;
 extern VALUE intern_error;
 
-#include <context.h>
-#include <socket.h>
-#include <frame.h>
-#include <message.h>
-#include <loop.h>
-#include <timer.h>
-#include <poller.h>
-#include <pollitem.h>
+#include "context.h"
+#include "socket.h"
+#include "frame.h"
+#include "message.h"
+#include "loop.h"
+#include "timer.h"
+#include "poller.h"
+#include "pollitem.h"
 
 static inline char *rb_czmq_formatted_current_time()
 {

@@ -1,4 +1,4 @@
-#include <rbczmq_ext.h>
+#include "rbczmq_ext.h"
 
 static VALUE intern_zctx_process;
 

@@ -1,4 +1,4 @@
-#include <rbczmq_ext.h>
+#include "rbczmq_ext.h"
 
 /*
  * :nodoc:
