@@ -1,4 +1,4 @@
-#include <rbczmq_ext.h>
+#include "rbczmq_ext.h"
 
 VALUE rb_mZmq;
 VALUE rb_eZmqError;
