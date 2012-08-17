@@ -24,6 +24,18 @@ class ZMQ::Socket
     end
   end
 
+
+  #  Returns the endpoint this socket is currently connected to, if any.
+  #
+  #     ctx = ZMQ::Context.new
+  #     sock = ctx.socket(:PUSH)
+  #     sock.endpoint    =>   nil
+  #     sock.bind("inproc://test")
+  #     sock.endpoint    =>  "inproc://test"
+  def endpoint
+    endpoints.first
+  end
+
   # Determines if there are one or more messages to read from this socket. Should be used in conjunction with the
   # ZMQ_FD socket option for edge-triggered notifications.
   #
@@ -59,9 +71,9 @@ class ZMQ::Socket
   def to_s
     case state
     when BOUND
-      "#{type_str} socket bound to #{endpoint}"
+      "#{type_str} socket bound to #{endpoints.join(', ')}"
     when CONNECTED
-      "#{type_str} socket connected to #{endpoint}"
+      "#{type_str} socket connected to #{endpoints.join(', ')}"
     else
       "#{type_str} socket"
     end

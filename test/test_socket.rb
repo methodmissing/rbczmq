@@ -171,6 +171,12 @@ class TestZmqSocket < ZmqTestCase
     assert_equal "PAIR socket", sock.to_s
     assert_equal "REP socket bound to tcp://127.0.0.1:*", rep.to_s
     assert_equal "REQ socket connected to tcp://127.0.0.1:#{port}", req.to_s
+
+
+    port2 = rep.bind("tcp://127.0.0.1:*")
+    req.connect("tcp://127.0.0.1:#{port2}")
+    assert_equal "REP socket bound to tcp://127.0.0.1:*, tcp://127.0.0.1:*", rep.to_s
+    assert_equal "REQ socket connected to tcp://127.0.0.1:#{port}, tcp://127.0.0.1:#{port2}", req.to_s
   ensure
     ctx.destroy
   end
@@ -183,6 +189,23 @@ class TestZmqSocket < ZmqTestCase
     req.connect("tcp://127.0.0.1:#{port}")
     assert_equal "tcp://127.0.0.1:*", rep.endpoint
     assert_equal "tcp://127.0.0.1:#{port}", req.endpoint
+  ensure
+    ctx.destroy
+  end
+
+  def test_endpoints
+    ctx = ZMQ::Context.new
+    rep = ctx.socket(:REP)
+    port = rep.bind("tcp://127.0.0.1:*")
+    req = ctx.socket(:REQ)
+    req.connect("tcp://127.0.0.1:#{port}")
+    assert_equal ["tcp://127.0.0.1:*"], rep.endpoints
+    assert_equal ["tcp://127.0.0.1:#{port}"], req.endpoints
+
+    port2 = rep.bind("tcp://127.0.0.1:*")
+    req.connect("tcp://127.0.0.1:#{port2}")
+    assert_equal ["tcp://127.0.0.1:*", "tcp://127.0.0.1:*"], rep.endpoints
+    assert_equal ["tcp://127.0.0.1:#{port}", "tcp://127.0.0.1:#{port2}"], req.endpoints
   ensure
     ctx.destroy
   end
