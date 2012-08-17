@@ -131,6 +131,21 @@ class TestZmqSocket < ZmqTestCase
     ctx.destroy
   end
 
+  def test_connect_all
+    ctx = ZMQ::Context.new
+    rep = ctx.socket(:PAIR)
+    port = rep.bind("inproc://test.socket-connect")
+    req = ctx.socket(:PAIR)
+    assert(req.state & ZMQ::Socket::PENDING)
+    req.connect_all("inproc://test.socket-connect")
+    assert req.fd != -1
+    assert(req.state & ZMQ::Socket::CONNECTED)
+
+    # TODO - test SRV lookups - insufficient infrastructure for resolver tests
+  ensure
+    ctx.destroy
+  end
+
   def test_bind_connect_errors
     ctx = ZMQ::Context.new
     req = ctx.socket(:REQ)

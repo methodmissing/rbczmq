@@ -101,15 +101,35 @@ class ZMQ::Socket
     real_connect(uri)
   end
 
+  # Connects to all endpoints that are returned from a SRV record lookup.
+  #
+  # socket = ctx.socket(:PUB)
+  #
+  # socket.connect "collector.domain.com" # resolves 10.0.0.2:9000 10.0.0.3:9000
+  #
+  def connect_all(uri)
+    if uri =~ PROTO_REXP
+      real_connect(uri)
+      return
+    end
+
+    addresses = resolve_all(uri)
+    if addresses.empty?
+      real_connect(uri)
+    else
+      addresses.each do |address|
+        host = Resolv.getaddress(address.target.to_s)
+        real_connect("tcp://#{host}:#{address.port}")
+      end
+    end
+    self
+  end
+
   private
   # Attempt to resolve DNS SRV records ( http://en.wikipedia.org/wiki/SRV_record ). Respects priority and weight
   # to provide a combination of load balancing and backup.
   def resolve(uri)
-    parts = uri.split('.')
-    service = parts.shift
-    domain = parts.join(".")
-    # ZeroMQ does not yet support udp, but may look into possibly supporting [e]pgm here
-    resources = ZMQ.resolver.getresources("_#{service}._tcp.#{domain}", Resolv::DNS::Resource::IN::SRV)
+    resources = resolve_all(uri)
     # lowest-numbered priority value is preferred
     resources.sort!{|a,b| a.priority <=> b.priority }
     res = resources.first
@@ -120,9 +140,17 @@ class ZMQ::Socket
       res = priority_peers.sort{|a,b| a.weight <=> b.weight }.last
     end
     return uri unless res
+    # ZeroMQ does not yet support udp, but may look into possibly supporting [e]pgm here
     "tcp://#{Resolv.getaddress(res.target.to_s)}:#{res.port}"
   rescue
     uri
+  end
+
+  def resolve_all(uri)
+    parts = uri.split('.')
+    service = parts.shift
+    domain = parts.join(".")
+    ZMQ.resolver.getresources("_#{service}._tcp.#{domain}", Resolv::DNS::Resource::IN::SRV)
   end
 end
 
