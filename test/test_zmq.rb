@@ -8,7 +8,7 @@ class TestZmq < ZmqTestCase
   end
 
   def test_version
-    assert_equal [3,3,0], ZMQ.version
+    assert_equal [3,2,1], ZMQ.version
   end
 
   def test_now
