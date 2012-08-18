@@ -1,5 +1,10 @@
 = Changelog
 
+== 0.9 (August 18, 2012)
+* Sockets now record and show all endpoints
+* Support connect_all for SRV managed topologies
+* Fix Rubinius specific compile errors
+
 == 0.8 (June 25, 2012)
 * Remove entries from the frames pointer map when managed frame objects are freed during GC
 * czmq's addstr and pushstr functions expect a format string, users of the library aren't (presently) expecting that (James Tucker)
