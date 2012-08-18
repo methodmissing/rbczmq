@@ -40,7 +40,7 @@ void rb_czmq_mark_sock(void *ptr)
     if (sock){
         if (sock->verbose)
             zclock_log ("I: %s socket %p, context %p: GC mark", zsocket_type_str(sock->socket), sock, sock->ctx);
-        rb_gc_mark(sock->endpoint);
+        rb_gc_mark(sock->endpoints);
         rb_gc_mark(sock->thread);
     }
 }
@@ -96,24 +96,24 @@ static VALUE rb_czmq_socket_close(VALUE obj)
 
 /*
  *  call-seq:
- *     sock.endpoint   =>  String or nil
+ *     sock.endpoints   =>  Array of Strings
  *
- *  Returns the endpoint this socket is currently connected to, if any.
+ *  Returns the endpoints this socket is currently connected to, if any.
  *
  * === Examples
  *     ctx = ZMQ::Context.new
  *     sock = ctx.socket(:PUSH)
- *     sock.endpoint    =>   nil
+ *     sock.endpoints    =>   []
  *     sock.bind("inproc://test")
- *     sock.endpoint    =>  "inproc://test"
+ *     sock.endpoints    =>  ["inproc://test"]
  *
 */
 
-static VALUE rb_czmq_socket_endpoint(VALUE obj)
+static VALUE rb_czmq_socket_endpoints(VALUE obj)
 {
     zmq_sock_wrapper *sock = NULL;
     GetZmqSocket(obj);
-    return sock->endpoint;
+    return sock->endpoints;
 }
 
 /*
@@ -221,7 +221,7 @@ static VALUE rb_czmq_socket_bind(VALUE obj, VALUE endpoint)
     if (sock->verbose)
         zclock_log ("I: %s socket %p: bound \"%s\"", zsocket_type_str(sock->socket), obj, StringValueCStr(endpoint));
     sock->state = ZMQ_SOCKET_BOUND;
-    sock->endpoint = rb_str_new4(endpoint);
+    rb_ary_push(sock->endpoints, rb_str_new4(endpoint));
     return INT2NUM(rc);
 }
 
@@ -255,7 +255,7 @@ static VALUE rb_czmq_socket_connect(VALUE obj, VALUE endpoint)
     if (sock->verbose)
         zclock_log ("I: %s socket %p: connected \"%s\"", zsocket_type_str(sock->socket), obj, StringValueCStr(endpoint));
     sock->state = ZMQ_SOCKET_CONNECTED;
-    sock->endpoint = rb_str_new4(endpoint);
+    rb_ary_push(sock->endpoints, rb_str_new4(endpoint));
     return Qtrue;
 }
 
@@ -1590,7 +1590,7 @@ void _init_rb_czmq_socket()
     rb_define_const(rb_cZmqSocket, "CONNECTED", INT2NUM(ZMQ_SOCKET_CONNECTED));
 
     rb_define_method(rb_cZmqSocket, "close", rb_czmq_socket_close, 0);
-    rb_define_method(rb_cZmqSocket, "endpoint", rb_czmq_socket_endpoint, 0);
+    rb_define_method(rb_cZmqSocket, "endpoints", rb_czmq_socket_endpoints, 0);
     rb_define_method(rb_cZmqSocket, "state", rb_czmq_socket_state, 0);
     rb_define_method(rb_cZmqSocket, "real_bind", rb_czmq_socket_bind, 1);
     rb_define_method(rb_cZmqSocket, "real_connect", rb_czmq_socket_connect, 1);

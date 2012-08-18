@@ -20,7 +20,7 @@ typedef struct {
     zlist_t *frame_buffer;
     zlist_t *msg_buffer;
 #endif
-    VALUE endpoint;
+    VALUE endpoints;
     VALUE thread;
 } zmq_sock_wrapper;
 

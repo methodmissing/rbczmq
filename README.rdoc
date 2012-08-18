@@ -222,6 +222,13 @@ Running tests
 
     rake test
 
+OS X notes:
+
+If you are installing the package on a new mack ensure you have libtool and autoconf isntalled.  
+You can get those with brew packaging system:
+
+    brew insatll libtool autoconf automake
+
 == TODO
 
 * ZMQ::Message#save && ZMQ::Message.load
