@@ -8,7 +8,9 @@ class TestZmq < ZmqTestCase
   end
 
   def test_version
-    assert_equal [2,2,1], ZMQ.version
+    version = ZMQ.version
+    assert_instance_of Array, version
+    assert version.all?{|v| Fixnum === v }
   end
 
   def test_now
