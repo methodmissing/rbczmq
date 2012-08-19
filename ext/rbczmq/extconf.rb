@@ -30,9 +30,6 @@ czmq_include_path = czmq_path + 'include'
 
 # Fail early if we don't meet the following dependencies.
 
-# Present on OS X and BSD systems, package install required on Linux
-fail("package uuid-dev required (apt-get install uuid-dev)") unless have_header('uuid/uuid.h')
-
 # Courtesy of EventMachine and @tmm1
 def check_libs libs = [], fatal = false
   libs.all? { |lib| have_library(lib) || (abort("could not find library: #{lib}") if fatal) }
