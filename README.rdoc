@@ -224,10 +224,10 @@ Running tests
 
 OS X notes:
 
-If you are installing the package on a new mack ensure you have libtool and autoconf isntalled.  
+If you are installing the package on a new mack ensure you have libtool and autoconf installed.
 You can get those with brew packaging system:
 
-    brew insatll libtool autoconf automake
+    brew install libtool autoconf automake
 
 == TODO
 
