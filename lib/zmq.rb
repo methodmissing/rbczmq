@@ -83,6 +83,7 @@ module ZMQ
 end
 
 require "zmq/context"
+require "zmq/monitor"
 require "zmq/socket"
 require "zmq/loop"
 require "zmq/timer"

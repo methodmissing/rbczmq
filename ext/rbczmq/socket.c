@@ -1,5 +1,16 @@
 #include "rbczmq_ext.h"
 
+VALUE intern_on_connected;
+VALUE intern_on_connect_delayed;
+VALUE intern_on_connect_retried;
+VALUE intern_on_listening;
+VALUE intern_on_bind_failed;
+VALUE intern_on_accepted;
+VALUE intern_on_accept_failed;
+VALUE intern_on_closed;
+VALUE intern_on_close_failed;
+VALUE intern_on_disconnected;
+
 /*
  * :nodoc:
  *  Destroy the socket while the GIL is released - may block depending on socket linger value.
@@ -42,6 +53,10 @@ void rb_czmq_mark_sock(void *ptr)
             zclock_log ("I: %s socket %p, context %p: GC mark", zsocket_type_str(sock->socket), sock, sock->ctx);
         rb_gc_mark(sock->endpoints);
         rb_gc_mark(sock->thread);
+        rb_gc_mark(sock->context);
+        rb_gc_mark(sock->monitor_endpoint);
+        rb_gc_mark(sock->monitor_handler);
+        rb_gc_mark(sock->monitor_thread);
     }
 }
 
@@ -1572,6 +1587,134 @@ static VALUE rb_czmq_socket_set_opt_sndtimeo(VALUE obj, VALUE value)
     ZmqSetSockOpt(obj, zsocket_set_sndtimeo, "SNDTIMEO", value);
 }
 
+/*
+ * :nodoc:
+ *  Receives a monitoring event message while the GIL is released.
+ *
+*/
+
+static VALUE rb_czmq_nogvl_monitor_recv(void *ptr)
+{
+    struct nogvl_monitor_recv_args *args = ptr;
+    int rc;
+#ifdef HAVE_RB_THREAD_BLOCKING_REGION
+    rc = zmq_recvmsg (args->socket, &args->msg, 0);
+#else
+    int fd;
+    size_t option_len = sizeof (int);
+    zmq_getsockopt (args->socket, ZMQ_FD, &fd, &option_len);
+try_readable:
+    if ((zsocket_events(args->socket) & ZMQ_POLLIN) == ZMQ_POLLIN) {
+        rc = zmq_recvmsg (args->socket, &args->msg, 0);
+     } else {
+        rb_thread_wait_fd(fd);
+        goto try_readable;
+     }
+#endif
+    return (VALUE)rc;
+}
+
+/*
+ * :nodoc:
+ *  Runs with the context of a new Ruby thread and spawns a PAIR socket for handling monitoring events
+ *
+*/
+
+static VALUE rb_czmq_socket_monitor_thread(void *arg)
+{
+    zmq_event_t event;
+    struct nogvl_monitor_recv_args args;
+    int rc;
+    zmq_sock_wrapper *sock = (zmq_sock_wrapper *)arg;
+
+    void *s = zsocket_new (sock->ctx, ZMQ_PAIR);
+    assert (s);
+
+    rc = zmq_connect (s, StringValueCStr(sock->monitor_endpoint));
+    assert (rc == 0);
+
+    THREAD_PASS;
+
+    while (1) {
+        args.socket = s;
+        zmq_msg_init (&args.msg);
+        rc = (int)rb_thread_blocking_region(rb_czmq_nogvl_monitor_recv, (void *)&args, RUBY_UBF_IO, 0);
+        if (rc == -1 && (zmq_errno() == ETERM || zmq_errno() == ENOTSOCK || zmq_errno() == EINTR)) break;
+        assert (rc != -1);
+        memcpy (&event, zmq_msg_data (&args.msg), sizeof (event));
+        switch (event.event) {
+        case ZMQ_EVENT_CONNECTED: rb_funcall(sock->monitor_handler, intern_on_connected, 2, rb_str_new2(event.data.connected.addr), INT2FIX(event.data.connected.fd));
+                                  break;
+        case ZMQ_EVENT_CONNECT_DELAYED: rb_funcall(sock->monitor_handler, intern_on_connect_delayed, 2, rb_str_new2(event.data.connect_delayed.addr), INT2FIX(event.data.connect_delayed.err));
+                                        break;
+        case ZMQ_EVENT_CONNECT_RETRIED: rb_funcall(sock->monitor_handler, intern_on_connect_retried, 2, rb_str_new2(event.data.connect_retried.addr), INT2FIX(event.data.connect_retried.interval));
+                                        break;
+        case ZMQ_EVENT_LISTENING: rb_funcall(sock->monitor_handler, intern_on_listening, 2, rb_str_new2(event.data.listening.addr), INT2FIX(event.data.listening.fd));
+                                  break;
+        case ZMQ_EVENT_BIND_FAILED: rb_funcall(sock->monitor_handler, intern_on_bind_failed, 2, rb_str_new2(event.data.bind_failed.addr), INT2FIX(event.data.bind_failed.err));
+                                    break;
+        case ZMQ_EVENT_ACCEPTED: rb_funcall(sock->monitor_handler, intern_on_accepted, 2, rb_str_new2(event.data.accepted.addr), INT2FIX(event.data.accepted.fd));
+                                 break;
+        case ZMQ_EVENT_ACCEPT_FAILED: rb_funcall(sock->monitor_handler, intern_on_accept_failed, 2, rb_str_new2(event.data.accept_failed.addr), INT2FIX(event.data.accept_failed.err));
+                                      break;
+        case ZMQ_EVENT_CLOSE_FAILED: rb_funcall(sock->monitor_handler, intern_on_close_failed, 2, rb_str_new2(event.data.close_failed.addr), INT2FIX(event.data.close_failed.err));
+                                     break;
+        case ZMQ_EVENT_CLOSED: rb_funcall(sock->monitor_handler, intern_on_closed, 2, rb_str_new2(event.data.closed.addr), INT2FIX(event.data.closed.fd));
+                               break;
+        case ZMQ_EVENT_DISCONNECTED: rb_funcall(sock->monitor_handler, intern_on_disconnected, 2, rb_str_new2(event.data.disconnected.addr), INT2FIX(event.data.disconnected.fd));
+                                     break;
+        }
+    }
+    zmq_close (s);
+    return Qnil;
+}
+
+/*
+ *  call-seq:
+ *     sock.monitor("inproc://monitoring", callback, events) =>  nil
+ *
+ *  Registers a monitoring callback for this socket
+ *
+ * === Examples
+ *     ctx = ZMQ::Context.new
+ *     rep = ctx.socket(:REP)
+ *     rep.monitor("inproc://monitoring.rep", RepMonitor)
+ *     req = ctx.socket(:REQ)
+ *     req.monitor("inproc://monitoring.req", ReqMonitor, ZMQ_EVENT_DISCONNECTED)
+ *     rep.bind("tcp://127.0.0.1:5331")
+ *     rep.bind("tcp://127.0.0.1:5332")
+ *
+*/
+
+static VALUE rb_czmq_socket_monitor(int argc, VALUE *argv, VALUE obj)
+{
+    VALUE endpoint;
+    VALUE handler;
+    VALUE events;
+    int rc;
+    zmq_sock_wrapper *sock = NULL;
+    GetZmqSocket(obj);
+    ZmqSockGuardCrossThread(sock);
+    rb_scan_args(argc, argv, "12", &endpoint, &handler, &events);
+    Check_Type(endpoint, T_STRING);
+    if (NIL_P(events))
+        events = rb_const_get_at(rb_mZmq, rb_intern("EVENT_ALL"));
+    if (NIL_P(handler)) {
+        handler = rb_class_new_instance(0, NULL, rb_const_get_at(rb_mZmq, rb_intern("Monitor")));
+    }
+    Check_Type(events, T_FIXNUM);
+    rc = zmq_socket_monitor(sock->socket, StringValueCStr(endpoint), NUM2INT(events));
+    if (rc == 0) {
+        sock->monitor_endpoint = endpoint;
+        sock->monitor_handler = handler;
+        sock->monitor_thread = rb_thread_create(rb_czmq_socket_monitor_thread, (void*)sock);
+        rb_thread_run(sock->monitor_thread);
+        return Qtrue;
+    } else {
+        return Qfalse;
+    }
+}
+
 void _init_rb_czmq_socket()
 {
     rb_cZmqSocket = rb_define_class_under(rb_mZmq, "Socket", rb_cObject);
@@ -1584,6 +1727,17 @@ void _init_rb_czmq_socket()
     rb_cZmqRepSocket = rb_define_class_under(rb_cZmqSocket, "Rep", rb_cZmqSocket);;
     rb_cZmqReqSocket = rb_define_class_under(rb_cZmqSocket, "Req", rb_cZmqSocket);;
     rb_cZmqPairSocket = rb_define_class_under(rb_cZmqSocket, "Pair", rb_cZmqSocket);;
+
+    intern_on_connected = rb_intern("on_connected");
+    intern_on_connect_delayed = rb_intern("on_connect_delayed");
+    intern_on_connect_retried = rb_intern("on_connect_retried");
+    intern_on_listening = rb_intern("on_listening");
+    intern_on_bind_failed = rb_intern("on_bind_failed");
+    intern_on_accepted = rb_intern("on_accepted");
+    intern_on_accept_failed = rb_intern("on_accept_failed");
+    intern_on_closed = rb_intern("on_closed");
+    intern_on_close_failed = rb_intern("on_close_failed");
+    intern_on_disconnected = rb_intern("on_disconnected");
 
     rb_define_const(rb_cZmqSocket, "PENDING", INT2NUM(ZMQ_SOCKET_PENDING));
     rb_define_const(rb_cZmqSocket, "BOUND", INT2NUM(ZMQ_SOCKET_BOUND));
@@ -1652,4 +1806,5 @@ void _init_rb_czmq_socket()
     rb_define_method(rb_cZmqSocket, "rcvtimeo=", rb_czmq_socket_set_opt_rcvtimeo, 1);
     rb_define_method(rb_cZmqSocket, "sndtimeo", rb_czmq_socket_opt_sndtimeo, 0);
     rb_define_method(rb_cZmqSocket, "sndtimeo=", rb_czmq_socket_set_opt_sndtimeo, 1);
+    rb_define_method(rb_cZmqSocket, "monitor", rb_czmq_socket_monitor, -1);
 }

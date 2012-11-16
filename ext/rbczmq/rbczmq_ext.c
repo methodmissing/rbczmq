@@ -197,6 +197,18 @@ void Init_rbczmq_ext()
     rb_define_const(rb_mZmq, "ETERM", INT2NUM(ETERM));
     rb_define_const(rb_mZmq, "EMTHREAD", INT2NUM(EMTHREAD));
 
+    rb_define_const(rb_mZmq, "EVENT_CONNECTED", INT2NUM(ZMQ_EVENT_CONNECTED));
+    rb_define_const(rb_mZmq, "EVENT_CONNECT_DELAYED", INT2NUM(ZMQ_EVENT_CONNECT_DELAYED));
+    rb_define_const(rb_mZmq, "EVENT_CONNECT_RETRIED", INT2NUM(ZMQ_EVENT_CONNECT_RETRIED));
+    rb_define_const(rb_mZmq, "EVENT_LISTENING", INT2NUM(ZMQ_EVENT_LISTENING));
+    rb_define_const(rb_mZmq, "EVENT_BIND_FAILED", INT2NUM(ZMQ_EVENT_BIND_FAILED));
+    rb_define_const(rb_mZmq, "EVENT_ACCEPTED", INT2NUM(ZMQ_EVENT_ACCEPTED));
+    rb_define_const(rb_mZmq, "EVENT_ACCEPT_FAILED", INT2NUM(ZMQ_EVENT_ACCEPT_FAILED));
+    rb_define_const(rb_mZmq, "EVENT_CLOSED", INT2NUM(ZMQ_EVENT_CLOSED));
+    rb_define_const(rb_mZmq, "EVENT_CLOSE_FAILED", INT2NUM(ZMQ_EVENT_CLOSE_FAILED));
+    rb_define_const(rb_mZmq, "EVENT_DISCONNECTED", INT2NUM(ZMQ_EVENT_DISCONNECTED));
+    rb_define_const(rb_mZmq, "EVENT_ALL", INT2NUM(ZMQ_EVENT_ALL));
+
     _init_rb_czmq_context();
     _init_rb_czmq_socket();
     _init_rb_czmq_frame();

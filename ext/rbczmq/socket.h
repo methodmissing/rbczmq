@@ -22,6 +22,10 @@ typedef struct {
 #endif
     VALUE endpoints;
     VALUE thread;
+    VALUE context;
+    VALUE monitor_endpoint;
+    VALUE monitor_handler;
+    VALUE monitor_thread;
 } zmq_sock_wrapper;
 
 #define ZmqAssertSocket(obj) ZmqAssertType(obj, rb_cZmqSocket, "ZMQ::Socket")
@@ -122,10 +126,26 @@ struct nogvl_recv_args {
     zmq_sock_wrapper *socket;
 };
 
+struct nogvl_monitor_recv_args {
+    void *socket;
+    zmq_msg_t msg;
+};
+
 struct nogvl_conn_args {
     zmq_sock_wrapper *socket;
     char *endpoint;
 };
+
+extern VALUE intern_on_connected;
+extern VALUE intern_on_connect_delayed;
+extern VALUE intern_on_connect_retried;
+extern VALUE intern_on_listening;
+extern VALUE intern_on_bind_failed;
+extern VALUE intern_on_accepted;
+extern VALUE intern_on_accept_failed;
+extern VALUE intern_on_closed;
+extern VALUE intern_on_close_failed;
+extern VALUE intern_on_disconnected;
 
 void _init_rb_czmq_socket();
 

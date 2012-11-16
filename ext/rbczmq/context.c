@@ -303,6 +303,10 @@ static VALUE rb_czmq_ctx_socket(VALUE obj, VALUE type)
     sock->state = ZMQ_SOCKET_PENDING;
     sock->endpoints = rb_ary_new();
     sock->thread = rb_thread_current();
+    sock->context = obj;
+    sock->monitor_endpoint = Qnil;
+    sock->monitor_handler = Qnil;
+    sock->monitor_thread = Qnil;
     rb_obj_call_init(socket, 0, NULL);
     return socket;
 }
