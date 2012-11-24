@@ -190,6 +190,7 @@ static VALUE rb_czmq_ctx_hwm(VALUE obj)
     errno = 0;
     int wm;
     ZmqGetContext(obj);
+    rb_warn("Deprecated method ZMQ::Context#hwm, does nothing - to be removed after 2013/05/14");
     return INT2FIX(zctx_hwm(ctx->ctx));
 }
 
@@ -211,6 +212,7 @@ static VALUE rb_czmq_ctx_set_hwm(VALUE obj, VALUE hwm)
     int wm;
     ZmqGetContext(obj);
     Check_Type(hwm, T_FIXNUM);
+    rb_warn("Deprecated method ZMQ::Context#hwm=, does nothing - to be removed after 2013/05/14");
     wm = FIX2INT(hwm);
     if (wm < 0) rb_raise(rb_eZmqError, "negative HWM values is not supported.");
     zctx_set_hwm(ctx->ctx, wm);

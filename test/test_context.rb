@@ -68,7 +68,8 @@ class TestZmqContext < ZmqTestCase
     assert_raises ZMQ::Error do
       ctx.hwm = -2
     end
-    assert_equal 10, ctx.hwm
+    # deprecated method
+    assert_equal 0, ctx.hwm
   ensure
     ctx.destroy
   end

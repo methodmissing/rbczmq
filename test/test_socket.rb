@@ -412,7 +412,7 @@ class TestZmqSocket < ZmqTestCase
 
   def test_sock_options
     ctx = ZMQ::Context.new
-    sock = ctx.socket(:PAIR)
+    sock = ctx.socket(:ROUTER)
     sock.verbose = true
 
     if ZMQ.version3?
@@ -509,7 +509,7 @@ class TestZmqSocket < ZmqTestCase
 
     assert !sock.rcvmore?
 
-    assert_equal 0, sock.events
+    assert_equal 2, sock.events
 
     sub_sock = ctx.socket(:SUB)
     sub_sock.verbose = true
