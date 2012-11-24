@@ -1,5 +1,11 @@
 = Changelog
 
+== 1.0 (November 24, 2012)
+* Supports ZeroMQ 3.2.2 (first stable and backwards compatible 3.x release)
+* Monitoring API for handling socket state changes / events
+* Support for raw TCP sockets (ROUTER sockets only)
+* Not dependent on libuuid anymore
+
 == 0.9 (August 18, 2012)
 * Sockets now record and show all endpoints
 * Support connect_all for SRV managed topologies
