@@ -2,6 +2,8 @@
 
 require File.join(File.dirname(__FILE__), 'helper')
 
+if ZMQ.stable_version?
+
 class TestMonitor
   attr_reader :listening, :closed
 
@@ -40,4 +42,6 @@ class TestZmqMonitoring < ZmqTestCase
   ensure
     ctx.destroy
   end
+end
+
 end

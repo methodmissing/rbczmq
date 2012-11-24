@@ -17,6 +17,12 @@ module ZMQ
     version[0] == 3
   end
 
+  def self.stable_version?
+    version[0] == 3 &&
+    version[1] == 2 &&
+    version[2] == 2
+  end
+
   def self.version2?
     !version3?
   end
