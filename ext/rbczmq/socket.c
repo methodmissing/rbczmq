@@ -1587,6 +1587,27 @@ static VALUE rb_czmq_socket_set_opt_sndtimeo(VALUE obj, VALUE value)
     ZmqSetSockOpt(obj, zsocket_set_sndtimeo, "SNDTIMEO", value);
 }
 
+#if defined (ZMQ_ROUTER_RAW)
+/*
+ *  call-seq:
+ *     sock.raw = true =>  nil
+ *
+ *  Define this as a RAW socket - applicable to ROUTER sockets only.
+ *
+ * === Examples
+ *     ctx = ZMQ::Context.new
+ *     sock = ctx.socket(:ROUTER)
+ *     sock.router = 200  =>  nil
+ *
+*/
+
+static VALUE rb_czmq_socket_set_opt_raw(VALUE obj, VALUE value)
+{
+    zmq_sock_wrapper *sock = NULL;
+    ZmqSetBooleanSockOpt(obj, zsocket_set_router_raw, "ROUTER_RAW", value);
+}
+#endif
+
 /*
  * :nodoc:
  *  Receives a monitoring event message while the GIL is released.
@@ -1777,6 +1798,10 @@ void _init_rb_czmq_socket()
     rb_define_method(rb_cZmqSocket, "sndhwm=", rb_czmq_socket_set_opt_sndhwm, 1);
     rb_define_method(rb_cZmqSocket, "rcvhwm", rb_czmq_socket_opt_rcvhwm, 0);
     rb_define_method(rb_cZmqSocket, "rcvhwm=", rb_czmq_socket_set_opt_rcvhwm, 1);
+
+#if defined (ZMQ_ROUTER_RAW)
+    rb_define_method(rb_cZmqSocket, "raw=", rb_czmq_socket_set_opt_raw, 1);
+#endif
 #endif
 
     rb_define_method(rb_cZmqSocket, "affinity", rb_czmq_socket_opt_affinity, 0);

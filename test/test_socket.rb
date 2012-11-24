@@ -499,6 +499,10 @@ class TestZmqSocket < ZmqTestCase
     sock.sndtimeo = 200
     assert_equal 200, sock.sndtimeo
 
+if sock.respond_to?(:raw=)
+    sock.raw = true
+end
+
     sock.identity = "anonymous"
     assert_raises ZMQ::Error do
       sock.identity = ""
