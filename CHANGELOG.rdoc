@@ -1,5 +1,9 @@
 = Changelog
 
+== 1.1 (April 4, 2012)
+* Bump czmq to version 1.4.0
+* Enable debug symbols for czmq in order to track down a GC bug with ZMQ::Message
+
 == 1.0 (November 24, 2012)
 * Supports ZeroMQ 3.2.2 (first stable and backwards compatible 3.x release)
 * Monitoring API for handling socket state changes / events
