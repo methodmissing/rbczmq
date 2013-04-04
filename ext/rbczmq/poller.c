@@ -47,7 +47,7 @@ int rb_czmq_poller_rebuild_pollset(zmq_poll_wrapper *poller)
         ZmqGetPollitem(pollable);
         poller->pollset[rebuilt] = *pollitem->item;
     }
-    poller->dirty = FALSE;
+    poller->dirty = false;
     return 0;
 }
 
@@ -93,8 +93,8 @@ VALUE rb_czmq_poller_new(VALUE obj)
     poller->pollables = rb_ary_new();
     poller->readables = rb_ary_new();
     poller->writables = rb_ary_new();
-    poller->dirty = FALSE;
-    poller->verbose = FALSE;
+    poller->dirty = false;
+    poller->verbose = false;
     rb_obj_call_init(obj, 0, NULL);
     return obj;
 }
@@ -143,7 +143,7 @@ VALUE rb_czmq_poller_poll(int argc, VALUE *argv, VALUE obj)
     if (NIL_P(tmout)) tmout = INT2NUM(0);
     if (TYPE(tmout) != T_FIXNUM && TYPE(tmout) != T_FLOAT) rb_raise(rb_eTypeError, "wrong timeout type %s (expected Fixnum or Float)", RSTRING_PTR(rb_obj_as_string(tmout)));
     if (poller->poll_size == 0) return INT2NUM(0);
-    if (poller->dirty == TRUE) {
+    if (poller->dirty == true) {
         rc = rb_czmq_poller_rebuild_pollset(poller);
         if (rc == -1) rb_raise(rb_eZmqError, "failed in rebuilding the pollset!");
     }
@@ -193,10 +193,10 @@ VALUE rb_czmq_poller_register(VALUE obj, VALUE pollable)
     pollable = rb_czmq_pollitem_coerce(pollable);
     ZmqGetPollitem(pollable);
     /* Let pollable item be verbose if poller is verbose */
-    if (poller->verbose == TRUE) rb_czmq_pollitem_set_verbose(pollable, Qtrue);
+    if (poller->verbose == true) rb_czmq_pollitem_set_verbose(pollable, Qtrue);
     rb_ary_push(poller->pollables, pollable);
     poller->poll_size++;
-    poller->dirty = TRUE;
+    poller->dirty = true;
     return pollable;
 }
 
@@ -226,7 +226,7 @@ VALUE rb_czmq_poller_remove(VALUE obj, VALUE pollable)
         if (pollable == rpollable || rb_czmq_pollitem_pollable(pollable) == rb_czmq_pollitem_pollable(rpollable)) {
             rb_ary_delete(poller->pollables, rpollable);
             poller->poll_size--;
-            poller->dirty = TRUE;
+            poller->dirty = true;
             return rpollable;
         }
     }
@@ -287,9 +287,9 @@ VALUE rb_czmq_poller_writables(VALUE obj)
 
 static VALUE rb_czmq_poller_set_verbose(VALUE obj, VALUE level)
 {
-    Bool vlevel;
+    bool vlevel;
     ZmqGetPoller(obj);
-    vlevel = (level == Qtrue) ? TRUE : FALSE;
+    vlevel = (level == Qtrue) ? true : false;
     poller->verbose = vlevel;
     return Qnil;
 }

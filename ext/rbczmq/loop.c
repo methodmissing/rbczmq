@@ -19,7 +19,7 @@ static VALUE rb_czmq_callback0(VALUE *args)
 ZMQ_NOINLINE static int rb_czmq_loop_started_callback(ZMQ_UNUSED zloop_t *loop, ZMQ_UNUSED zmq_pollitem_t *item, void *arg)
 {
     zmq_loop_wrapper *loop_wrapper = arg;
-    loop_wrapper->running = TRUE;
+    loop_wrapper->running = true;
     return 0;
 }
 
@@ -32,7 +32,7 @@ ZMQ_NOINLINE static int rb_czmq_loop_started_callback(ZMQ_UNUSED zloop_t *loop, 
 ZMQ_NOINLINE static int rb_czmq_loop_breaker_callback(ZMQ_UNUSED zloop_t *loop, ZMQ_UNUSED zmq_pollitem_t *item, void *arg)
 {
     zmq_loop_wrapper *loop_wrapper = arg;
-    loop_wrapper->running = FALSE;
+    loop_wrapper->running = false;
     return -1;
 }
 
@@ -72,7 +72,7 @@ ZMQ_NOINLINE static int rb_czmq_loop_timer_callback(zloop_t *loop, ZMQ_UNUSED zm
     int rc;
     VALUE args[3];
     ZmqGetTimer((VALUE)cb);
-    if (timer->cancelled == TRUE) {
+    if (timer->cancelled == true) {
        zloop_timer_end(loop, (void *)cb);
        return 0;
     }
@@ -163,8 +163,8 @@ static VALUE rb_czmq_loop_new(VALUE loop)
     lp->loop = zloop_new();
     ZmqAssertObjOnAlloc(lp->loop, lp);
     lp->flags = 0;
-    lp->running = FALSE;
-    lp->verbose = FALSE;
+    lp->running = false;
+    lp->verbose = false;
     rb_obj_call_init(loop, 0, NULL);
     return loop;
 }
@@ -209,7 +209,7 @@ static VALUE rb_czmq_loop_start(VALUE obj)
 static VALUE rb_czmq_loop_running_p(VALUE obj)
 {
     ZmqGetLoop(obj);
-    return (loop->running == TRUE) ? Qtrue : Qfalse;
+    return (loop->running == true) ? Qtrue : Qfalse;
 }
 
 /*
@@ -238,7 +238,7 @@ static void rb_czmq_loop_stop0(zmq_loop_wrapper *loop)
 static VALUE rb_czmq_loop_stop(VALUE obj)
 {
     ZmqGetLoop(obj);
-    if (loop->running == FALSE) rb_raise(rb_eZmqError, "event loop not running!");
+    if (loop->running == false) rb_raise(rb_eZmqError, "event loop not running!");
     rb_czmq_loop_stop0(loop);
     return Qnil;
 }
@@ -278,9 +278,9 @@ static VALUE rb_czmq_loop_destroy(VALUE obj)
 
 static VALUE rb_czmq_loop_set_verbose(VALUE obj, VALUE level)
 {
-    Bool vlevel;
+    bool vlevel;
     ZmqGetLoop(obj);
-    vlevel = (level == Qtrue) ? TRUE : FALSE;
+    vlevel = (level == Qtrue) ? true : false;
     zloop_set_verbose(loop->loop, vlevel);
     loop->verbose = vlevel;
     return Qnil;
@@ -309,7 +309,7 @@ static VALUE rb_czmq_loop_register(VALUE obj, VALUE pollable)
     rc = zloop_poller(loop->loop, pollitem->item, rb_czmq_loop_pollitem_callback, (void *)pollitem);
     ZmqAssert(rc);
     /* Let pollable be verbose if loop is verbose */
-    if (loop->verbose == TRUE) rb_czmq_pollitem_set_verbose(pollable, Qtrue);
+    if (loop->verbose == true) rb_czmq_pollitem_set_verbose(pollable, Qtrue);
     return Qtrue;
 }
 

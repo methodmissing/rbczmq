@@ -46,7 +46,7 @@ rb_encoding *binary_encoding;
 
 static VALUE rb_czmq_m_interrupted_p(ZMQ_UNUSED VALUE obj)
 {
-    return (zctx_interrupted == TRUE) ? Qtrue : Qfalse;
+    return (zctx_interrupted == true) ? Qtrue : Qfalse;
 }
 
 /*

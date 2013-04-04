@@ -13,7 +13,7 @@ typedef struct {
     zctx_t *ctx;
     void *socket;
     int flags;
-    Bool verbose;
+    bool verbose;
     int state;
 #ifndef HAVE_RB_THREAD_BLOCKING_REGION
     zlist_t *str_buffer;
@@ -106,20 +106,20 @@ void rb_czmq_free_sock_gc(void *ptr);
 struct nogvl_send_args {
     zmq_sock_wrapper *socket;
     const char *msg;
-    Bool read;
+    bool read;
 };
 
 struct nogvl_send_frame_args {
     zmq_sock_wrapper *socket;
     zframe_t *frame;
     int flags;
-    Bool read;
+    bool read;
 };
 
 struct nogvl_send_message_args {
     zmq_sock_wrapper *socket;
     zmsg_t *message;
-    Bool read;
+    bool read;
 };
 
 struct nogvl_recv_args {

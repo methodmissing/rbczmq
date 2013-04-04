@@ -229,10 +229,10 @@ VALUE rb_czmq_pollitem_handler_equals(VALUE obj, VALUE handler)
 
 VALUE rb_czmq_pollitem_set_verbose(VALUE obj, VALUE level)
 {
-    Bool vlevel;
+    bool vlevel;
     zmq_sock_wrapper *sock = NULL;
     ZmqGetPollitem(obj);
-    vlevel = (level == Qtrue) ? TRUE : FALSE;
+    vlevel = (level == Qtrue) ? true : false;
     if (rb_obj_is_kind_of(pollitem->socket, rb_cZmqSocket)) {
         GetZmqSocket(pollitem->socket);
         sock->verbose = vlevel;

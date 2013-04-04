@@ -7,8 +7,8 @@ typedef struct {
     VALUE writables;
     zmq_pollitem_t *pollset;
     int poll_size;
-    Bool dirty;
-    Bool verbose;
+    bool dirty;
+    bool verbose;
 } zmq_poll_wrapper;
 
 #define ZmqAssertPoller(obj) ZmqAssertType(obj, rb_cZmqPoller, "ZMQ::Poller")

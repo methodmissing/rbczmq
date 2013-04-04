@@ -6,8 +6,8 @@
 typedef struct {
     zloop_t  *loop;
     int flags;
-    Bool verbose;
-    Bool running;
+    bool verbose;
+    bool running;
 } zmq_loop_wrapper;
 
 #define ZmqAssertLoop(obj) ZmqAssertType(obj, rb_cZmqLoop, "ZMQ::Loop")

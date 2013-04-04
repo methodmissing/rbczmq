@@ -232,7 +232,7 @@ static VALUE rb_czmq_frame_data_equals_p(VALUE obj, VALUE data)
 {
     ZmqGetFrame(obj);
     Check_Type(data, T_STRING);
-    return (zframe_streq(frame, RSTRING_PTR(data)) == TRUE) ? Qtrue : Qfalse;
+    return (zframe_streq(frame, RSTRING_PTR(data)) == true) ? Qtrue : Qfalse;
 }
 
 /*

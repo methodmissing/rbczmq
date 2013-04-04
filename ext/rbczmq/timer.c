@@ -49,7 +49,7 @@ VALUE rb_czmq_timer_s_new(int argc, VALUE *argv, VALUE timer)
     Check_Type(times, T_FIXNUM);
     timer_delay = (size_t)(((TYPE(delay) == T_FIXNUM) ? FIX2LONG(delay) : RFLOAT_VALUE(delay)) * 1000); 
     timer = Data_Make_Struct(rb_cZmqTimer, zmq_timer_wrapper, rb_czmq_mark_timer, rb_czmq_free_timer_gc, tr);
-    tr->cancelled = FALSE;
+    tr->cancelled = false;
     tr->delay = timer_delay;
     tr->times = FIX2INT(times);
     tr->callback = callback;
@@ -72,7 +72,7 @@ VALUE rb_czmq_timer_s_new(int argc, VALUE *argv, VALUE timer)
 static VALUE rb_czmq_timer_fire(VALUE obj, VALUE args)
 {
     ZmqGetTimer(obj);
-    if (timer->cancelled == TRUE) rb_raise(rb_eZmqError, "cannot fire timer, already cancelled!");
+    if (timer->cancelled == true) rb_raise(rb_eZmqError, "cannot fire timer, already cancelled!");
     return rb_apply(timer->callback, intern_call, args); 
 }
 
@@ -91,7 +91,7 @@ static VALUE rb_czmq_timer_fire(VALUE obj, VALUE args)
 static VALUE rb_czmq_timer_cancel(VALUE obj)
 {
     ZmqGetTimer(obj);
-    timer->cancelled = TRUE;
+    timer->cancelled = true;
     return Qnil; 
 }
 

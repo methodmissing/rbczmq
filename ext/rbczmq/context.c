@@ -301,7 +301,7 @@ static VALUE rb_czmq_ctx_socket(VALUE obj, VALUE type)
 #endif
     sock->flags = 0;
     sock->ctx = ctx->ctx;
-    sock->verbose = FALSE;
+    sock->verbose = false;
     sock->state = ZMQ_SOCKET_PENDING;
     sock->endpoints = rb_ary_new();
     sock->thread = rb_thread_current();

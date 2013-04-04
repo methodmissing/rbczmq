@@ -289,10 +289,10 @@ static VALUE rb_czmq_socket_connect(VALUE obj, VALUE endpoint)
 
 static VALUE rb_czmq_socket_set_verbose(VALUE obj, VALUE level)
 {
-    Bool vlevel;
+    bool vlevel;
     zmq_sock_wrapper *sock = NULL;
     GetZmqSocket(obj);
-    vlevel = (level == Qtrue) ? TRUE : FALSE;
+    vlevel = (level == Qtrue) ? true : false;
     sock->verbose = vlevel;
     return Qnil;
 }
@@ -310,10 +310,10 @@ static VALUE rb_czmq_nogvl_zstr_send(void *ptr)
 #ifdef HAVE_RB_THREAD_BLOCKING_REGION
     return (VALUE)zstr_send(socket->socket, args->msg);
 #else
-    if (rb_thread_alone()) return (VALUE)zstr_send_nowait(socket->socket, args->msg);
+    if (rb_thread_alone()) return (VALUE)zstr_send(socket->socket, args->msg);
 try_writable:
     if ((zsocket_events(socket->socket) & ZMQ_POLLOUT) == ZMQ_POLLOUT) {
-        return (VALUE)zstr_send_nowait(socket->socket, args->msg);
+        return (VALUE)zstr_send(socket->socket, args->msg);
     } else {
         rb_thread_wait_fd(zsocket_fd(socket->socket));
         if (zsocket_sndtimeo(socket->socket) != -1)
