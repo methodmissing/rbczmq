@@ -39,7 +39,7 @@ def check_heads heads = [], fatal = false
   heads.all? { |head| have_header(head) || (abort("could not find header: #{head}") if fatal)}
 end
 
-CZMQ_CFLAGS = []
+CZMQ_CFLAGS = %w(-g)
 
 case RUBY_PLATFORM
 when /mswin32/, /mingw32/, /bccwin32/
