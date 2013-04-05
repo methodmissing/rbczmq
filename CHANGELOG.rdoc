@@ -1,5 +1,8 @@
 = Changelog
 
+== 1.2 (April 5, 2012)
+* Escape czmq CFLAGS
+
 == 1.1 (April 4, 2012)
 * Bump czmq to version 1.4.0
 * Enable debug symbols for czmq in order to track down a GC bug with ZMQ::Message

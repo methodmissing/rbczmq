@@ -112,7 +112,7 @@ end unless File.exist?(lib)
 lib = libs_path + "libczmq.#{LIBEXT}"
 Dir.chdir czmq_path do
   sys "./autogen.sh", "CZMQ autogen failed!" unless File.exist?(czmq_path + 'configure')
-  sys "./configure LDFLAGS=-L#{libs_path} CFLAGS=#{CZMQ_CFLAGS.join(" ")} --prefix=#{dst_path} --with-libzmq=#{dst_path} --disable-shared && make all && make install", "CZMQ compile error!"
+  sys "./configure LDFLAGS=-L#{libs_path} CFLAGS='#{CZMQ_CFLAGS.join(" ")}' --prefix=#{dst_path} --with-libzmq=#{dst_path} --disable-shared && make all && make install", "CZMQ compile error!"
 end unless File.exist?(lib)
 
 dir_config('rbczmq')
