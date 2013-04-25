@@ -10,7 +10,7 @@
     if (!(st_lookup(frames_map, (st_data_t)frame, 0))) rb_raise(rb_eZmqError, "ZMQ::Frame instance %p has been destroyed by the ZMQ framework", (void *)obj);
 
 #define ZmqRegisterFrame(fr) \
-    zframe_freefn((fr), rb_czmq_frame_freed); \
+    zframe_freefn((fr), rb_czmq_frame_freed, NULL); \
     st_insert(frames_map, (st_data_t)(fr), (st_data_t)0);
 
 void rb_czmq_free_frame(zframe_t *frame);

@@ -96,14 +96,26 @@ end
 unless File.directory?(zmq_path) && File.directory?(czmq_path)
   fail "The 'tar' (creates and manipulates streaming archive files) utility is required to extract dependencies" if `which tar`.strip.empty?
   Dir.chdir(vendor_path) do
-    sys "tar xvzf zeromq.tar.gz", "Could not extract the ZeroMQ archive!"
-    sys "tar xvzf czmq.tar.gz", "Could not extract the CZMQ archive!"
+    names = Dir['*mq*.tar.gz'].map { |f| File.basename(f, '.tar.gz') }
+    fail "required files not found: #{names}" unless names.size == 2
+
+    names.each do |name|
+      puts "Extracting #{name}"
+      sys "tar xvzf #{name}.tar.gz", "Could not extract #{name}"
+      puts "Moving #{name} to #{name.split('-').first}"
+      sys "mv #{name} #{name.split('-').first}", "Could not move #{name}"
+    end
   end
 end
 
 # build libzmq
 lib = libs_path + "libzmq.#{LIBEXT}"
 Dir.chdir zmq_path do
+  Dir['../patches/zeromq/*.patch'].sort.each do |patch|
+    puts "applying: #{patch}"
+    sys "patch -p1 < #{patch}", "failed to apply patch: #{patch}"
+  end
+
   sys "./autogen.sh", "ZeroMQ autogen failed!" unless File.exist?(zmq_path + 'configure')
   sys "./configure --prefix=#{dst_path} --without-documentation --enable-shared && make && make install", "ZeroMQ compile error!"
 end unless File.exist?(lib)
@@ -111,6 +123,11 @@ end unless File.exist?(lib)
 # build libczmq
 lib = libs_path + "libczmq.#{LIBEXT}"
 Dir.chdir czmq_path do
+  Dir['../patches/czmq/*.patch'].sort.each do |patch|
+    puts "Applying: #{patch}"
+    sys "patch -p1 < #{patch}", "Failed to apply patch: #{patch}"
+  end
+
   sys "./autogen.sh", "CZMQ autogen failed!" unless File.exist?(czmq_path + 'configure')
   sys "./configure LDFLAGS=-L#{libs_path} CFLAGS='#{CZMQ_CFLAGS.join(" ")}' --prefix=#{dst_path} --with-libzmq=#{dst_path} --disable-shared && make all && make install", "CZMQ compile error!"
 end unless File.exist?(lib)
