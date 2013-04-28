@@ -14,6 +14,8 @@ VALUE rb_cZmqDealerSocket;
 VALUE rb_cZmqRepSocket;
 VALUE rb_cZmqReqSocket;
 VALUE rb_cZmqPairSocket;
+VALUE rb_cZmqXPubSocket;
+VALUE rb_cZmqXSubSocket;
 
 VALUE rb_cZmqFrame;
 VALUE rb_cZmqMessage;
@@ -191,6 +193,8 @@ void Init_rbczmq_ext()
     rb_define_const(rb_mZmq, "ROUTER", INT2NUM(ZMQ_ROUTER));
     rb_define_const(rb_mZmq, "PUSH", INT2NUM(ZMQ_PUSH));
     rb_define_const(rb_mZmq, "PULL", INT2NUM(ZMQ_PULL));
+    rb_define_const(rb_mZmq, "XSUB", INT2NUM(ZMQ_XSUB));
+    rb_define_const(rb_mZmq, "XPUB", INT2NUM(ZMQ_XPUB));
 
     rb_define_const(rb_mZmq, "EFSM", INT2NUM(EFSM));
     rb_define_const(rb_mZmq, "ENOCOMPATPROTO", INT2NUM(ENOCOMPATPROTO));
