@@ -8,7 +8,6 @@ rvm:
   - 1.9.3
   - ruby-head
 script: "bundle exec rake"
-before_install: "sudo apt-get install uuid-dev"
 gemfile:
   - Gemfile
 notifications:
@@ -17,4 +16,3 @@ notifications:
 branches:
   only:
     - master
-    - 3.2
