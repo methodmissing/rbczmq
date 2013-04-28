@@ -1,14 +1,17 @@
 PATH
   remote: .
   specs:
-    rbczmq (1.3)
+    rbczmq (1.4)
 
 GEM
-  remote: http://rubygems.org/
+  remote: https://rubygems.org/
   specs:
+    json (1.7.7)
     rake (10.0.4)
     rake-compiler (0.8.3)
       rake
+    rdoc (4.0.1)
+      json (~> 1.4)
 
 PLATFORMS
   ruby
@@ -17,3 +20,4 @@ DEPENDENCIES
   rake
   rake-compiler (~> 0.8.0)
   rbczmq!
+  rdoc

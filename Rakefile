@@ -8,11 +8,7 @@ ENV["RBXOPT"] = "-Xrbc.db"
 
 require 'rake/extensiontask'
 require 'rake/testtask'
-begin
 require 'rdoc/task'
-rescue LoadError # fallback to older 1.8.7 rubies
-require 'rake/rdoctask'
-end
 
 gemspec = eval(IO.read('rbczmq.gemspec'))
 
