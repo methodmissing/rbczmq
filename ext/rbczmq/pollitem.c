@@ -68,12 +68,11 @@ static VALUE rb_czmq_pollitem_s_new(int argc, VALUE *argv, VALUE obj)
     if (!(evts & ZMQ_POLLIN) && !(evts & ZMQ_POLLOUT))
         rb_raise(rb_eZmqError, "invalid socket event: Only ZMQ::POLLIN and ZMQ::POLLOUT events are supported!");
 
-    /* XXX: Cleanup allocated struct on any failures below */
     obj = Data_Make_Struct(rb_cZmqPollitem, zmq_pollitem_wrapper, rb_czmq_mark_pollitem, rb_czmq_free_pollitem_gc, pollitem);
     pollitem->events = events;
     pollitem->handler = Qnil;
     pollitem->item = ALLOC(zmq_pollitem_t);
-    if (!pollitem->item) rb_memerror();
+    ZmqAssertObjOnAlloc(pollitem->item, pollitem);
     pollitem->item->events = evts;
     if (rb_obj_is_kind_of(pollable, rb_cZmqSocket)) {
        GetZmqSocket(pollable);
