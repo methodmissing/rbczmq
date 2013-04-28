@@ -257,6 +257,10 @@ static inline VALUE rb_czmq_ctx_socket_klass(int socket_type)
                          break;
         case ZMQ_DEALER: return rb_cZmqDealerSocket;
                          break;
+        case ZMQ_XPUB: return rb_cZmqXPubSocket;
+                      break;
+        case ZMQ_XSUB: return rb_cZmqXSubSocket;
+                      break;
         default: rb_raise(rb_eZmqError, "ZMQ socket type %d not supported!", socket_type);
                  break;
     }

@@ -1748,6 +1748,8 @@ void _init_rb_czmq_socket()
     rb_cZmqRepSocket = rb_define_class_under(rb_cZmqSocket, "Rep", rb_cZmqSocket);;
     rb_cZmqReqSocket = rb_define_class_under(rb_cZmqSocket, "Req", rb_cZmqSocket);;
     rb_cZmqPairSocket = rb_define_class_under(rb_cZmqSocket, "Pair", rb_cZmqSocket);;
+    rb_cZmqXPubSocket = rb_define_class_under(rb_cZmqSocket, "XPub", rb_cZmqSocket);
+    rb_cZmqXSubSocket = rb_define_class_under(rb_cZmqSocket, "XSub", rb_cZmqSocket);;
 
     intern_on_connected = rb_intern("on_connected");
     intern_on_connect_delayed = rb_intern("on_connect_delayed");
