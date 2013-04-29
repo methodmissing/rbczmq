@@ -155,6 +155,66 @@ static VALUE rb_czmq_m_interrupted_bang(ZMQ_UNUSED VALUE obj)
     return Qnil;
 }
 
+/*
+ * :nodoc:
+ *  Runs the ZeroMQ proxy with the GVL released.
+ *
+*/
+static VALUE rb_czmq_m_proxy_nogvl(void* args)
+{
+	void** sockets = (void**)args;
+	return (VALUE)zmq_proxy(sockets[0], sockets[1], sockets[2]);
+}
+
+/*
+ *  call-seq:
+ *     ZMQ.proxy(frontend, backend, capture = nil) => nil
+ *
+ * Run the ZMQ proxy method echoing messages received from front end socket to back end and vice versa,
+ * copying messages to the capture socket if provided. This method does not return unless the application
+ * is interrupted with a signal.
+ *
+ * @see http://api.zeromq.org/3-2:zmq-proxy
+ *
+ * === Examples
+ *     context = ZMQ::Context.new
+ *     frontend = context.socket(ZMQ::ROUTER)
+ *     frontend.bind("tcp://*:5555")
+ *     backend = context.socket(ZMQ::DEALER)
+ *     backend.bind("tcp://*:5556")
+ *     ZMQ.proxy(frontend, backend) => -1 when interrupted
+*/
+static VALUE rb_czmq_m_proxy(int argc, VALUE *argv, ZMQ_UNUSED VALUE klass)
+{
+    zmq_sock_wrapper *sock = NULL;
+    VALUE frontend, backend, capture;
+    void *sockets[3];
+    int rc;
+
+    rb_scan_args(argc, argv, "21", &frontend, &backend, &capture);
+
+    GetZmqSocket(frontend);
+    sockets[0] = sock->socket;
+
+    GetZmqSocket(backend);
+    sockets[1] = sock->socket;
+
+    if (!NIL_P(capture))
+    {
+        GetZmqSocket(capture);
+        sockets[2] = sock->socket;
+    }
+    else
+    {
+        sockets[2] = NULL;
+    }
+
+    rc = (int)rb_thread_blocking_region(rb_czmq_m_proxy_nogvl, (void *)sockets, RUBY_UBF_IO, 0);
+
+    // int result = zmq_proxy(frontend_socket, backend_socket, capture_socket);
+    return INT2NUM(rc);
+}
+
 void Init_rbczmq_ext()
 {
     frames_map = st_init_numtable();
@@ -179,6 +239,7 @@ void Init_rbczmq_ext()
     rb_define_module_function(rb_mZmq, "error", rb_czmq_m_error, 0);
     rb_define_module_function(rb_mZmq, "errno", rb_czmq_m_errno, 0);
     rb_define_module_function(rb_mZmq, "interrupted!", rb_czmq_m_interrupted_bang, 0);
+    rb_define_module_function(rb_mZmq, "proxy", rb_czmq_m_proxy, -1);
 
     rb_define_const(rb_mZmq, "POLLIN", INT2NUM(ZMQ_POLLIN));
     rb_define_const(rb_mZmq, "POLLOUT", INT2NUM(ZMQ_POLLOUT));
