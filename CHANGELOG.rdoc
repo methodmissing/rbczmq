@@ -1,5 +1,9 @@
 = Changelog
 
+== 1.5 (April 29, 2013)
+* Add support for XSUB and XPUB socket types (Matt Connolly)
+* Introduce a ZMQ.proxy API (Matt Connolly)
+
 == 1.4 (April 27, 2013)
 * Ships with release libzmq and czmq tarballs - removes autotools dependency (James Tucker)
 
