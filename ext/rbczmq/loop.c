@@ -62,25 +62,63 @@ ZMQ_NOINLINE static int rb_czmq_callback(zloop_t *loop, VALUE *args)
     return 0;
 }
 
+/* data structure used to pass czmq parameters across to callbacks with ruby GVL */
+struct _rb_czmq_callback_invocation
+{
+	int result;
+	zloop_t *loop;
+	VALUE* args;
+	
+	// used by poll item callback
+	zmq_pollitem_t *item;
+	void* arg;
+};
+
 /*
  * :nodoc:
  *  Low level callback for when timers registered with the reactor fires. This calls back into the Ruby VM.
  *
+ * This function is called from rb_thread_call_with_gvl and is executed with the ruby GVL held.
 */
-ZMQ_NOINLINE static int rb_czmq_loop_timer_callback(zloop_t *loop, ZMQ_UNUSED zmq_pollitem_t *item, void *cb)
+ZMQ_NOINLINE static void* rb_czmq_loop_timer_callback_with_gvl(void* data)
 {
-    int rc;
+	struct _rb_czmq_callback_invocation* invocation = (struct _rb_czmq_callback_invocation*)data;
+	zloop_t* loop = invocation->loop;
+	zmq_pollitem_t *item = invocation->item;
+	void* cb = invocation->arg;
+
     VALUE args[3];
     ZmqGetTimer((VALUE)cb);
     if (timer->cancelled == true) {
-       zloop_timer_end(loop, (void *)cb);
-       return 0;
-    }
-    args[0] = (VALUE)cb;
-    args[1] = intern_call;
-    args[2] = Qnil;
-    rc = rb_czmq_callback(loop, args);
-    return rc;
+		zloop_timer_end(loop, (void *)cb);
+		invocation->result = 0;
+    } else {
+	    args[0] = (VALUE)cb;
+	    args[1] = intern_call;
+	    args[2] = Qnil;
+	
+	    invocation->result = rb_czmq_callback(loop, args);
+	}
+    return NULL;
+}
+
+
+/*
+ * :nodoc:
+ *  Low level callback for when timers registered with the reactor fires. This calls back into the Ruby VM.
+ *
+ * This is the CZMQ callback, which grabs the ruby GVL and calls the with GVL callback above.
+*/
+ZMQ_NOINLINE static int rb_czmq_loop_timer_callback(zloop_t *loop, ZMQ_UNUSED zmq_pollitem_t *item, void *cb)
+{
+	struct _rb_czmq_callback_invocation invocation;
+	invocation.result = -1;
+	invocation.loop = loop;
+	invocation.item = item;
+	invocation.args = NULL;
+	invocation.arg = cb;
+	rb_thread_call_with_gvl(rb_czmq_loop_timer_callback_with_gvl, &invocation);
+	return invocation.result;
 }
 
 /*
@@ -88,9 +126,15 @@ ZMQ_NOINLINE static int rb_czmq_loop_timer_callback(zloop_t *loop, ZMQ_UNUSED zm
  *  Low level callback for handling socket activity. This calls back into the Ruby VM. We special case ZMQ_POLLERR
  *  by invoking the error callback on the handler registered for this socket.
  *
+ * This function is called from rb_thread_call_with_gvl and is executed with the ruby GVL held.
 */
-ZMQ_NOINLINE static int rb_czmq_loop_pollitem_callback(zloop_t *loop, zmq_pollitem_t *item, void *arg)
+ZMQ_NOINLINE static void* rb_czmq_loop_pollitem_callback_with_gvl(void* data)
 {
+	struct _rb_czmq_callback_invocation *invocation = (struct _rb_czmq_callback_invocation *)data;
+	zloop_t *loop = invocation->loop;
+	zmq_pollitem_t *item = invocation->item;
+	void *arg = invocation->arg;
+	
     int ret_r = 0;
     int ret_w = 0;
     int ret_e = 0;
@@ -111,8 +155,31 @@ ZMQ_NOINLINE static int rb_czmq_loop_pollitem_callback(zloop_t *loop, zmq_pollit
         args[2] = rb_exc_new2(rb_eZmqError, zmq_strerror(zmq_errno()));
         ret_e = rb_czmq_callback(loop, args);
     }
-    if (ret_r == -1 || ret_w == -1 || ret_e == -1) return -1;
-    return 0;
+    if (ret_r == -1 || ret_w == -1 || ret_e == -1) {
+		invocation->result = -1;
+	} else {
+		invocation->result = 0;
+	}
+	return NULL;
+}
+
+/*
+ * :nodoc:
+ *  Low level callback for handling socket activity. This calls back into the Ruby VM. We special case ZMQ_POLLERR
+ *  by invoking the error callback on the handler registered for this socket.
+ *
+ * This is the CZMQ callback, which grabs the ruby GVL and calls the with GVL callback above.
+*/
+ZMQ_NOINLINE static int rb_czmq_loop_pollitem_callback(zloop_t *loop, zmq_pollitem_t *item, void *arg)
+{
+	struct _rb_czmq_callback_invocation invocation;
+	invocation.result = -1;
+	invocation.loop = loop;
+	invocation.item = item;
+	invocation.arg = arg;
+	invocation.args = NULL;
+	rb_thread_call_with_gvl(rb_czmq_loop_pollitem_callback_with_gvl, (void*)&invocation);
+	return invocation.result;
 }
 
 static void rb_czmq_loop_stop0(zmq_loop_wrapper *loop);
@@ -170,13 +237,44 @@ static VALUE rb_czmq_loop_new(VALUE loop)
 }
 
 /*
+ * :nodoc:
+ *  Run the zloop without holding the GVL. 
+ *
+*/
+static VALUE rb_czmq_loop_start_nogvl(void *ptr)
+{
+	zmq_loop_wrapper *loop = (zmq_loop_wrapper *)ptr;
+	return (VALUE)zloop_start(loop->loop);
+}
+
+/*
+ * :nodoc:
+ * unblocking function: called by ruby when our zloop is running without
+ * gvl to tell it to stop and return back to ruby.
+*/
+static void rb_czmq_loop_start_ubf(void* arg)
+{
+	// this flag is set when an interrupt / signal would kill
+	// an application using czmq and allows loops to end gracefully.
+	// This will terminate all loops and pools in all threads.
+	
+	// Without setting this, the CZMQ loop does not terminate when
+	// the user hits CTRL-C.
+	zctx_interrupted = TRUE;
+	
+	// do same as 
+    zmq_loop_wrapper *loop_wrapper = arg;
+    loop_wrapper->running = false;
+}
+
+/*
  *  call-seq:
  *     loop.start    =>  Fixnum
  *
  *  Creates a new reactor instance and blocks the caller until the process is interrupted, the context terminates or the
  *  loop's explicitly stopped via callback. Returns 0 if interrupted and -1 when stopped via a handler.
- *
  * === Examples
+ *
  *     loop = ZMQ::Loop.new    =>   ZMQ::Loop
  *     loop.start    =>   Fixnum
  *
@@ -189,7 +287,9 @@ static VALUE rb_czmq_loop_start(VALUE obj)
     ZmqGetLoop(obj);
     THREAD_PASS;
     zloop_timer(loop->loop, 1, 1, rb_czmq_loop_started_callback, loop);
-    rc = zloop_start(loop->loop);
+
+    rc = (int)rb_thread_call_without_gvl(rb_czmq_loop_start_nogvl, (void *)loop, rb_czmq_loop_start_ubf, (void*)loop);
+	
     if (rc > 0) rb_raise(rb_eZmqError, "internal event loop error!");
     return INT2NUM(rc);
 }
