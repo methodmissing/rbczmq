@@ -254,15 +254,15 @@ static VALUE rb_czmq_loop_start_nogvl(void *ptr)
 */
 static void rb_czmq_loop_start_ubf(void* arg)
 {
-	// this flag is set when an interrupt / signal would kill
-	// an application using czmq and allows loops to end gracefully.
-	// This will terminate all loops and pools in all threads.
-	
-	// Without setting this, the CZMQ loop does not terminate when
-	// the user hits CTRL-C.
-	zctx_interrupted = TRUE;
-	
-	// do same as 
+    // this flag is set when an interrupt / signal would kill
+    // an application using czmq and allows loops to end gracefully.
+    // This will terminate all loops and pools in all threads.
+
+    // Without setting this, the CZMQ loop does not terminate when
+    // the user hits CTRL-C.
+    zctx_interrupted = true;
+
+    // do same as 
     zmq_loop_wrapper *loop_wrapper = arg;
     loop_wrapper->running = false;
 }
