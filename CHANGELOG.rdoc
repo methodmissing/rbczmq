@@ -1,5 +1,10 @@
 = Changelog
 
+== 1.6 (May 2, 2013 )
+* Bump czmq to 1.4.0
+* Bump zeromq to 3.2.3
+* Make ZMQ::Loop#start thread-safe (Matt Connolly)
+
 == 1.5 (April 29, 2013)
 * Add support for XSUB and XPUB socket types (Matt Connolly)
 * Introduce a ZMQ.proxy API (Matt Connolly)
