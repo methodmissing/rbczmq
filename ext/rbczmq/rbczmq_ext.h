@@ -67,6 +67,7 @@ extern VALUE rb_cZmqLoop;
 extern VALUE rb_cZmqTimer;
 extern VALUE rb_cZmqPoller;
 extern VALUE rb_cZmqPollitem;
+extern VALUE rb_cZmqBeacon;
 
 extern st_table *frames_map;
 
@@ -83,6 +84,7 @@ extern VALUE intern_error;
 #include "timer.h"
 #include "poller.h"
 #include "pollitem.h"
+#include "beacon.h"
 
 static inline char *rb_czmq_formatted_current_time()
 {
