@@ -16,7 +16,8 @@ class TestZmqBeacon < ZmqTestCase
 
   def test_hostname
     beacon = ZMQ::Beacon.new(80000)
-    assert_equal "127.0.0.1", beacon.hostname
+    hosts = Socket.ip_address_list.map(&:ip_address)
+    assert hosts.include?(beacon.hostname)
   ensure
     beacon.destroy
   end
