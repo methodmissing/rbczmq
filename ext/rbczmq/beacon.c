@@ -4,6 +4,7 @@ static void rb_czmq_free_beacon_gc(void *ptr)
 {
     zmq_beacon_wrapper *beacon = (zmq_beacon_wrapper *)ptr;
     if (beacon) {
+        zbeacon_destroy(&beacon->beacon);
         xfree(beacon);
     }
 }
