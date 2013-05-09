@@ -8,6 +8,7 @@
 #define ZMQ_SOCKET_PENDING 0x01
 #define ZMQ_SOCKET_BOUND 0x02
 #define ZMQ_SOCKET_CONNECTED 0x04
+#define ZMQ_SOCKET_DISCONNECTED 0x08
 
 typedef struct {
     zctx_t *ctx;

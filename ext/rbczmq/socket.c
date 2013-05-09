@@ -173,7 +173,7 @@ static VALUE rb_czmq_socket_fd(VALUE obj)
 {
     zmq_sock_wrapper *sock = NULL;
     GetZmqSocket(obj);
-    if (sock->state == ZMQ_SOCKET_PENDING) return INT2NUM(-1);
+    if (sock->state == ZMQ_SOCKET_PENDING || sock->state == ZMQ_SOCKET_DISCONNECTED) return INT2NUM(-1);
     return INT2NUM(zsocket_fd(sock->socket));
 }
 
@@ -271,6 +271,56 @@ static VALUE rb_czmq_socket_connect(VALUE obj, VALUE endpoint)
         zclock_log ("I: %s socket %p: connected \"%s\"", zsocket_type_str(sock->socket), obj, StringValueCStr(endpoint));
     sock->state = ZMQ_SOCKET_CONNECTED;
     rb_ary_push(sock->endpoints, rb_str_new4(endpoint));
+    return Qtrue;
+}
+
+/*
+ * :nodoc:
+ *  Disconnects from an endpoint while the GIL is released.
+ *
+*/
+VALUE rb_czmq_nogvl_socket_disconnect(void *ptr)
+{
+    int rc;
+    struct nogvl_conn_args *args = ptr;
+    errno = 0;
+    zmq_sock_wrapper *socket = args->socket;
+    rc = zsocket_disconnect(socket->socket, args->endpoint);
+    return (VALUE)rc;
+}
+
+/*
+ *  call-seq:
+ *     sock.disconnect("tcp://localhost:3456")   =>  boolean
+ *
+ *  Attempts to disconnect from a given endpoint.
+ *
+ * === Examples
+ *     ctx = ZMQ::Context.new
+ *     rep = ctx.socket(:REP)
+ *     port = rep.bind("tcp://localhost:*")    =>  5432
+ *     req = ctx.socket(:REQ)
+ *     req.connect("tcp://localhost:#{port}")   => true
+ *     req.disconnect("tcp://localhost:#{port}")   => true
+ *
+*/
+
+static VALUE rb_czmq_socket_disconnect(VALUE obj, VALUE endpoint)
+{
+    struct nogvl_conn_args args;
+    int rc;
+    zmq_sock_wrapper *sock = NULL;
+    GetZmqSocket(obj);
+    ZmqSockGuardCrossThread(sock);
+    Check_Type(endpoint, T_STRING);
+    args.socket = sock;
+    args.endpoint = StringValueCStr(endpoint);
+    rc = (int)rb_thread_blocking_region(rb_czmq_nogvl_socket_disconnect, (void *)&args, RUBY_UBF_IO, 0);
+    ZmqAssert(rc);
+    if (sock->verbose)
+        zclock_log ("I: %s socket %p: disconnected \"%s\"", zsocket_type_str(sock->socket), obj, StringValueCStr(endpoint));
+    sock->state = ZMQ_SOCKET_DISCONNECTED;
+    rb_ary_delete(sock->endpoints, endpoint);
     return Qtrue;
 }
 
@@ -1765,12 +1815,14 @@ void _init_rb_czmq_socket()
     rb_define_const(rb_cZmqSocket, "PENDING", INT2NUM(ZMQ_SOCKET_PENDING));
     rb_define_const(rb_cZmqSocket, "BOUND", INT2NUM(ZMQ_SOCKET_BOUND));
     rb_define_const(rb_cZmqSocket, "CONNECTED", INT2NUM(ZMQ_SOCKET_CONNECTED));
+    rb_define_const(rb_cZmqSocket, "DISCONNECTED", INT2NUM(ZMQ_SOCKET_DISCONNECTED));
 
     rb_define_method(rb_cZmqSocket, "close", rb_czmq_socket_close, 0);
     rb_define_method(rb_cZmqSocket, "endpoints", rb_czmq_socket_endpoints, 0);
     rb_define_method(rb_cZmqSocket, "state", rb_czmq_socket_state, 0);
     rb_define_method(rb_cZmqSocket, "real_bind", rb_czmq_socket_bind, 1);
     rb_define_method(rb_cZmqSocket, "real_connect", rb_czmq_socket_connect, 1);
+    rb_define_method(rb_cZmqSocket, "disconnect", rb_czmq_socket_disconnect, 1);
     rb_define_method(rb_cZmqSocket, "fd", rb_czmq_socket_fd, 0);
     rb_define_alias(rb_cZmqSocket, "to_i", "fd");
     rb_define_method(rb_cZmqSocket, "verbose=", rb_czmq_socket_set_verbose, 1);

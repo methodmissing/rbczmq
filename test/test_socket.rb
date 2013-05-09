@@ -15,6 +15,20 @@ class TestZmqSocket < ZmqTestCase
     ctx.destroy
   end
 
+  def test_disconnect
+    ctx = ZMQ::Context.new
+    rep = ctx.socket(:REP)
+    endpoint = "inproc://test.socket-send-timeout"
+    rep.bind(endpoint)
+    req = ctx.connect(:REQ, endpoint)
+    assert req.disconnect(endpoint)
+    assert_raises Errno::EINVAL do
+      req.disconnect "invalid"
+    end
+  ensure
+    ctx.destroy
+  end
+
   def test_send_timeout
     ctx = ZMQ::Context.new
     rep = ctx.socket(:REP)
