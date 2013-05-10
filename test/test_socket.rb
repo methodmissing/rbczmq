@@ -445,6 +445,25 @@ class TestZmqSocket < ZmqTestCase
     sock.recovery_ivl = 20
     assert_equal 20, sock.recovery_ivl
 
+    assert_equal -1, sock.maxmsgsize
+    sock.maxmsgsize = 20
+    assert_equal 20, sock.maxmsgsize
+
+    assert_equal 1, sock.multicast_hops
+    sock.multicast_hops = 20
+    assert_equal 20, sock.multicast_hops
+
+    assert sock.ipv4only?
+    sock.ipv4only = false
+    assert !sock.ipv4only?
+
+    sock.delay_attach_on_connect = true
+    sock.router_mandatory = true
+    sock.router_raw = true
+
+    xpub = ctx.socket(:XPUB)
+    xpub.xpub_verbose = true
+
     assert_equal 0, sock.sndbuf
     sock.sndbuf = 1000
     assert_equal 1000, sock.sndbuf

@@ -853,89 +853,6 @@ static VALUE rb_czmq_socket_recv_message(VALUE obj)
     return rb_czmq_alloc_message(message);
 }
 
-#if ZMQ_VERSION_MAJOR == 2
-
-/*
- *  call-seq:
- *     sock.hwm =>  Fixnum
- *
- *  Returns the socket HWM (High Water Mark) value.
- *
- * === Examples
- *     ctx = ZMQ::Context.new
- *     sock = ctx.socket(:REP)
- *     sock.hwm  =>  0
- *
-*/
-
-static VALUE rb_czmq_socket_opt_hwm(VALUE obj)
-{
-    zmq_sock_wrapper *sock = NULL;
-    GetZmqSocket(obj);
-    return INT2NUM(zsocket_hwm(sock->socket));
-}
-
-/*
- *  call-seq:
- *     sock.hwm = 100 =>  nil
- *
- *  Sets the socket HWM (High Water Mark() value.
- *
- * === Examples
- *     ctx = ZMQ::Context.new
- *     sock = ctx.socket(:REP)
- *     sock.hwm = 100  =>  nil
- *     sock.hwm  =>  100
- *
-*/
-
-static VALUE rb_czmq_socket_set_opt_hwm(VALUE obj, VALUE value)
-{
-    zmq_sock_wrapper *sock = NULL;
-    ZmqSetSockOpt(obj, zsocket_set_hwm, "HWM", value);
-}
-
-/*
- *  call-seq:
- *     sock.swap =>  Fixnum
- *
- *  Returns the socket SWAP value.
- *
- * === Examples
- *     ctx = ZMQ::Context.new
- *     sock = ctx.socket(:REP)
- *     sock.swap  =>  0
- *
-*/
-
-static VALUE rb_czmq_socket_opt_swap(VALUE obj)
-{
-    zmq_sock_wrapper *sock = NULL;
-    GetZmqSocket(obj);
-    return INT2NUM(zsocket_swap(sock->socket));
-}
-
-/*
- *  call-seq:
- *     sock.swap = 100 =>  nil
- *
- *  Sets the socket SWAP value.
- *
- * === Examples
- *     ctx = ZMQ::Context.new
- *     sock = ctx.socket(:REP)
- *     sock.swap = 100  =>  nil
- *
-*/
-
-static VALUE rb_czmq_socket_set_opt_swap(VALUE obj, VALUE value)
-{
-    zmq_sock_wrapper *sock = NULL;
-    ZmqSetSockOpt(obj, zsocket_set_swap, "SWAP", value);
-}
-#endif
-
-#if ZMQ_VERSION_MAJOR == 3
 /*
  *  call-seq:
  *     sock.sndhwm =>  Fixnum
@@ -1015,7 +932,6 @@ static VALUE rb_czmq_socket_set_opt_rcvhwm(VALUE obj, VALUE value)
     zmq_sock_wrapper *sock = NULL;
     ZmqSetSockOpt(obj, zsocket_set_rcvhwm, "RCVHWM", value);
 }
-#endif
 
 /*
  *  call-seq:
@@ -1134,85 +1050,200 @@ static VALUE rb_czmq_socket_set_opt_recovery_ivl(VALUE obj, VALUE value)
     ZmqSetSockOpt(obj, zsocket_set_recovery_ivl, "RECOVERY_IVL", value);
 }
 
-#if ZMQ_VERSION_MAJOR == 2
 /*
  *  call-seq:
- *     sock.recovery_ivl_msec =>  Fixnum
+ *     sock.maxmsgsize =>  Fixnum
  *
- *  Returns the socket RECOVERY_IVL_MSEC value.
+ *  Returns the socket MAXMSGSIZE value.
  *
  * === Examples
  *     ctx = ZMQ::Context.new
  *     sock = ctx.socket(:REP)
- *     sock.recovery_ivl_msec  =>  -1
+ *     sock.maxmsgsize  =>  10
  *
 */
 
-static VALUE rb_czmq_socket_opt_recovery_ivl_msec(VALUE obj)
+static VALUE rb_czmq_socket_opt_maxmsgsize(VALUE obj)
 {
     zmq_sock_wrapper *sock = NULL;
     GetZmqSocket(obj);
-    return INT2NUM(zsocket_recovery_ivl_msec(sock->socket));
+    return INT2NUM(zsocket_maxmsgsize(sock->socket));
 }
 
 /*
  *  call-seq:
- *     sock.recovery_ivl_msec = 20 =>  nil
+ *     sock.maxmsgsize = 20 =>  nil
  *
- *  Sets the socket RECOVERY_IVL_MSEC value.
+ *  Sets the socket MAXMSGSIZE value.
  *
  * === Examples
  *     ctx = ZMQ::Context.new
  *     sock = ctx.socket(:REP)
- *     sock.recovery_ivl_msec = 20  =>  nil
+ *     sock.maxmsgsize = 20  =>  nil
  *
 */
 
-static VALUE rb_czmq_socket_set_opt_recovery_ivl_msec(VALUE obj, VALUE value)
+static VALUE rb_czmq_socket_set_opt_maxmsgsize(VALUE obj, VALUE value)
 {
     zmq_sock_wrapper *sock = NULL;
-    ZmqSetSockOpt(obj, zsocket_set_recovery_ivl_msec, "RECOVERY_IVL_MSEC", value);
+    ZmqSetSockOpt(obj, zsocket_set_maxmsgsize, "MAXMSGSIZE", value);
 }
 
 /*
  *  call-seq:
- *     sock.mcast_loop? =>  boolean
+ *     sock.multicast_hops =>  Fixnum
  *
- *  Returns the socket MCAST_LOOP status.
+ *  Returns the socket MULTICAST_HOPS value.
  *
  * === Examples
  *     ctx = ZMQ::Context.new
  *     sock = ctx.socket(:REP)
- *     sock.mcast_loop?  =>  true
+ *     sock.multicast_hops  =>  10
  *
 */
 
-static VALUE rb_czmq_socket_opt_mcast_loop(VALUE obj)
+static VALUE rb_czmq_socket_opt_multicast_hops(VALUE obj)
 {
     zmq_sock_wrapper *sock = NULL;
     GetZmqSocket(obj);
-    return (zsocket_mcast_loop(sock->socket) == 1) ? Qtrue : Qfalse;
+    return INT2NUM(zsocket_multicast_hops(sock->socket));
 }
 
 /*
  *  call-seq:
- *     sock.mcast_loop = false =>  nil
+ *     sock.multicast_hops = 20 =>  nil
  *
- *  Sets the socket MCAST_LOOP value.
+ *  Sets the socket MULTICAST_HOPS value.
  *
  * === Examples
  *     ctx = ZMQ::Context.new
  *     sock = ctx.socket(:REP)
- *     sock.mcast_loop = false  =>  nil
+ *     sock.multicast_hops = 20  =>  nil
  *
 */
 
-static VALUE rb_czmq_socket_set_opt_mcast_loop(VALUE obj, VALUE value)
+static VALUE rb_czmq_socket_set_opt_multicast_hops(VALUE obj, VALUE value)
 {
     zmq_sock_wrapper *sock = NULL;
-    ZmqSetBooleanSockOpt(obj, zsocket_set_mcast_loop, "MCAST_LOOP", value);
+    ZmqSetSockOpt(obj, zsocket_set_multicast_hops, "MULTICAST_HOPS", value);
 }
-#endif
+
+/*
+ *  call-seq:
+ *     sock.ipv4only =>  Boolean
+ *
+ *  Returns the socket IPV4ONLY value.
+ *
+ * === Examples
+ *     ctx = ZMQ::Context.new
+ *     sock = ctx.socket(:REP)
+ *     sock.ipv4only  =>  false
+ *
+*/
+
+static VALUE rb_czmq_socket_opt_ipv4only(VALUE obj)
+{
+    int ipv4only;
+    zmq_sock_wrapper *sock = NULL;
+    GetZmqSocket(obj);
+    ipv4only = zsocket_ipv4only(sock->socket);
+    return (ipv4only == 0 ? Qfalse : Qtrue);
+}
+
+/*
+ *  call-seq:
+ *     sock.ipv4only = true =>  nil
+ *
+ *  Sets the socket IPV4ONLY value.
+ *
+ * === Examples
+ *     ctx = ZMQ::Context.new
+ *     sock = ctx.socket(:REP)
+ *     sock.ipv4only = true  =>  nil
+ *
+*/
+
+static VALUE rb_czmq_socket_set_opt_ipv4only(VALUE obj, VALUE value)
+{
+    zmq_sock_wrapper *sock = NULL;
+    ZmqSetBooleanSockOpt(obj, zsocket_set_ipv4only, "IPV4ONLY", value);
+}
+
+/*
+ *  call-seq:
+ *     sock.delay_attach_on_connect = true =>  nil
+ *
+ *  Sets the socket DELAY_ATTACH_ON_CONNECT value.
+ *
+ * === Examples
+ *     ctx = ZMQ::Context.new
+ *     sock = ctx.socket(:REP)
+ *     sock.delay_attach_on_connect = true  =>  nil
+ *
+*/
+
+static VALUE rb_czmq_socket_set_opt_delay_attach_on_connect(VALUE obj, VALUE value)
+{
+    zmq_sock_wrapper *sock = NULL;
+    ZmqSetBooleanSockOpt(obj, zsocket_set_delay_attach_on_connect, "DELAY_ATTACH_ON_CONNECT", value);
+}
+
+/*
+ *  call-seq:
+ *     sock.router_mandatory = true =>  nil
+ *
+ *  Sets the socket ROUTER_MANDATORY value.
+ *
+ * === Examples
+ *     ctx = ZMQ::Context.new
+ *     sock = ctx.socket(:REP)
+ *     sock.router_mandatory = true  =>  nil
+ *
+*/
+
+static VALUE rb_czmq_socket_set_opt_router_mandatory(VALUE obj, VALUE value)
+{
+    zmq_sock_wrapper *sock = NULL;
+    ZmqSetBooleanSockOpt(obj, zsocket_set_router_mandatory, "ROUTER_MANDATORY", value);
+}
+
+/*
+ *  call-seq:
+ *     sock.router_raw= true =>  nil
+ *
+ *  Sets the socket ROUTER_RAW value.
+ *
+ * === Examples
+ *     ctx = ZMQ::Context.new
+ *     sock = ctx.socket(:REP)
+ *     sock.router_raw = true  =>  nil
+ *
+*/
+
+static VALUE rb_czmq_socket_set_opt_router_raw(VALUE obj, VALUE value)
+{
+    zmq_sock_wrapper *sock = NULL;
+    ZmqSetBooleanSockOpt(obj, zsocket_set_router_raw, "ROUTER_RAW", value);
+}
+
+/*
+ *  call-seq:
+ *     sock.xpub_verbose = true =>  nil
+ *
+ *  Sets the socket XPUB_VERBOSE value.
+ *
+ * === Examples
+ *     ctx = ZMQ::Context.new
+ *     sock = ctx.socket(:REP)
+ *     sock.xpub_verbose = true  =>  nil
+ *
+*/
+
+static VALUE rb_czmq_socket_set_opt_xpub_verbose(VALUE obj, VALUE value)
+{
+    zmq_sock_wrapper *sock = NULL;
+    ZmqSetBooleanSockOpt(obj, zsocket_set_xpub_verbose, "XPUB_VERBOSE", value);
+}
 
 /*
  *  call-seq:
@@ -1637,27 +1668,6 @@ static VALUE rb_czmq_socket_set_opt_sndtimeo(VALUE obj, VALUE value)
     ZmqSetSockOpt(obj, zsocket_set_sndtimeo, "SNDTIMEO", value);
 }
 
-#if defined (ZMQ_ROUTER_RAW)
-/*
- *  call-seq:
- *     sock.raw = true =>  nil
- *
- *  Define this as a RAW socket - applicable to ROUTER sockets only.
- *
- * === Examples
- *     ctx = ZMQ::Context.new
- *     sock = ctx.socket(:ROUTER)
- *     sock.router = 200  =>  nil
- *
-*/
-
-static VALUE rb_czmq_socket_set_opt_raw(VALUE obj, VALUE value)
-{
-    zmq_sock_wrapper *sock = NULL;
-    ZmqSetBooleanSockOpt(obj, zsocket_set_router_raw, "ROUTER_RAW", value);
-}
-#endif
-
 /*
  * :nodoc:
  *  Receives a monitoring event message while the GIL is released.
@@ -1836,34 +1846,26 @@ void _init_rb_czmq_socket()
     rb_define_method(rb_cZmqSocket, "recv_frame_nonblock", rb_czmq_socket_recv_frame_nonblock, 0);
     rb_define_method(rb_cZmqSocket, "recv_message", rb_czmq_socket_recv_message, 0);
 
-#if ZMQ_VERSION_MAJOR == 2
-    rb_define_method(rb_cZmqSocket, "swap", rb_czmq_socket_opt_swap, 0);
-    rb_define_method(rb_cZmqSocket, "swap=", rb_czmq_socket_set_opt_swap, 1);
-    rb_define_method(rb_cZmqSocket, "recovery_ivl_msec", rb_czmq_socket_opt_recovery_ivl_msec, 0);
-    rb_define_method(rb_cZmqSocket, "recovery_ivl_msec=", rb_czmq_socket_set_opt_recovery_ivl_msec, 1);
-    rb_define_method(rb_cZmqSocket, "mcast_loop?", rb_czmq_socket_opt_mcast_loop, 0);
-    rb_define_method(rb_cZmqSocket, "mcast_loop=", rb_czmq_socket_set_opt_mcast_loop, 1);
-    rb_define_method(rb_cZmqSocket, "hwm", rb_czmq_socket_opt_hwm, 0);
-    rb_define_method(rb_cZmqSocket, "hwm=", rb_czmq_socket_set_opt_hwm, 1);
-#endif
-
-#if ZMQ_VERSION_MAJOR == 3
     rb_define_method(rb_cZmqSocket, "sndhwm", rb_czmq_socket_opt_sndhwm, 0);
     rb_define_method(rb_cZmqSocket, "sndhwm=", rb_czmq_socket_set_opt_sndhwm, 1);
     rb_define_method(rb_cZmqSocket, "rcvhwm", rb_czmq_socket_opt_rcvhwm, 0);
     rb_define_method(rb_cZmqSocket, "rcvhwm=", rb_czmq_socket_set_opt_rcvhwm, 1);
-
-#if defined (ZMQ_ROUTER_RAW)
-    rb_define_method(rb_cZmqSocket, "raw=", rb_czmq_socket_set_opt_raw, 1);
-#endif
-#endif
-
     rb_define_method(rb_cZmqSocket, "affinity", rb_czmq_socket_opt_affinity, 0);
     rb_define_method(rb_cZmqSocket, "affinity=", rb_czmq_socket_set_opt_affinity, 1);
     rb_define_method(rb_cZmqSocket, "rate", rb_czmq_socket_opt_rate, 0);
     rb_define_method(rb_cZmqSocket, "rate=", rb_czmq_socket_set_opt_rate, 1);
     rb_define_method(rb_cZmqSocket, "recovery_ivl", rb_czmq_socket_opt_recovery_ivl, 0);
     rb_define_method(rb_cZmqSocket, "recovery_ivl=", rb_czmq_socket_set_opt_recovery_ivl, 1);
+    rb_define_method(rb_cZmqSocket, "maxmsgsize", rb_czmq_socket_opt_maxmsgsize, 0);
+    rb_define_method(rb_cZmqSocket, "maxmsgsize=", rb_czmq_socket_set_opt_maxmsgsize, 1);
+    rb_define_method(rb_cZmqSocket, "multicast_hops", rb_czmq_socket_opt_multicast_hops, 0);
+    rb_define_method(rb_cZmqSocket, "multicast_hops=", rb_czmq_socket_set_opt_multicast_hops, 1);
+    rb_define_method(rb_cZmqSocket, "ipv4only?", rb_czmq_socket_opt_ipv4only, 0);
+    rb_define_method(rb_cZmqSocket, "ipv4only=", rb_czmq_socket_set_opt_ipv4only, 1);
+    rb_define_method(rb_cZmqSocket, "delay_attach_on_connect=", rb_czmq_socket_set_opt_delay_attach_on_connect, 1);
+    rb_define_method(rb_cZmqSocket, "router_mandatory=", rb_czmq_socket_set_opt_router_mandatory, 1);
+    rb_define_method(rb_cZmqSocket, "router_raw=", rb_czmq_socket_set_opt_router_raw, 1);
+    rb_define_method(rb_cZmqSocket, "xpub_verbose=", rb_czmq_socket_set_opt_xpub_verbose, 1);
     rb_define_method(rb_cZmqSocket, "sndbuf", rb_czmq_socket_opt_sndbuf, 0);
     rb_define_method(rb_cZmqSocket, "sndbuf=", rb_czmq_socket_set_opt_sndbuf, 1);
     rb_define_method(rb_cZmqSocket, "rcvbuf", rb_czmq_socket_opt_rcvbuf, 0);
