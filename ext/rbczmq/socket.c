@@ -854,6 +854,46 @@ static VALUE rb_czmq_socket_recv_message(VALUE obj)
 }
 
 /*
+ * :nodoc:
+ *  Poll for input while the GIL is released.
+ *
+*/
+static VALUE rb_czmq_nogvl_poll(void *ptr)
+{
+    struct nogvl_socket_poll_args *args = ptr;
+    zmq_sock_wrapper *socket = args->socket;
+    return (VALUE)zsocket_poll(socket->socket, args->timeout);
+}
+
+/*
+ *  call-seq:
+ *     sock.poll(100) =>  Boolean
+ *
+ *  Poll for input events on the socket. Returns true if there is input, otherwise false.
+ *
+ * === Examples
+ *     ctx = ZMQ::Context.new
+ *     sock = ctx.socket(:REP)
+ *     sock.bind("inproc://test")
+ *     sock.poll(100)  =>  true
+ *
+*/
+
+static VALUE rb_czmq_socket_poll(VALUE obj, VALUE timeout)
+{
+    bool readable;
+    struct nogvl_socket_poll_args args;
+    zmq_sock_wrapper *sock = NULL;
+    GetZmqSocket(obj);
+    Check_Type(timeout, T_FIXNUM);
+    ZmqSockGuardCrossThread(sock);
+    args.socket = sock;
+    args.timeout = FIX2INT(timeout);
+    readable = (bool)rb_thread_blocking_region(rb_czmq_nogvl_poll, (void *)&args, RUBY_UBF_IO, 0);
+    return (readable == true) ? Qtrue : Qfalse;
+}
+
+/*
  *  call-seq:
  *     sock.sndhwm =>  Fixnum
  *
@@ -1845,6 +1885,7 @@ void _init_rb_czmq_socket()
     rb_define_method(rb_cZmqSocket, "recv_frame", rb_czmq_socket_recv_frame, 0);
     rb_define_method(rb_cZmqSocket, "recv_frame_nonblock", rb_czmq_socket_recv_frame_nonblock, 0);
     rb_define_method(rb_cZmqSocket, "recv_message", rb_czmq_socket_recv_message, 0);
+    rb_define_method(rb_cZmqSocket, "poll", rb_czmq_socket_poll, 1);
 
     rb_define_method(rb_cZmqSocket, "sndhwm", rb_czmq_socket_opt_sndhwm, 0);
     rb_define_method(rb_cZmqSocket, "sndhwm=", rb_czmq_socket_set_opt_sndhwm, 1);

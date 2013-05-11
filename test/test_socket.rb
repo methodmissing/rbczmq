@@ -391,6 +391,19 @@ class TestZmqSocket < ZmqTestCase
     ctx.destroy
   end
 
+  def test_poll
+    ctx = ZMQ::Context.new
+    rep = ctx.socket(:PAIR)
+    rep.bind("inproc://test.socket-poll")
+    assert !rep.poll(100)
+    req = ctx.socket(:PAIR)
+    req.connect("inproc://test.socket-poll")
+    req.send("test")
+    assert rep.poll(100)
+  ensure
+    ctx.destroy
+  end
+
   def test_send_receive_message
     ctx = ZMQ::Context.new
     rep = ctx.socket(:PAIR)

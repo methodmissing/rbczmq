@@ -127,6 +127,11 @@ struct nogvl_recv_args {
     zmq_sock_wrapper *socket;
 };
 
+struct nogvl_socket_poll_args {
+    zmq_sock_wrapper *socket;
+    int timeout;
+};
+
 struct nogvl_monitor_recv_args {
     void *socket;
     zmq_msg_t msg;
