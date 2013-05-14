@@ -1836,25 +1836,6 @@ static VALUE rb_czmq_socket_monitor(int argc, VALUE *argv, VALUE obj)
     }
 }
 
-static VALUE rb_czmq_socket_announce(VALUE obj, VALUE bcn, VALUE transmit)
-{
-    zmq_sock_wrapper *sock = NULL;
-    GetZmqSocket(obj);
-    GetZmqBeacon(bcn);
-    Check_Type(transmit, T_STRING);
-    zbeacon_publish(beacon->beacon, (byte *)StringValueCStr(transmit), RSTRING_LEN(transmit));
-    return Qnil;
-}
-
-static VALUE rb_czmq_socket_lookup(VALUE obj, VALUE bcn, VALUE filter)
-{
-    zmq_sock_wrapper *sock = NULL;
-    GetZmqSocket(obj);
-    GetZmqBeacon(bcn);
-    Check_Type(filter, T_STRING);
-    return Qnil;
-}
-
 void _init_rb_czmq_socket()
 {
     rb_cZmqSocket = rb_define_class_under(rb_mZmq, "Socket", rb_cObject);
@@ -1905,8 +1886,6 @@ void _init_rb_czmq_socket()
     rb_define_method(rb_cZmqSocket, "recv_frame_nonblock", rb_czmq_socket_recv_frame_nonblock, 0);
     rb_define_method(rb_cZmqSocket, "recv_message", rb_czmq_socket_recv_message, 0);
     rb_define_method(rb_cZmqSocket, "poll", rb_czmq_socket_poll, 1);
-    rb_define_method(rb_cZmqSocket, "announce", rb_czmq_socket_announce, 2);
-    rb_define_method(rb_cZmqSocket, "lookup", rb_czmq_socket_lookup, 2);
 
     rb_define_method(rb_cZmqSocket, "sndhwm", rb_czmq_socket_opt_sndhwm, 0);
     rb_define_method(rb_cZmqSocket, "sndhwm=", rb_czmq_socket_set_opt_sndhwm, 1);

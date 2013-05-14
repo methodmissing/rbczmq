@@ -248,10 +248,15 @@ static VALUE rb_czmq_beacon_subscribe(VALUE obj, VALUE filter)
 {
     struct nogvl_beacon_subscribe_args args;
     GetZmqBeacon(obj);
-    Check_Type(filter, T_STRING);
     args.beacon = beacon;
-    args.filter = StringValueCStr(filter);
-    args.length = RSTRING_LEN(filter);
+    if (NIL_P(filter)) {
+        args.filter = NULL;
+        args.length = 0;
+    } else {
+        Check_Type(filter, T_STRING);
+        args.filter = StringValueCStr(filter);
+        args.length = RSTRING_LEN(filter);
+    }
     rb_thread_blocking_region(rb_czmq_nogvl_subscribe, (void *)&args, RUBY_UBF_IO, 0);
     return Qnil;
 }
@@ -287,8 +292,13 @@ static VALUE rb_czmq_beacon_unsubscribe(VALUE obj)
 
 static VALUE rb_czmq_beacon_pipe(VALUE obj)
 {
+    zmq_sock_wrapper *sock = NULL;
+    VALUE socket;
     GetZmqBeacon(obj);
-    return rb_czmq_socket_alloc(Qnil, NULL, zbeacon_pipe(beacon->beacon));
+    socket = rb_czmq_socket_alloc(Qnil, NULL, zbeacon_pipe(beacon->beacon));
+    GetZmqSocket(socket);
+    sock->state = ZMQ_SOCKET_BOUND;
+    return socket;
 }
 
 void _init_rb_czmq_beacon()
