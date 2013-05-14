@@ -68,4 +68,26 @@ class TestZmqBeacon < ZmqTestCase
   ensure
     beacon.destroy
   end
+
+  def test_announce_lookup
+    ctx = ZMQ::Context.new
+    address = "tcp://127.0.0.1:90000"
+    rep = ctx.bind(:REP, address)
+    service_beacon = ZMQ::Beacon.new(80000)
+    service_beacon.publish(address)
+    sleep(0.5)
+    client_beacon = ZMQ::Beacon.new(80000)
+    client_beacon.subscribe("tcp")
+    client_beacon.pipe.rcvtimeo = 1000
+    sender_address = client_beacon.pipe.recv
+    client_address = client_beacon.pipe.recv
+    assert_equal address, client_address
+    req = ctx.connect(:REQ, client_address)
+    req.send "ping"
+    assert_equal "ping", rep.recv
+  ensure
+    ctx.destroy
+    service_beacon.destroy
+    client_beacon.destroy
+  end
 end
