@@ -266,6 +266,33 @@ static inline VALUE rb_czmq_ctx_socket_klass(int socket_type)
     }
 }
 
+VALUE rb_czmq_socket_alloc(VALUE context, zctx_t *ctx, void *s)
+{
+    VALUE socket;
+    zmq_sock_wrapper *sock = NULL;
+    socket = Data_Make_Struct(rb_czmq_ctx_socket_klass(zsocket_type(s)), zmq_sock_wrapper, rb_czmq_mark_sock, rb_czmq_free_sock_gc, sock);
+    sock->socket = s;
+    ZmqAssertObjOnAlloc(sock->socket, sock);
+#ifndef HAVE_RB_THREAD_BLOCKING_REGION
+    sock->str_buffer = zlist_new();
+    sock->frame_buffer = zlist_new();
+    sock->msg_buffer = zlist_new();
+#endif
+    sock->flags = 0;
+    sock->ctx = ctx;
+    sock->verbose = false;
+    sock->state = ZMQ_SOCKET_PENDING;
+    sock->endpoints = rb_ary_new();
+    sock->thread = rb_thread_current();
+    sock->context = context;
+    sock->monitor_endpoint = Qnil;
+    sock->monitor_handler = Qnil;
+    sock->monitor_thread = Qnil;
+    sock->beacon = Qnil;
+    rb_obj_call_init(socket, 0, NULL);
+    return socket;
+}
+
 /*
  *  call-seq:
  *     ctx.socket(:PUSH)    =>  ZMQ::Socket
@@ -287,34 +314,14 @@ static VALUE rb_czmq_ctx_socket(VALUE obj, VALUE type)
     VALUE socket;
     int socket_type;
     struct nogvl_socket_args args;
-    zmq_sock_wrapper *sock = NULL;
     errno = 0;
     ZmqGetContext(obj);
     if (TYPE(type) != T_FIXNUM && TYPE(type) != T_SYMBOL) rb_raise(rb_eTypeError, "wrong socket type %s (expected Fixnum or Symbol)", RSTRING_PTR(rb_obj_as_string(type)));
     socket_type = FIX2INT((SYMBOL_P(type)) ? rb_const_get_at(rb_mZmq, rb_to_id(type)) : type);
 
-    socket = Data_Make_Struct(rb_czmq_ctx_socket_klass(socket_type), zmq_sock_wrapper, rb_czmq_mark_sock, rb_czmq_free_sock_gc, sock);
     args.ctx = ctx->ctx;
     args.type = socket_type;
-    sock->socket = (void*)rb_thread_blocking_region(rb_czmq_nogvl_socket_new, (void *)&args, RUBY_UBF_IO, 0);
-    ZmqAssertObjOnAlloc(sock->socket, sock);
-#ifndef HAVE_RB_THREAD_BLOCKING_REGION
-    sock->str_buffer = zlist_new();
-    sock->frame_buffer = zlist_new();
-    sock->msg_buffer = zlist_new();
-#endif
-    sock->flags = 0;
-    sock->ctx = ctx->ctx;
-    sock->verbose = false;
-    sock->state = ZMQ_SOCKET_PENDING;
-    sock->endpoints = rb_ary_new();
-    sock->thread = rb_thread_current();
-    sock->context = obj;
-    sock->monitor_endpoint = Qnil;
-    sock->monitor_handler = Qnil;
-    sock->monitor_thread = Qnil;
-    rb_obj_call_init(socket, 0, NULL);
-    return socket;
+    return rb_czmq_socket_alloc(obj, ctx->ctx, (void*)rb_thread_blocking_region(rb_czmq_nogvl_socket_new, (void *)&args, RUBY_UBF_IO, 0));
 }
 
 void _init_rb_czmq_context()

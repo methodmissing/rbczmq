@@ -287,11 +287,8 @@ static VALUE rb_czmq_beacon_unsubscribe(VALUE obj)
 
 static VALUE rb_czmq_beacon_pipe(VALUE obj)
 {
-    void *socket;
     GetZmqBeacon(obj);
-    socket = zbeacon_pipe(beacon->beacon);
-    // TODO: Return ZMQ::Socket instance + plug in with GC
-    return Qnil;
+    return rb_czmq_socket_alloc(Qnil, NULL, zbeacon_pipe(beacon->beacon));
 }
 
 void _init_rb_czmq_beacon()

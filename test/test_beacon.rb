@@ -60,4 +60,12 @@ class TestZmqBeacon < ZmqTestCase
   ensure
     beacon.destroy
   end
+
+  def test_pipe
+    beacon = ZMQ::Beacon.new(80000)
+    assert_instance_of ZMQ::Socket::Pair, beacon.pipe
+    GC.start # check GC cycle with "detached" socket
+  ensure
+    beacon.destroy
+  end
 end

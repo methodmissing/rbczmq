@@ -21,6 +21,8 @@ struct nogvl_socket_args {
     int type;
 };
 
+VALUE rb_czmq_socket_alloc(VALUE context, zctx_t *ctx, void *s);
+
 void _init_rb_czmq_context();
 
 #endif
