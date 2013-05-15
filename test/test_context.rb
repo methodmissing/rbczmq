@@ -59,21 +59,6 @@ class TestZmqContext < ZmqTestCase
     ctx.destroy
   end
 
-  def test_hwm
-    ctx = ZMQ::Context.new
-    assert_raises TypeError do
-      ctx.hwm = :invalid
-    end
-    ctx.hwm = 10
-    assert_raises ZMQ::Error do
-      ctx.hwm = -2
-    end
-    # deprecated method
-    assert_equal 0, ctx.hwm
-  ensure
-    ctx.destroy
-  end
-
   def test_bind_connect
     ctx = ZMQ::Context.new
     rep = ctx.bind(:REP, "inproc://test.bind_connect")
