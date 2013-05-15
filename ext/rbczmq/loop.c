@@ -285,7 +285,7 @@ static VALUE rb_czmq_loop_start(VALUE obj)
     int rc;
     errno = 0;
     ZmqGetLoop(obj);
-    THREAD_PASS;
+    rb_thread_schedule();
     zloop_timer(loop->loop, 1, 1, rb_czmq_loop_started_callback, loop);
 
     rc = (int)rb_thread_blocking_region(rb_czmq_loop_start_nogvl, (void *)loop, rb_czmq_loop_start_ubf, (void*)loop);

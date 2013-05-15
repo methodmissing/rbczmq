@@ -1638,7 +1638,7 @@ static VALUE rb_czmq_socket_monitor_thread(void *arg)
     rc = zmq_connect (s, StringValueCStr(sock->monitor_endpoint));
     assert (rc == 0);
 
-    THREAD_PASS;
+    rb_thread_schedule();
 
     while (1) {
         args.socket = s;

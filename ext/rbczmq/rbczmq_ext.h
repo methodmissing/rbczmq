@@ -16,6 +16,12 @@
 
 #include "rbczmq_prelude.h"
 
+#include <ruby/encoding.h>
+#include <ruby/io.h>
+extern rb_encoding *binary_encoding;
+#define ZmqEncode(str) rb_enc_associate(str, binary_encoding)
+
+
 #define ZmqRaiseSysError() { \
         printf("Sys error location: %s:%d\n", __FILE__,__LINE__); \
         rb_sys_fail(zmq_strerror(zmq_errno())); \
