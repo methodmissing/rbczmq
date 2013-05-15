@@ -1,5 +1,12 @@
 = Changelog
 
+== 1.6.1 (May 15, 2013 )
+* Bump czmq to 1.4.1
+* Introduce ZMQ::Beacon for service announcement and discovery
+* Implement ZMQ::Socket#poll
+* Implement ZMQ::Socket#disconnect
+* Drop support for ZeroMQ 2.x
+
 == 1.6 (May 2, 2013 )
 * Bump czmq to 1.4.0
 * Bump zeromq to 3.2.3
