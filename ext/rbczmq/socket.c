@@ -1713,7 +1713,6 @@ static VALUE rb_czmq_socket_monitor(int argc, VALUE *argv, VALUE obj)
         sock->monitor_endpoint = endpoint;
         sock->monitor_handler = handler;
         sock->monitor_thread = rb_thread_create(rb_czmq_socket_monitor_thread, (void*)sock);
-        rb_thread_run(sock->monitor_thread);
         return Qtrue;
     } else {
         return Qfalse;
