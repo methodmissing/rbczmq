@@ -16,11 +16,6 @@ typedef struct {
     int flags;
     bool verbose;
     int state;
-#ifndef HAVE_RB_THREAD_BLOCKING_REGION
-    zlist_t *str_buffer;
-    zlist_t *frame_buffer;
-    zlist_t *msg_buffer;
-#endif
     VALUE endpoints;
     VALUE thread;
     VALUE context;

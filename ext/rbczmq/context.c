@@ -227,11 +227,6 @@ VALUE rb_czmq_socket_alloc(VALUE context, zctx_t *ctx, void *s)
     socket = Data_Make_Struct(rb_czmq_ctx_socket_klass(zsocket_type(s)), zmq_sock_wrapper, rb_czmq_mark_sock, rb_czmq_free_sock_gc, sock);
     sock->socket = s;
     ZmqAssertObjOnAlloc(sock->socket, sock);
-#ifndef HAVE_RB_THREAD_BLOCKING_REGION
-    sock->str_buffer = zlist_new();
-    sock->frame_buffer = zlist_new();
-    sock->msg_buffer = zlist_new();
-#endif
     sock->flags = 0;
     sock->ctx = ctx;
     sock->verbose = false;
