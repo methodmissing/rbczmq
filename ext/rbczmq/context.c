@@ -288,7 +288,6 @@ VALUE rb_czmq_socket_alloc(VALUE context, zctx_t *ctx, void *s)
     sock->monitor_endpoint = Qnil;
     sock->monitor_handler = Qnil;
     sock->monitor_thread = Qnil;
-    sock->beacon = Qnil;
     rb_obj_call_init(socket, 0, NULL);
     return socket;
 }
@@ -311,7 +310,6 @@ VALUE rb_czmq_socket_alloc(VALUE context, zctx_t *ctx, void *s)
 
 static VALUE rb_czmq_ctx_socket(VALUE obj, VALUE type)
 {
-    VALUE socket;
     int socket_type;
     struct nogvl_socket_args args;
     errno = 0;
