@@ -32,9 +32,7 @@ VALUE intern_readable;
 VALUE intern_writable;
 VALUE intern_error;
 
-#ifdef HAVE_RUBY_ENCODING_H
 rb_encoding *binary_encoding;
-#endif
 
 /*
  *  call-seq:
@@ -225,9 +223,7 @@ void Init_rbczmq_ext()
     intern_writable = rb_intern("on_writable");
     intern_error = rb_intern("on_error");
 
-#ifdef HAVE_RUBY_ENCODING_H
     binary_encoding = rb_enc_find("binary");
-#endif
 
     rb_mZmq = rb_define_module("ZMQ");
 
