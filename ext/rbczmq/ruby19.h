@@ -9,7 +9,4 @@ extern rb_encoding *binary_encoding;
 #define THREAD_PASS rb_thread_schedule();
 #endif
 
-#define TRAP_BEG
-#define TRAP_END
-
 #endif

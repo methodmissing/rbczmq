@@ -14,9 +14,6 @@ extern rb_encoding *binary_encoding;
 #define ZmqEncode(str) str
 #endif
 
-#define TRAP_BEG
-#define TRAP_END
-
 #define ZMQ_DEFAULT_SOCKET_TIMEOUT Qnil
 
 #define THREAD_PASS rb_thread_schedule();
