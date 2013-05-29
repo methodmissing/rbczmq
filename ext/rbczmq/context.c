@@ -140,7 +140,6 @@ static VALUE rb_czmq_ctx_set_iothreads(VALUE obj, VALUE threads)
     ZmqGetContext(obj);
     Check_Type(threads, T_FIXNUM);
     iothreads = FIX2INT(threads);
-    if (iothreads > 1) rb_warn("You probably don't want to spawn more than 1 I/O thread per ZMQ context.");
     if (iothreads < 0) rb_raise(rb_eZmqError, "negative I/O threads count is not supported.");
     zctx_set_iothreads(ctx->ctx, iothreads);
     if (zmq_errno() == EINVAL) ZmqRaiseSysError();
