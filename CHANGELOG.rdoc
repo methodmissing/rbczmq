@@ -1,5 +1,8 @@
 = Changelog
 
+== 1.6.2 (May 29, 2013 )
+* Fix compiler and Ruby warnings
+
 == 1.6.1 (May 15, 2013 )
 * Bump czmq to 1.4.1
 * Introduce ZMQ::Beacon for service announcement and discovery
