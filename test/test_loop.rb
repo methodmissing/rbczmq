@@ -175,7 +175,7 @@ class TestZmqLoop < ZmqTestCase
 
   def test_register_ruby_sockets
     server = TCPServer.new("127.0.0.1", 0)
-    f, port, host, addr = server.addr
+    port = server.addr[1]
     client = TCPSocket.new("127.0.0.1", port)
     s = server.accept
     ret = ZMQ::Loop.run do

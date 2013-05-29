@@ -71,7 +71,7 @@ class TestZmqPoller < ZmqTestCase
   def test_poll_ruby_sockets
     poller = ZMQ::Poller.new
     server = TCPServer.new("127.0.0.1", 0)
-    f, port, host, addr = server.addr
+    port = server.addr[1]
     client = TCPSocket.new("127.0.0.1", port)
     s = server.accept
 

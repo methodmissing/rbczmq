@@ -187,7 +187,7 @@ static VALUE rb_czmq_beacon_publish(VALUE obj, VALUE transmit)
     Check_Type(transmit, T_STRING);
     args.beacon = beacon;
     args.transmit = StringValueCStr(transmit);
-    args.length = RSTRING_LEN(transmit);
+    args.length = (int)RSTRING_LEN(transmit);
     rb_thread_blocking_region(rb_czmq_nogvl_publish, (void *)&args, RUBY_UBF_IO, 0);
     return Qnil;
 }
@@ -255,7 +255,7 @@ static VALUE rb_czmq_beacon_subscribe(VALUE obj, VALUE filter)
     } else {
         Check_Type(filter, T_STRING);
         args.filter = StringValueCStr(filter);
-        args.length = RSTRING_LEN(filter);
+        args.length = (int)RSTRING_LEN(filter);
     }
     rb_thread_blocking_region(rb_czmq_nogvl_subscribe, (void *)&args, RUBY_UBF_IO, 0);
     return Qnil;

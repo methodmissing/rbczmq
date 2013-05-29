@@ -135,7 +135,7 @@ class TestZmqSocket < ZmqTestCase
   def test_connect
     ctx = ZMQ::Context.new
     rep = ctx.socket(:PAIR)
-    port = rep.bind("inproc://test.socket-connect")
+    rep.bind("inproc://test.socket-connect")
     req = ctx.socket(:PAIR)
     assert(req.state & ZMQ::Socket::PENDING)
     req.connect("inproc://test.socket-connect")
@@ -148,7 +148,7 @@ class TestZmqSocket < ZmqTestCase
   def test_connect_all
     ctx = ZMQ::Context.new
     rep = ctx.socket(:PAIR)
-    port = rep.bind("inproc://test.socket-connect")
+    rep.bind("inproc://test.socket-connect")
     req = ctx.socket(:PAIR)
     assert(req.state & ZMQ::Socket::PENDING)
     req.connect_all("inproc://test.socket-connect")
@@ -458,7 +458,7 @@ class TestZmqSocket < ZmqTestCase
     sock.recovery_ivl = 20
     assert_equal 20, sock.recovery_ivl
 
-    assert_equal -1, sock.maxmsgsize
+    assert_equal(-1, sock.maxmsgsize)
     sock.maxmsgsize = 20
     assert_equal 20, sock.maxmsgsize
 
@@ -501,11 +501,11 @@ class TestZmqSocket < ZmqTestCase
     sock.reconnect_ivl_max = 5
     assert_equal 5, sock.reconnect_ivl_max
 
-    assert_equal -1, sock.rcvtimeo
+    assert_equal(-1, sock.rcvtimeo)
     sock.rcvtimeo = 200
     assert_equal 200, sock.rcvtimeo
 
-    assert_equal -1, sock.sndtimeo
+    assert_equal(-1, sock.sndtimeo)
     sock.sndtimeo = 200
     assert_equal 200, sock.sndtimeo
 

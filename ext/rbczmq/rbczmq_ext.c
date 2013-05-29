@@ -178,9 +178,9 @@ static VALUE rb_czmq_m_proxy_nogvl(void* args)
  * === Examples
  *     context = ZMQ::Context.new
  *     frontend = context.socket(ZMQ::ROUTER)
- *     frontend.bind("tcp://*:5555")
+ *     frontend.bind("tcp://127.0.0.1:5555")
  *     backend = context.socket(ZMQ::DEALER)
- *     backend.bind("tcp://*:5556")
+ *     backend.bind("tcp://127.0.0.1:5556")
  *     ZMQ.proxy(frontend, backend) => -1 when interrupted
 */
 static VALUE rb_czmq_m_proxy(int argc, VALUE *argv, ZMQ_UNUSED VALUE klass)

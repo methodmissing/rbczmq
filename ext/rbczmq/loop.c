@@ -84,7 +84,6 @@ ZMQ_NOINLINE static void* rb_czmq_loop_timer_callback_with_gvl(void* data)
 {
 	struct _rb_czmq_callback_invocation* invocation = (struct _rb_czmq_callback_invocation*)data;
 	zloop_t* loop = invocation->loop;
-	zmq_pollitem_t *item = invocation->item;
 	void* cb = invocation->arg;
 
     VALUE args[3];
