@@ -355,7 +355,7 @@ static VALUE rb_czmq_nogvl_zstr_send(void *ptr)
     struct nogvl_send_args *args = ptr;
     errno = 0;
     zmq_sock_wrapper *socket = args->socket;
-    return (VALUE)zstr_send(socket->socket, args->msg);
+    return (VALUE)zstr_send(socket->socket, "%s", args->msg);
 }
 
 /*
@@ -368,7 +368,7 @@ static VALUE rb_czmq_nogvl_zstr_sendm(void *ptr)
     struct nogvl_send_args *args = ptr;
     errno = 0;
     zmq_sock_wrapper *socket = args->socket;
-    return (VALUE)zstr_sendm(socket->socket, args->msg);
+    return (VALUE)zstr_sendm(socket->socket, "%s", args->msg);
 }
 
 /*

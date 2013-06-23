@@ -263,7 +263,19 @@ class TestZmqSocket < ZmqTestCase
   ensure
     ctx.destroy
   end
-
+  
+  def test_send_receive_with_percent_in_string
+    ctx = ZMQ::Context.new
+    rep = ctx.socket(:PAIR)
+    rep.bind("inproc://test.socket-send_receive")
+    req = ctx.socket(:PAIR)
+    req.connect("inproc://test.socket-send_receive")
+    assert req.send("hi %d")
+    assert_equal "hi %d", rep.recv
+  ensure
+    ctx.destroy
+  end
+  
   def test_verbose
     ctx = ZMQ::Context.new
     rep = ctx.socket(:PAIR)
