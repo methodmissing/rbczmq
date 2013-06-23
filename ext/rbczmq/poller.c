@@ -155,7 +155,10 @@ VALUE rb_czmq_poller_poll(int argc, VALUE *argv, VALUE obj)
     args.timeout = (long)timeout;
 
     rc = (int)rb_thread_blocking_region(rb_czmq_nogvl_poll, (void *)&args, RUBY_UBF_IO, 0);
-    ZmqAssert(rc);
+    /* only call ZmqAssert if return code is less than zero since zmq_poll returns the number of pollers on success */
+    if (rc < 0) {
+        ZmqAssert(rc);
+    }
     if (rc == 0) {
         rb_ary_clear(poller->readables);
         rb_ary_clear(poller->writables);
