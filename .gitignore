@@ -15,8 +15,6 @@ true/*
 *.gem
 doc/*
 .DS_Store
-ext/zeromq
-ext/czmq
 pkg
 scratch
 ext/rbczmq/dst
