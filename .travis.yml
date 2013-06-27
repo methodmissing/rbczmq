@@ -1,8 +1,8 @@
 language: ruby
 rvm:
   - rbx-19mode
-  - 1.9.2
   - 1.9.3
+  - 2.0.0
   - ruby-head
 script: "bundle exec rake"
 gemfile:
@@ -10,6 +10,7 @@ gemfile:
 notifications:
   recipients:
     - lourens@methodmissing.com
+    - matt.connolly@me.com
 branches:
   only:
     - master
