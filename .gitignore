@@ -21,3 +21,6 @@ pkg
 scratch
 ext/rbczmq/dst
 ext/rbczmq/Makefile
+
+# Rubymine:
+.idea/
