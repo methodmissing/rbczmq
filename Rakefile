@@ -10,7 +10,7 @@ require 'rake/extensiontask'
 require 'rake/testtask'
 require 'rdoc/task'
 
-gemspec = eval(IO.read('rbczmq.gemspec'))
+gemspec = Gem::Specification.load('rbczmq.gemspec')
 
 Gem::PackageTask.new(gemspec) do |pkg|
 end
@@ -20,8 +20,6 @@ Rake::ExtensionTask.new('rbczmq', gemspec) do |ext|
   ext.ext_dir = 'ext/rbczmq'
 
   CLEAN.include 'ext/rbczmq/dst'
-  CLEAN.include 'ext/zeromq'
-  CLEAN.include 'ext/czmq'
   CLEAN.include 'lib/**/rbczmq_ext.*'
 end
 

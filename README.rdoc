@@ -215,7 +215,10 @@ Rubygems installation
 
 Building from source
 
-    git clone git@github.com:methodmissing/rbczmq.git
+    git clone https://github.com/methodmissing/rbczmq.git
+    cd rbczmq
+    git submodule init
+    git submodule update
     rake
 
 Running tests
