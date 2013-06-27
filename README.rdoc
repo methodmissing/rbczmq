@@ -224,7 +224,7 @@ Running tests
 
 OS X notes:
 
-If you are installing the package on a new mack ensure you have libtool and autoconf installed.
+If you are installing the package on a new Mac ensure you have libtool and autoconf installed.
 You can get those with brew packaging system:
 
     brew install libtool autoconf automake
