@@ -1672,8 +1672,18 @@ static VALUE rb_czmq_socket_monitor_thread(void *arg)
         case ZMQ_EVENT_DISCONNECTED: rb_funcall(sock->monitor_handler, intern_on_disconnected, 2, rb_str_new2(event.data.disconnected.addr), INT2FIX(event.data.disconnected.fd));
                                      break;
         }
+
+        /* once the socket is marked as destroyed, it appears to be not safe to call receive on it. */
+        if (sock->flags & ZMQ_SOCKET_DESTROYED)
+        {
+            break;
+        }
     }
-    zmq_close (s);
+    /* leave the socket to be closed when the context is destroyed on the main/other thread.
+        This additional thread is likely to be terminated by termination, interrupt or the
+        end of the application's normal executing when the context is destroyed.
+       */
+    /* zmq_close (s); */
     return Qnil;
 }
 
