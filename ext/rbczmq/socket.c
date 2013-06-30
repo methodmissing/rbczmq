@@ -20,6 +20,7 @@ static VALUE rb_czmq_nogvl_zsocket_destroy(void *ptr)
 {
     zmq_sock_wrapper *sock = ptr;
     errno = 0;
+    sock->flags |= ZMQ_SOCKET_DESTROYED;
     zsocket_destroy(sock->ctx, sock->socket);
     return Qnil;
 }
