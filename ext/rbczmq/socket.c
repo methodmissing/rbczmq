@@ -1618,6 +1618,12 @@ static VALUE rb_czmq_nogvl_monitor_recv(void *ptr)
 {
     struct nogvl_monitor_recv_args *args = ptr;
     int rc;
+    /* if the socket being monitored has been destroyed, simply return
+       an error condition. The monitoring thread will then exit. */
+    if (args->monitored_socket_wrapper->flags & ZMQ_SOCKET_DESTROYED)
+    {
+        return (VALUE)-1;
+    }
     rc = zmq_recvmsg (args->socket, &args->msg, 0);
     return (VALUE)rc;
 }
@@ -1643,11 +1649,14 @@ static VALUE rb_czmq_socket_monitor_thread(void *arg)
 
     rb_thread_schedule();
 
+    args.monitored_socket_wrapper = sock;
+    args.socket = s;
+    
     while (1) {
-        args.socket = s;
         zmq_msg_init (&args.msg);
         rc = (int)rb_thread_blocking_region(rb_czmq_nogvl_monitor_recv, (void *)&args, RUBY_UBF_IO, 0);
         if (rc == -1 && (zmq_errno() == ETERM || zmq_errno() == ENOTSOCK || zmq_errno() == EINTR)) break;
+        if (rc == -1 && (sock->flags & ZMQ_SOCKET_DESTROYED)) break;
         assert (rc != -1);
         memcpy (&event, zmq_msg_data (&args.msg), sizeof (event));
         switch (event.event) {

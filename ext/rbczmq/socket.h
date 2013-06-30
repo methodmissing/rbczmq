@@ -130,6 +130,7 @@ struct nogvl_socket_poll_args {
 struct nogvl_monitor_recv_args {
     void *socket;
     zmq_msg_t msg;
+    zmq_sock_wrapper *monitored_socket_wrapper;
 };
 
 struct nogvl_conn_args {
