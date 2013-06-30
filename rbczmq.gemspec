@@ -5,8 +5,8 @@ require File.expand_path('../lib/zmq/version', __FILE__)
 Gem::Specification.new do |s|
   s.name = "rbczmq"
   s.version = ZMQ::VERSION
-  s.summary = "Ruby extension for CZMQ - High-level C Binding for ØMQ (http://czmq.zeromq.org)"
-  s.description = "Ruby extension for CZMQ - High-level C Binding for ØMQ (http://czmq.zeromq.org)"
+  s.summary = "Ruby extension for ZeroMQ (ZMQ) using CZMQ - High-level C Binding for ØMQ (http://czmq.zeromq.org)"
+  s.description = "Ruby extension for ZeroMQ (ZMQ) using CZMQ - High-level C Binding for ØMQ (http://czmq.zeromq.org)"
   s.authors = ["Lourens Naudé", "James Tucker", "Matt Connolly"]
   s.email = ["lourens@methodmissing.com", "jftucker@gmail.com", "matt.connolly@me.com"]
   s.homepage = "http://github.com/methodmissing/rbczmq"
