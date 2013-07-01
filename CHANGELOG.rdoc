@@ -1,5 +1,14 @@
 = Changelog
 
+== 1.6.3 (July 1, 2013)
+* Mark socket wrapper is destroyed before calling destroy on the socket (Matt Connolly)
+* Fix edge cases in socket monitor implementation (Matt Connolly)
+* Setup up ZeroMQ and CZMQ as git submodules (Matt Connolly)
+* SmartOS/Solaris: remove broken "add_define"s, not used in zmq or czmq; update czmq compile flags (Matt Connolly)
+* Fix sockets sending strings in printf-style format directly (Matt Connolly)
+* Fix ZMQ::Poller#poll fail in ZmqAssert incorrectly (Matt Connolly)
+*  Fix socket#bind returning false incorrectly (Matt Connolly)
+
 == 1.6.2 (May 29, 2013 )
 * Fix compiler and Ruby warnings
 
