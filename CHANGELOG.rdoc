@@ -1,5 +1,8 @@
 = Changelog
 
+== 1.6.4 (July 10, 2013)
+* Depend on a checkout task for vendored submodule init (Matt Connolly)
+
 == 1.6.3 (July 1, 2013)
 * Mark socket wrapper is destroyed before calling destroy on the socket (Matt Connolly)
 * Fix edge cases in socket monitor implementation (Matt Connolly)
