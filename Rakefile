@@ -57,5 +57,12 @@ task :clobber_rbc do
   sh 'find . -name *.rbc -print0 | xargs -0 rm'
 end
 
+desc "setup the vendored libzmq && czmq source"
+task :checkout do
+  sh "git submodule update --init"
+end
+
+task :compile => :checkout
+
 task :test => :compile
 task :default => :test
