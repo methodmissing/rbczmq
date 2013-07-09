@@ -91,22 +91,6 @@ else
   CONFIG['LDSHARED'] = "$(CXX) -shared"
 end
 
-# extract dependencies
-unless File.directory?(zmq_path) && File.directory?(czmq_path)
-  fail "The 'tar' (creates and manipulates streaming archive files) utility is required to extract dependencies" if `which tar`.strip.empty?
-  Dir.chdir(vendor_path) do
-    names = Dir['*mq*.tar.gz'].map { |f| File.basename(f, '.tar.gz') }
-    fail "required files not found: #{names}" unless names.size == 2
-
-    names.each do |name|
-      puts "Extracting #{name}"
-      sys "tar xvzf #{name}.tar.gz", "Could not extract #{name}"
-      puts "Moving #{name} to #{name.split('-').first}"
-      sys "mv #{name} #{name.split('-').first}", "Could not move #{name}"
-    end
-  end
-end
-
 # build libzmq
 lib = libs_path + "libzmq.#{LIBEXT}"
 Dir.chdir zmq_path do
