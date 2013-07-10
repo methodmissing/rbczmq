@@ -1,6 +1,4 @@
-# zmq_logger.rb
-#
-# Logging via ZMQ push/pull sockets.
+# encoding: utf-8
 
 require 'logger'
 
@@ -28,9 +26,11 @@ module ZMQ
       Socket::Pair
     ]
 
-    # initialise a new log object. The logger sends log messages to a push socket.
-    # the caller should connect the push socket to pull socket where the log messages
-    # will be processed. socket should be a ZMQ::Socket::Push or ZMQ::Socket::Pub socket
+    # Initialise a new logger object. The logger sends log messages to a socket.
+    # The caller is responsible for connecting the socket before using the logger to
+    # send log output to the socket.
+    #
+    # Supported socket types are a Socket::Pub, Socket::Push, and Socket::Pair
     def initialize(socket)
       raise InvalidSocketError unless VALID_SOCKET_CLASSES.any? { |klass| socket.is_a?(klass) }
       super(nil)
