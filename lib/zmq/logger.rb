@@ -2,7 +2,6 @@
 #
 # Logging via ZMQ push/pull sockets.
 
-require 'rbczmq'
 require 'logger'
 
 module ZMQ
