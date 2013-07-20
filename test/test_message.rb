@@ -273,4 +273,22 @@ class TestZmqMessage < ZmqTestCase
     assert_equal frame.object_id, ary.first.object_id
   end
 
+  def test_message_unwrap_dup
+    ctx = ZMQ::Context.new
+    router = ctx.socket(ZMQ::ROUTER)
+    port = router.bind("tcp://127.0.0.1:*")
+    req = ctx.connect(ZMQ::REQ, "tcp://127.0.0.1:#{port}")
+    msg = ZMQ::Message.new
+    msg.addstr "hello world"
+    req.send_message msg
+    msg2 = router.recv_message
+    identity = msg2.unwrap
+    assert_equal "hello world", msg2.first.data
+    msg3 = ZMQ::Message.new
+    msg3.addstr "reply"
+    msg3.wrap identity.dup
+    assert_equal 3, msg3.size
+  ensure
+    ctx.destroy
+  end
 end

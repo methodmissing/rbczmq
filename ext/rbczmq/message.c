@@ -508,9 +508,9 @@ static VALUE rb_czmq_message_unwrap(VALUE obj)
     ZmqAssertMessageOwned(message);
 
     /* reimplemented the zmsg_unwrap function for simpler logic: */
-    zframe_t *frame = zmsg_pop(message->message);
+    zframe_t *zframe = zmsg_pop(message->message);
     VALUE frame_obj = 0;
-    if (frame != NULL) {
+    if (zframe != NULL) {
         frame_obj = (VALUE)zlist_pop(message->frames);
     }
 
@@ -519,6 +519,12 @@ static VALUE rb_czmq_message_unwrap(VALUE obj)
         empty = zmsg_pop(message->message);
         zframe_destroy (&empty);
         zlist_pop(message->frames);
+    }
+    
+    {
+        ZmqGetFrame(frame_obj);
+        frame->message = NULL;
+        frame->flags |= ZMQ_FRAME_OWNED;
     }
     return frame_obj ? frame_obj : Qnil;
 }
