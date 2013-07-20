@@ -8,9 +8,12 @@
 void rb_czmq_free_message(zmq_message_wrapper *message)
 {
     errno = 0;
-    zmsg_destroy(&message->message);
-    message->message = NULL;
-    message->flags |= ZMQ_MESSAGE_DESTROYED;
+    if (message != NULL && message->message != NULL && message->flags & ZMQ_MESSAGE_OWNED) {
+        zmsg_destroy(&message->message);
+        message->message = NULL;
+        message->flags &= ~ZMQ_MESSAGE_OWNED;
+        zlist_destroy(&message->frames);
+    }
 }
 
 /*
@@ -22,8 +25,19 @@ static void rb_czmq_free_message_gc(void *ptr)
 {
     zmq_message_wrapper *msg = (zmq_message_wrapper *)ptr;
     if (msg) {
-        if (msg->message != NULL && !(msg->flags & ZMQ_MESSAGE_DESTROYED)) rb_czmq_free_message(msg);
+        rb_czmq_free_message(msg);
         xfree(msg);
+    }
+}
+
+/*
+ * :nodoc:
+ * mark the owned ZMQ::Frame objects so that they are not collected.
+*/
+void rb_czmq_mark_message(zmq_message_wrapper *message)
+{
+    for (VALUE frame = (VALUE)zlist_first(message->frames); frame; frame = (VALUE)zlist_next(message->frames)) {
+        rb_gc_mark(frame);
     }
 }
 
@@ -40,7 +54,19 @@ VALUE rb_czmq_alloc_message(zmsg_t *message)
     message_obj = Data_Make_Struct(rb_cZmqMessage, zmq_message_wrapper, 0, rb_czmq_free_message_gc, m);
     m->message = message;
     ZmqAssertObjOnAlloc(m->message, m);
-    m->flags = 0;
+    m->flags = ZMQ_MESSAGE_OWNED;
+    m->frames = zlist_new();
+
+    /* create ZMQ::Frame objects for all frames in the message and
+       link the ruby objects to this message. */
+    for (zframe_t* zframe = zmsg_first(message); zframe != NULL; zframe = zmsg_next(message)) {
+        VALUE frame_object = rb_czmq_alloc_frame(zframe);
+        ZmqGetFrame(frame_object);
+        frame->flags &= ~ZMQ_FRAME_OWNED;
+        frame->message = m;
+        zlist_append(m->frames, (void*)frame_object);
+    }
+
     rb_obj_call_init(message_obj, 0, NULL);
     return message_obj;
 }
@@ -58,14 +84,11 @@ VALUE rb_czmq_alloc_message(zmsg_t *message)
 
 static VALUE rb_czmq_message_new(VALUE message)
 {
-    zmq_message_wrapper *msg = NULL;
-    errno = 0;
-    message = Data_Make_Struct(rb_cZmqMessage, zmq_message_wrapper, 0, rb_czmq_free_message_gc, msg);
-    msg->message = zmsg_new();
-    ZmqAssertObjOnAlloc(msg->message, msg);
-    msg->flags = 0;
-    rb_obj_call_init(message, 0, NULL);
-    return message;
+    zmsg_t* msg = zmsg_new();
+    if (msg == NULL) {
+        rb_raise(rb_eZmqError, "Failed to allocate message object (zmsg_new).");
+    }
+    return rb_czmq_alloc_message(msg);
 }
 
 /*
@@ -85,6 +108,7 @@ static VALUE rb_czmq_message_new(VALUE message)
 static VALUE rb_czmq_message_size(VALUE obj)
 {
     ZmqGetMessage(obj);
+    ZmqReturnNilUnlessOwned(message);
     return INT2NUM(zmsg_size(message->message));
 }
 
@@ -105,6 +129,7 @@ static VALUE rb_czmq_message_size(VALUE obj)
 static VALUE rb_czmq_message_content_size(VALUE obj)
 {
     ZmqGetMessage(obj);
+    ZmqReturnNilUnlessOwned(message);
     return INT2NUM(zmsg_content_size(message->message));
 }
 
@@ -127,10 +152,15 @@ static VALUE rb_czmq_message_push(VALUE obj, VALUE frame_obj)
     int rc = 0;
     errno = 0;
     ZmqGetMessage(obj);
+    ZmqAssertMessageOwned(message);
     ZmqGetFrame(frame_obj);
-    rc = zmsg_push(message->message, frame);
+    ZmqAssertFrameOwnedNoMessage(frame);
+
+    rc = zmsg_push(message->message, frame->frame);
     ZmqAssert(rc);
-    rb_czmq_frame_freed(frame);
+    frame->message = message;
+    frame->flags &= ~ZMQ_FRAME_OWNED;
+    zlist_push(message->frames, (void*)frame_obj);
     return Qtrue;
 }
 
@@ -153,10 +183,15 @@ static VALUE rb_czmq_message_add(VALUE obj, VALUE frame_obj)
     int rc = 0;
     errno = 0;
     ZmqGetMessage(obj);
+    ZmqAssertMessageOwned(message);
     ZmqGetFrame(frame_obj);
-    rc = zmsg_add(message->message, frame);
+    ZmqAssertFrameOwnedNoMessage(frame);
+
+    rc = zmsg_add(message->message, frame->frame);
     ZmqAssert(rc);
-    rb_czmq_frame_freed(frame);
+    frame->message = message;
+    frame->flags &= ~ZMQ_FRAME_OWNED;
+    zlist_append(message->frames, (void*)frame_obj);
     return Qtrue;
 }
 
@@ -179,9 +214,11 @@ static VALUE rb_czmq_message_pop(VALUE obj)
 {
     zframe_t *frame = NULL;
     ZmqGetMessage(obj);
-    frame = zmsg_pop(message->message);
+    ZmqAssertMessageOwned(message);
+    frame = zmsg_pop(message->message); /* we now own the frame */
     if (frame == NULL) return Qnil;
-    return rb_czmq_alloc_frame(frame);
+    VALUE frame_obj = (VALUE)zlist_pop(message->frames);
+    return frame_obj ? frame_obj : Qnil;
 }
 
 /*
@@ -200,6 +237,7 @@ static VALUE rb_czmq_message_pop(VALUE obj)
 static VALUE rb_czmq_message_print(VALUE obj)
 {
     ZmqGetMessage(obj);
+    ZmqReturnNilUnlessOwned(message);
     zmsg_dump(message->message);
     return Qnil;
 }
@@ -220,11 +258,10 @@ static VALUE rb_czmq_message_print(VALUE obj)
 
 static VALUE rb_czmq_message_first(VALUE obj)
 {
-    zframe_t *frame = NULL;
     ZmqGetMessage(obj);
-    frame = zmsg_first(message->message);
-    if (frame == NULL) return Qnil;
-    return rb_czmq_alloc_frame(zframe_dup(frame));
+    ZmqReturnNilUnlessOwned(message);
+    VALUE frame_obj = (VALUE)zlist_first(message->frames);
+    return frame_obj ? frame_obj : Qnil;
 }
 
 /*
@@ -244,11 +281,10 @@ static VALUE rb_czmq_message_first(VALUE obj)
 
 static VALUE rb_czmq_message_next(VALUE obj)
 {
-    zframe_t *frame = NULL;
     ZmqGetMessage(obj);
-    frame = zmsg_next(message->message);
-    if (frame == NULL) return Qnil;
-    return rb_czmq_alloc_frame(zframe_dup(frame));
+    ZmqReturnNilUnlessOwned(message);
+    VALUE frame_obj = (VALUE)zlist_next(message->frames);
+    return frame_obj ? frame_obj : Qnil;
 }
 
 /*
@@ -267,11 +303,10 @@ static VALUE rb_czmq_message_next(VALUE obj)
 
 static VALUE rb_czmq_message_last(VALUE obj)
 {
-    zframe_t *frame = NULL;
     ZmqGetMessage(obj);
-    frame = zmsg_last(message->message);
-    if (frame == NULL) return Qnil;
-    return rb_czmq_alloc_frame(zframe_dup(frame));
+    ZmqReturnNilUnlessOwned(message);
+    VALUE frame_obj = (VALUE)zlist_last(message->frames);
+    return frame_obj ? frame_obj : Qnil;
 }
 
 /*
@@ -293,10 +328,18 @@ static VALUE rb_czmq_message_last(VALUE obj)
 static VALUE rb_czmq_message_remove(VALUE obj, VALUE frame_obj)
 {
     ZmqGetMessage(obj);
-    zframe_t *frame = NULL;
-    ZmqAssertFrame(frame_obj);
-    Data_Get_Struct(frame_obj, zframe_t, frame);
-    zmsg_remove(message->message, frame);
+    ZmqAssertMessageOwned(message);
+    ZmqGetFrame(frame_obj);
+
+    /* remove from message and our list of frame objects */
+    zmsg_remove(message->message, frame->frame);
+    zlist_remove(message->frames, (void*)frame_obj);
+
+    /* removing from message does not destroy the frame,
+       therefore, we take ownership of the frame at this point */
+    frame->message = NULL;
+    frame->flags |= ZMQ_FRAME_OWNED;
+
     return Qnil;
 }
 
@@ -317,9 +360,19 @@ static VALUE rb_czmq_message_pushstr(VALUE obj, VALUE str)
     int rc = 0;
     errno = 0;
     ZmqGetMessage(obj);
+    ZmqAssertMessageOwned(message);
     Check_Type(str, T_STRING);
     rc = zmsg_pushmem(message->message, StringValueCStr(str), RSTRING_LEN(str));
     ZmqAssert(rc);
+
+    /* keep zlist of frame ruby objects in sync with message's frame list */
+    zframe_t* zframe = zmsg_first(message->message);
+    VALUE frame_object = rb_czmq_alloc_frame(zframe);
+    ZmqGetFrame(frame_object);
+    frame->flags &= ~ZMQ_FRAME_OWNED;
+    frame->message = message;
+    zlist_push(message->frames, (void*)frame_object);
+
     return Qtrue;
 }
 
@@ -340,9 +393,19 @@ static VALUE rb_czmq_message_addstr(VALUE obj, VALUE str)
     int rc = 0;
     errno = 0;
     ZmqGetMessage(obj);
+    ZmqAssertMessageOwned(message);
     Check_Type(str, T_STRING);
     rc = zmsg_addmem(message->message, StringValueCStr(str), RSTRING_LEN(str));
     ZmqAssert(rc);
+
+    /* keep zlist of frame ruby objects in sync with message's frame list */
+    zframe_t* zframe = zmsg_last(message->message);
+    VALUE frame_object = rb_czmq_alloc_frame(zframe);
+    ZmqGetFrame(frame_object);
+    frame->flags &= ~ZMQ_FRAME_OWNED;
+    frame->message = message;
+    zlist_append(message->frames, (void*)frame_object);
+
     return Qtrue;
 }
 
@@ -363,8 +426,13 @@ static VALUE rb_czmq_message_popstr(VALUE obj)
 {
     char *str = NULL;
     ZmqGetMessage(obj);
+    ZmqAssertMessageOwned(message);
     str = zmsg_popstr(message->message);
     if (str == NULL) return Qnil;
+
+    /* destroys the frame, keep frame objects list in sync: */
+    zlist_pop(message->frames);
+
     return rb_str_new2(str);
 }
 
@@ -386,9 +454,30 @@ static VALUE rb_czmq_message_wrap(VALUE obj, VALUE frame_obj)
 {
     errno = 0;
     ZmqGetMessage(obj);
-    ZmqGetFrame(frame_obj);
-    zmsg_wrap(message->message, frame);
-    rb_czmq_frame_freed(frame);
+    ZmqAssertMessageOwned(message);
+
+    {
+        ZmqGetFrame(frame_obj);
+        ZmqAssertFrameOwned(frame);
+        zmsg_wrap(message->message, frame->frame);
+        frame->flags &= ~ZMQ_FRAME_OWNED;
+        frame->message = message;
+    }
+
+    /* keep frame objects list in sync. Two frames have been added. frame_obj from above
+       and a new one for the empty frame. */
+    {
+        zmsg_first(message->message);
+        zframe_t* empty_frame = zmsg_next(message->message);
+
+        VALUE empty_frame_object = rb_czmq_alloc_frame(empty_frame);
+        ZmqGetFrame(empty_frame_object);
+        frame->flags &= ~ZMQ_FRAME_OWNED;
+        frame->message = message;
+
+        zlist_push(message->frames, (void*)empty_frame_object);
+        zlist_push(message->frames, (void*)frame_obj);
+    }
     return Qnil;
 }
 
@@ -410,11 +499,23 @@ static VALUE rb_czmq_message_wrap(VALUE obj, VALUE frame_obj)
 
 static VALUE rb_czmq_message_unwrap(VALUE obj)
 {
-    zframe_t *frame = NULL;
     ZmqGetMessage(obj);
-    frame = zmsg_unwrap(message->message);
-    if (frame == NULL) return Qnil;
-    return rb_czmq_alloc_frame(frame);
+    ZmqAssertMessageOwned(message);
+
+    /* reimplemented the zmsg_unwrap function for simpler logic: */
+    zframe_t *frame = zmsg_pop(message->message);
+    VALUE frame_obj = 0;
+    if (frame != NULL) {
+        frame_obj = (VALUE)zlist_pop(message->frames);
+    }
+
+    zframe_t *empty = zmsg_first(message->message);
+    if (zframe_size(empty) == 0) {
+        empty = zmsg_pop(message->message);
+        zframe_destroy (&empty);
+        zlist_pop(message->frames);
+    }
+    return frame_obj ? frame_obj : Qnil;
 }
 
 /*
@@ -431,16 +532,11 @@ static VALUE rb_czmq_message_unwrap(VALUE obj)
 
 static VALUE rb_czmq_message_dup(VALUE obj)
 {
-    VALUE dup;
-    zmq_message_wrapper *dup_msg = NULL;
-    errno = 0;
     ZmqGetMessage(obj);
-    dup = Data_Make_Struct(rb_cZmqMessage, zmq_message_wrapper, 0, rb_czmq_free_message_gc, dup_msg);
-    dup_msg->message = zmsg_dup(message->message);
-    ZmqAssertObjOnAlloc(dup_msg->message, dup_msg);
-    dup_msg->flags = message->flags;
-    rb_obj_call_init(dup, 0, NULL);
-    return dup;
+    ZmqAssertMessageOwned(message);
+
+    zmsg_t* dup_msg = zmsg_dup(message->message);
+    return rb_czmq_alloc_message(dup_msg);
 }
 
 /*
@@ -460,6 +556,7 @@ static VALUE rb_czmq_message_dup(VALUE obj)
 static VALUE rb_czmq_message_destroy(VALUE obj)
 {
     ZmqGetMessage(obj);
+    ZmqAssertMessageOwned(message);
     rb_czmq_free_message(message);
     return Qnil;
 }
@@ -483,6 +580,7 @@ static VALUE rb_czmq_message_encode(VALUE obj)
     byte *buff;
     size_t buff_size;
     ZmqGetMessage(obj);
+    ZmqReturnNilUnlessOwned(message);
     buff_size = zmsg_encode(message->message, &buff);
     return rb_str_new((char *)buff, buff_size);
 }
@@ -531,8 +629,10 @@ static VALUE rb_czmq_message_eql_p(VALUE obj, VALUE other_message)
     size_t other_buff_size;
     ZmqGetMessage(obj);
     ZmqAssertMessage(other_message);
+    ZmqAssertMessageOwned(message);
     Data_Get_Struct(other_message, zmq_message_wrapper, other);
     if (!other) rb_raise(rb_eTypeError, "uninitialized ZMQ message!");
+    ZmqAssertMessageOwned(other);
 
     if (zmsg_size(message->message) != zmsg_size(other->message)) return Qfalse;
     if (zmsg_content_size(message->message) != zmsg_content_size(other->message)) return Qfalse;
@@ -580,13 +680,31 @@ static VALUE rb_czmq_message_to_a(VALUE obj)
 {
     VALUE ary;
     ZmqGetMessage(obj);
-    ary = rb_ary_new2(zmsg_size(message->message));
-    zframe_t *frame = zmsg_first(message->message);
-    while (frame) {
-        rb_ary_push(ary, rb_czmq_alloc_frame(zframe_dup(frame)));
-        frame = zmsg_next(message->message);
+    ZmqAssertMessageOwned(message);
+    ary = rb_ary_new2(zlist_size(message->frames));
+    VALUE frame_obj = (VALUE)zlist_first(message->frames);
+    while (frame_obj) {
+        rb_ary_push(ary, frame_obj);
+        frame_obj = (VALUE)zlist_next(message->frames);
     }
     return ary;
+}
+
+/*
+ * call-seq:
+ *    msg.gone?   #=> false
+ *    msg.destroy # or send
+ *    msg.gone?   #=> true
+ *
+ * Return boolean indicating if the ZMQ::Message is gone (sent or destroyed). If the message is
+ * gone, accessor methods will return nil and methods requiring data or methods that mutate
+ * the message will raise an exception.
+*/
+
+static VALUE rb_czmq_message_gone(VALUE obj)
+{
+    ZmqGetMessage(obj);
+    return (message->flags & ZMQ_MESSAGE_OWNED) ? Qfalse : Qtrue;
 }
 
 void _init_rb_czmq_message()
@@ -617,4 +735,5 @@ void _init_rb_czmq_message()
     rb_define_method(rb_cZmqMessage, "eql?", rb_czmq_message_equals, 1);
     rb_define_method(rb_cZmqMessage, "==", rb_czmq_message_equals, 1);
     rb_define_method(rb_cZmqMessage, "to_a", rb_czmq_message_to_a, 0);
+    rb_define_method(rb_cZmqMessage, "gone?", rb_czmq_message_gone, 0);
 }

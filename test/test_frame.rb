@@ -11,10 +11,9 @@ class TestZmqFrame < ZmqTestCase
 
   def test_destroyed_frame
     frame = ZMQ::Frame("message")
+    assert !frame.gone?
     frame.destroy
-    assert_raises ZMQ::Error do
-      frame.data
-    end
+    assert frame.gone?
   end
 
   def test_alloc_empty

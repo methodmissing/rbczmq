@@ -229,7 +229,7 @@ static VALUE rb_czmq_socket_bind(VALUE obj, VALUE endpoint)
     args.endpoint = StringValueCStr(endpoint);
     rc = (int)rb_thread_blocking_region(rb_czmq_nogvl_socket_bind, (void *)&args, RUBY_UBF_IO, 0);
     /* ZmqAssert will return false on any non-zero return code. Bind returns the port number */
-    if (rc < 0) { 
+    if (rc < 0) {
         ZmqAssert(rc);
     }
     if (sock->verbose)
@@ -562,6 +562,7 @@ static VALUE rb_czmq_socket_send_frame(int argc, VALUE *argv, VALUE obj)
     ZmqSockGuardCrossThread(sock);
     rb_scan_args(argc, argv, "11", &frame_obj, &flags);
     ZmqGetFrame(frame_obj);
+    ZmqAssertFrameOwnedNoMessage(frame);
 
     if (NIL_P(flags)) {
         flgs = 0;
@@ -573,13 +574,17 @@ static VALUE rb_czmq_socket_send_frame(int argc, VALUE *argv, VALUE obj)
 
     if (sock->verbose) {
         cur_time = rb_czmq_formatted_current_time();
-        print_frame = (flgs & ZFRAME_REUSE) ? frame : zframe_dup(frame);
+        print_frame = (flgs & ZFRAME_REUSE) ? frame->frame : zframe_dup(frame->frame);
     }
     args.socket = sock;
-    args.frame = frame;
+    args.frame = frame->frame;
     args.flags = flgs;
     rc = (int)rb_thread_blocking_region(rb_czmq_nogvl_send_frame, (void *)&args, RUBY_UBF_IO, 0);
     ZmqAssert(rc);
+    if ((flgs & ZFRAME_REUSE) == 0) {
+        /* frame has been destroyed, clear the owns flag */
+        frame->flags &= ~ZMQ_FRAME_OWNED;
+    }
     if (sock->verbose) ZmqDumpFrame("send_frame", print_frame);
     return Qtrue;
 }
@@ -623,11 +628,12 @@ static VALUE rb_czmq_socket_send_message(VALUE obj, VALUE message_obj)
     ZmqAssertSocketNotPending(sock, "can only send on a bound or connected socket!");
     ZmqSockGuardCrossThread(sock);
     ZmqGetMessage(message_obj);
+    ZmqAssertMessageOwned(message);
     if (sock->verbose) print_message = zmsg_dup(message->message);
     args.socket = sock;
     args.message = message->message;
     rb_thread_blocking_region(rb_czmq_nogvl_send_message, (void *)&args, RUBY_UBF_IO, 0);
-    message->flags |= ZMQ_MESSAGE_DESTROYED;
+    message->flags &= ~ZMQ_MESSAGE_OWNED;
     if (sock->verbose) ZmqDumpMessage("send_message", print_message);
     return Qnil;
 }
@@ -1652,7 +1658,7 @@ static VALUE rb_czmq_socket_monitor_thread(void *arg)
 
     args.monitored_socket_wrapper = sock;
     args.socket = s;
-    
+
     while (1) {
         zmq_msg_init (&args.msg);
         rc = (int)rb_thread_blocking_region(rb_czmq_nogvl_monitor_recv, (void *)&args, RUBY_UBF_IO, 0);

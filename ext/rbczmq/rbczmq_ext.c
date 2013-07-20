@@ -25,8 +25,6 @@ VALUE rb_cZmqPoller;
 VALUE rb_cZmqPollitem;
 VALUE rb_cZmqBeacon;
 
-st_table *frames_map = NULL;
-
 VALUE intern_call;
 VALUE intern_readable;
 VALUE intern_writable;
@@ -216,8 +214,6 @@ static VALUE rb_czmq_m_proxy(int argc, VALUE *argv, ZMQ_UNUSED VALUE klass)
 
 void Init_rbczmq_ext()
 {
-    frames_map = st_init_numtable();
-
     intern_call = rb_intern("call");
     intern_readable = rb_intern("on_readable");
     intern_writable = rb_intern("on_writable");

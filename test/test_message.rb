@@ -11,10 +11,11 @@ class TestZmqMessage < ZmqTestCase
 
   def test_destroyed
     msg = ZMQ::Message("one", "two")
+    assert_not_nil msg.encode
+    assert !msg.gone?
     msg.destroy
-    assert_raises ZMQ::Error do
-      msg.encode
-    end
+    assert msg.gone?
+    assert_nil msg.encode
   end
 
   def test_message_sugar
@@ -182,7 +183,7 @@ class TestZmqMessage < ZmqTestCase
   end
 
   def test_equals
-    msg =  ZMQ::Message.new
+    msg = ZMQ::Message.new
     msg.pushstr "body"
     msg.pushstr "header"
 
@@ -198,4 +199,78 @@ class TestZmqMessage < ZmqTestCase
     assert !msg.eql?(other)
     assert other.eql?(other)
   end
+
+  def test_message_with_frames
+    msg = ZMQ::Message.new
+    frame = ZMQ::Frame.new("hello")
+    assert_equal "hello", frame.data
+    msg.add frame
+    # frame is owned by message, but message is still owned by ruby,
+    # so the frame data should still be accessible:
+    assert_equal "hello", frame.data
+  end
+
+  def test_messge_add_frame_twice
+    msg = ZMQ::Message.new
+    frame = ZMQ::Frame.new("hello")
+    msg.add frame
+    assert_raises ZMQ::Error do
+      msg.add frame
+    end
+  end
+
+  def test_message_is_gone_after_send
+    ctx = ZMQ::Context.new
+    endpoint = "inproc://test.test_message_is_gone_after_send"
+    push = ctx.bind(:PUSH, endpoint)
+    pull = ctx.connect(:PULL, endpoint)
+    msg = ZMQ::Message.new
+    frame = ZMQ::Frame.new("hello")
+    msg.add frame
+    push.send_message(msg)
+    assert msg.gone?
+    assert frame.gone?
+  ensure
+    ctx.destroy
+  end
+
+  def test_message_has_frames_on_receive
+    ctx = ZMQ::Context.new
+    endpoint = "inproc://test.test_message_is_gone_after_send"
+    push = ctx.bind(:PUSH, endpoint)
+    pull = ctx.connect(:PULL, endpoint)
+    msg = ZMQ::Message.new
+    msg.add ZMQ::Frame.new("hello")
+    msg.add ZMQ::Frame.new("world")
+    push.send_message(msg)
+    received = pull.recv_message
+    assert_not_nil received
+    assert_equal 2, received.size
+    assert_equal "hello", received.first.data
+    assert_equal "world", received.next.data
+  ensure
+    ctx.destroy
+  end
+
+  def test_message_remove_frame
+    msg = ZMQ::Message.new
+    frame = ZMQ::Frame.new("hello")
+    msg.add frame
+    assert_equal 1, msg.size
+    # same object is returned
+    assert_equal frame.object_id, msg.first.object_id
+    msg.remove frame
+    assert_equal 0, msg.size
+  end
+
+  def test_message_array_same_frame_objects
+    msg = ZMQ::Message.new
+    frame = ZMQ::Frame.new("hello")
+    msg.add frame
+    ary = msg.to_a
+    assert_equal 1, ary.count
+    assert_equal frame, ary.first
+    assert_equal frame.object_id, ary.first.object_id
+  end
+
 end
