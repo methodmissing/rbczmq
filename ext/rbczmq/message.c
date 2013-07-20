@@ -36,8 +36,10 @@ static void rb_czmq_free_message_gc(void *ptr)
 */
 void rb_czmq_mark_message(zmq_message_wrapper *message)
 {
-    for (VALUE frame = (VALUE)zlist_first(message->frames); frame; frame = (VALUE)zlist_next(message->frames)) {
+    VALUE frame = (VALUE)zlist_first(message->frames);
+    while (frame) {
         rb_gc_mark(frame);
+        frame = (VALUE)zlist_next(message->frames);
     }
 }
 
@@ -59,12 +61,15 @@ VALUE rb_czmq_alloc_message(zmsg_t *message)
 
     /* create ZMQ::Frame objects for all frames in the message and
        link the ruby objects to this message. */
-    for (zframe_t* zframe = zmsg_first(message); zframe != NULL; zframe = zmsg_next(message)) {
+    zframe_t* zframe = zmsg_first(message);
+    while (zframe) {
         VALUE frame_object = rb_czmq_alloc_frame(zframe);
         ZmqGetFrame(frame_object);
         frame->flags &= ~ZMQ_FRAME_OWNED;
         frame->message = m;
         zlist_append(m->frames, (void*)frame_object);
+        
+        zframe = zmsg_next(message);
     }
 
     rb_obj_call_init(message_obj, 0, NULL);
