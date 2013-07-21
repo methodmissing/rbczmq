@@ -1,11 +1,11 @@
 = Changelog
 
-== 1.7.0 (in development):
+== 1.7.0 (July 21, 2013)
 
-* ZMQ::Frame - Implemented an interal wrapper around the underlying czmq frame objects to better manage memory and object ownership.
-* ZMQ::Frame#gone? and ZMQ::Message#gone? - new methods, return true when the frame/message has been sent and is no longer available for accessing. Methods may return nil for read operations or raise ZMQ::Error if the frame/message would be changed by that method.
-* ZMQ::Message - iterators (#first, #next, #last and #to_a) return consistent frame objects (not duplicates as in previous versions) that can be used with #remove.
-* Sending a message or frame marks it as "gone". The underlying data objects will be released by ZeroMQ as the frames/messages are sent over the socket.
+* ZMQ::Frame - Implemented an interal wrapper around the underlying czmq frame objects to better manage memory and object ownership. (Matt Connolly)
+* ZMQ::Frame#gone? and ZMQ::Message#gone? - new methods, return true when the frame/message has been sent and is no longer available for accessing. Methods may return nil for read operations or raise ZMQ::Error if the frame/message would be changed by that method. (Matt Connolly)
+* ZMQ::Message - iterators (#first, #next, #last and #to_a) return consistent frame objects (not duplicates as in previous versions) that can be used with #remove. (Matt Connolly)
+* Sending a message or frame marks it as "gone". The underlying data objects will be released by ZeroMQ as the frames/messages are sent over the socket. (Matt Connolly)
 
 == 1.6.4 (July 10, 2013)
 * Depend on a checkout task for vendored submodule init (Matt Connolly)
