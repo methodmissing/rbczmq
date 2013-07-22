@@ -217,12 +217,16 @@ static VALUE rb_czmq_message_add(VALUE obj, VALUE frame_obj)
 
 static VALUE rb_czmq_message_pop(VALUE obj)
 {
-    zframe_t *frame = NULL;
+    zframe_t *zframe = NULL;
     ZmqGetMessage(obj);
     ZmqAssertMessageOwned(message);
-    frame = zmsg_pop(message->message); /* we now own the frame */
-    if (frame == NULL) return Qnil;
+    zframe = zmsg_pop(message->message); /* we now own the frame */
+    if (zframe == NULL) return Qnil;
     VALUE frame_obj = (VALUE)zlist_pop(message->frames);
+    /* detach frame from message, it is now owned by the ruby object */
+    ZmqGetFrame(frame_obj);
+    frame->flags |= ZMQ_FRAME_OWNED;
+    frame->message = NULL;
     return frame_obj ? frame_obj : Qnil;
 }
 

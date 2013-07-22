@@ -291,4 +291,14 @@ class TestZmqMessage < ZmqTestCase
   ensure
     ctx.destroy
   end
+
+  def test_pop_ownership
+    msg = ZMQ::Message.new
+    other = ZMQ::Message.new
+    msg.pushstr "hello"
+    frame = msg.pop
+    other.push frame
+    assert_equal 1, other.size
+  end
+
 end
