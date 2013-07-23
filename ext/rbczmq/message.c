@@ -53,7 +53,7 @@ VALUE rb_czmq_alloc_message(zmsg_t *message)
     VALUE message_obj;
     zmq_message_wrapper *m = NULL;
     errno = 0;
-    message_obj = Data_Make_Struct(rb_cZmqMessage, zmq_message_wrapper, 0, rb_czmq_free_message_gc, m);
+    message_obj = Data_Make_Struct(rb_cZmqMessage, zmq_message_wrapper, rb_czmq_mark_message, rb_czmq_free_message_gc, m);
     m->message = message;
     ZmqAssertObjOnAlloc(m->message, m);
     m->flags = ZMQ_MESSAGE_OWNED;
