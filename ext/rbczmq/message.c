@@ -40,10 +40,12 @@ static void rb_czmq_free_message_gc(void *ptr)
 */
 void rb_czmq_mark_message(zmq_message_wrapper *message)
 {
-    VALUE frame = (VALUE)zlist_first(message->frames);
-    while (frame) {
-        rb_gc_mark(frame);
-        frame = (VALUE)zlist_next(message->frames);
+    if (message->frames) {
+        VALUE frame = (VALUE)zlist_first(message->frames);
+        while (frame) {
+            rb_gc_mark(frame);
+            frame = (VALUE)zlist_next(message->frames);
+        }
     }
 }
 
