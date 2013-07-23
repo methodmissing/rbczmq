@@ -8,10 +8,14 @@
 void rb_czmq_free_message(zmq_message_wrapper *message)
 {
     errno = 0;
-    if (message != NULL && message->message != NULL && message->flags & ZMQ_MESSAGE_OWNED) {
+
+    if (message->message != NULL && message->flags & ZMQ_MESSAGE_OWNED) {
         zmsg_destroy(&message->message);
-        message->message = NULL;
         message->flags &= ~ZMQ_MESSAGE_OWNED;
+    }
+    message->message = NULL;
+
+    if (message->frames) {
         zlist_destroy(&message->frames);
     }
 }

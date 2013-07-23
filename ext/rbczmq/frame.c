@@ -28,10 +28,11 @@ VALUE rb_czmq_alloc_frame(zframe_t *frame)
 */
 void rb_czmq_free_frame(zmq_frame_wrapper *frame)
 {
-    if (frame && frame->frame && (frame->flags & ZMQ_FRAME_OWNED) != 0) {
+    if (frame->frame && (frame->flags & ZMQ_FRAME_OWNED) != 0) {
         zframe_destroy(&frame->frame);
         frame->flags &= ~ZMQ_FRAME_OWNED;
     }
+    frame->frame = NULL;
 }
 
 /*
@@ -42,7 +43,10 @@ void rb_czmq_free_frame(zmq_frame_wrapper *frame)
 void rb_czmq_free_frame_gc(void *ptr)
 {
     zmq_frame_wrapper *frame = (zmq_frame_wrapper *)ptr;
-    rb_czmq_free_frame(frame);
+    if (frame) {
+        rb_czmq_free_frame(frame);
+        xfree(frame);
+    }
 }
 
 /*
