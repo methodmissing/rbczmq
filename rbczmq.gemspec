@@ -10,6 +10,7 @@ Gem::Specification.new do |s|
   s.authors = ["Lourens Naudé", "James Tucker", "Matt Connolly"]
   s.email = ["lourens@methodmissing.com", "jftucker@gmail.com", "matt.connolly@me.com"]
   s.homepage = "http://github.com/methodmissing/rbczmq"
+  s.license = 'MIT'
   s.date = Time.now.utc.strftime('%Y-%m-%d')
   s.platform = Gem::Platform::RUBY
   s.extensions = "ext/rbczmq/extconf.rb"

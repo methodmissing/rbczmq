@@ -5,6 +5,7 @@
 * FIX: ZMQ::Message#pop did not relase ownership of frame.
 * FIX: !Important! ZMQ::Message was not marking owned ZMQ::Frame objects, leading to potential GC crash in 1.7.0.
 * FIX: Fixed memory leak in ZMQ::Message.
+* Updated license in gemspec and readme.
 
 == 1.7.0 (July 21, 2013)
 

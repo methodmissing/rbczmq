@@ -232,6 +232,11 @@ You can get those with brew packaging system:
 
     brew install libtool autoconf automake
 
+== LICENSE
+
+The rbczmq gem is licensed under the MIT license. See the file "MIT-LICENSE" for details.
+This gem uses the "zmq" and "czmq" libraries, both of which are licensed under the LGPL license.
+
 == TODO
 
 * ZMQ::Message#save && ZMQ::Message.load
