@@ -1,6 +1,6 @@
 = Changelog
 
-== 1.7.1 (tbc)
+== 1.7.1 (July 25, 2013)
 
 * FIX: ZMQ::Message#pop did not relase ownership of frame.
 * FIX: !Important! ZMQ::Message was not marking owned ZMQ::Frame objects, leading to potential GC crash in 1.7.0.
