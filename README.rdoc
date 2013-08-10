@@ -1,6 +1,6 @@
 = rbczmq - binding for the high level ZeroMQ C API {<img src="https://secure.travis-ci.org/methodmissing/rbczmq.png" alt="Build Status" />}[http://travis-ci.org/methodmissing/rbczmq]
 
-(c) 2011 Lourens Naudé (methodmissing), James Tucker (raggi) with API guidance from the czmq (http://czmq.zeromq.org/) project.
+(c) 2011-2013 Lourens Naudé (methodmissing), James Tucker (raggi), Matt Connolly (mattconnolly) with API guidance from the czmq (http://czmq.zeromq.org/) project.
 
   http://github.com/methodmissing/rbczmq
 
@@ -203,9 +203,10 @@ Here's a few basic examples. Please refer to documentation (http://methodmissing
 
 == Requirements
 
-* A POSIX compliant OS, known to work well on Linux, BSD variants and Mac OS X
-* Ruby MRI 1.8, 1.9 or Rubinius (JRuby capi support forthcoming)
+* A POSIX compliant OS, known to work well on Linux, BSD variants, Mac OS X and SmartOS.
+* Ruby MRI 1.9, 2.0 or Rubinius (JRuby capi support forthcoming)
 * A C compiler
+* This is a "fat" gem, including its own source code for both ZeroMQ and CZMQ libraries. No system installation if either library is required.
 
 == Installation
 
@@ -241,7 +242,6 @@ This gem uses the "zmq" and "czmq" libraries, both of which are licensed under t
 
 * ZMQ::Message#save && ZMQ::Message.load
 * Optimize zloop handler callbacks (perftools)
-* OS X leaks utility - http://developer.apple.com/library/mac/#documentation/Darwin/Reference/ManPages/man1/leaks.1.html
 * Handle GC issue with timers in loop callbacks
 * czmq send methods aren't non-blocking by default
 * Revisit the ZMQ::Loop API
@@ -252,6 +252,7 @@ This gem uses the "zmq" and "czmq" libraries, both of which are licensed under t
 * Do not clobber local scope from macros (James's commit in master)
 * Incorporate examples into CI as well
 * Zero-copy semantics for frames
+* Enable use of a system installed ZeroMQ/CZMQ libraries.
 
 == Contact, feedback and bugs
 
