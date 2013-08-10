@@ -20,7 +20,10 @@ static VALUE rb_czmq_nogvl_zctx_destroy(void *ptr)
 {
     errno = 0;
     zmq_ctx_wrapper *ctx = ptr;
-    zctx_destroy(&ctx->ctx);
+    if (ctx->pid == getpid()) {
+        /* only actually destroy the context if we are the process that created it. */
+        zctx_destroy(&ctx->ctx);
+    }
     ctx->flags |= ZMQ_CONTEXT_DESTROYED;
     return Qnil;
 }
@@ -36,7 +39,7 @@ static void rb_czmq_free_ctx(zmq_ctx_wrapper *ctx)
     ctx_map = rb_ivar_get(rb_mZmq, intern_zctx_process);
     rb_thread_blocking_region(rb_czmq_nogvl_zctx_destroy, ctx, RUBY_UBF_IO, 0);
     ctx->ctx = NULL;
-    rb_hash_aset(ctx_map, get_pid(), Qnil);
+    rb_hash_aset(ctx_map, ctx->pidValue, Qnil);
 }
 
 /*
@@ -94,8 +97,10 @@ static VALUE rb_czmq_ctx_s_new(int argc, VALUE *argv, VALUE context)
     ctx->ctx = (zctx_t*)rb_thread_blocking_region(rb_czmq_nogvl_zctx_new, NULL, RUBY_UBF_IO, 0);
     ZmqAssertObjOnAlloc(ctx->ctx, ctx);
     ctx->flags = 0;
+    ctx->pid = getpid();
+    ctx->pidValue = get_pid();
     rb_obj_call_init(context, 0, NULL);
-    rb_hash_aset(ctx_map, get_pid(), context);
+    rb_hash_aset(ctx_map, ctx->pidValue, context);
     if (!NIL_P(io_threads)) rb_czmq_ctx_set_iothreads(context, io_threads);
     return context;
 }
@@ -117,6 +122,7 @@ static VALUE rb_czmq_ctx_s_new(int argc, VALUE *argv, VALUE context)
 static VALUE rb_czmq_ctx_destroy(VALUE obj)
 {
     ZmqGetContext(obj);
+    ZmqAssertContextPidMatches(ctx);
     rb_czmq_free_ctx(ctx);
     return Qnil;
 }
@@ -138,6 +144,7 @@ static VALUE rb_czmq_ctx_set_iothreads(VALUE obj, VALUE threads)
     int iothreads;
     errno = 0;
     ZmqGetContext(obj);
+    ZmqAssertContextPidMatches(ctx);
     Check_Type(threads, T_FIXNUM);
     iothreads = FIX2INT(threads);
     if (iothreads < 0) rb_raise(rb_eZmqError, "negative I/O threads count is not supported.");
@@ -165,6 +172,7 @@ static VALUE rb_czmq_ctx_set_linger(VALUE obj, VALUE linger)
     errno = 0;
     int msecs;
     ZmqGetContext(obj);
+    ZmqAssertContextPidMatches(ctx);
     Check_Type(linger, T_FIXNUM);
     msecs = FIX2INT(linger);
     if (msecs < 0) rb_raise(rb_eZmqError, "negative linger / timeout values is not supported.");
@@ -262,6 +270,7 @@ static VALUE rb_czmq_ctx_socket(VALUE obj, VALUE type)
     struct nogvl_socket_args args;
     errno = 0;
     ZmqGetContext(obj);
+    ZmqAssertContextPidMatches(ctx);
     if (TYPE(type) != T_FIXNUM && TYPE(type) != T_SYMBOL) rb_raise(rb_eTypeError, "wrong socket type %s (expected Fixnum or Symbol)", RSTRING_PTR(rb_obj_as_string(type)));
     socket_type = FIX2INT((SYMBOL_P(type)) ? rb_const_get_at(rb_mZmq, rb_to_id(type)) : type);
 
