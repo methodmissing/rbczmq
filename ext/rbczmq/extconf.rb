@@ -91,6 +91,11 @@ else
   CONFIG['LDSHARED'] = "$(CXX) -shared"
 end
 
+# if bundling from git, do a git checkout:
+unless File.exist?(zmq_path + 'autogen.sh')
+  sys "cd ../.. && git submodule update --init", "Checking out git submodules error!"
+end
+
 # build libzmq
 lib = libs_path + "libzmq.#{LIBEXT}"
 Dir.chdir zmq_path do
