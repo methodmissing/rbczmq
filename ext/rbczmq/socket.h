@@ -72,7 +72,7 @@ typedef struct {
     GetZmqSocket(obj); \
     ZmqSockGuardCrossThread(sock); \
     Check_Type(value, T_STRING); \
-    (assertion); \
+    { assertion }; \
     val = StringValueCStr(value); \
     (opt)(sock->socket, val); \
     if (sock->verbose) \
@@ -129,7 +129,8 @@ struct nogvl_socket_poll_args {
 
 struct nogvl_monitor_recv_args {
     void *socket;
-    zmq_msg_t msg;
+    zmq_msg_t msg_event;
+    zmq_msg_t msg_endpoint;
     zmq_sock_wrapper *monitored_socket_wrapper;
 };
 

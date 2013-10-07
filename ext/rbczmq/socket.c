@@ -1287,7 +1287,9 @@ static VALUE rb_czmq_socket_opt_linger(VALUE obj)
 {
     zmq_sock_wrapper *sock = NULL;
     GetZmqSocket(obj);
-    return INT2NUM(zsocket_linger(sock->socket));
+    // return INT2NUM(zsocket_linger(sock->socket));
+    // TODO: how to get the linger value in ZMQ4/CZMQ2?
+    return INT2NUM(-1);
 }
 
 /*
@@ -1631,7 +1633,11 @@ static VALUE rb_czmq_nogvl_monitor_recv(void *ptr)
     {
         return (VALUE)-1;
     }
-    rc = zmq_recvmsg (args->socket, &args->msg, 0);
+    rc = zmq_recvmsg (args->socket, &args->msg_event, 0);
+    if (rc == 0 && zmq_msg_more(&args->msg_event))
+    {
+        rc = zmq_recvmsg (args->socket, &args->msg_endpoint, 0);
+    }
     return (VALUE)rc;
 }
 
@@ -1658,34 +1664,42 @@ static VALUE rb_czmq_socket_monitor_thread(void *arg)
 
     args.monitored_socket_wrapper = sock;
     args.socket = s;
-
+    
+    char endpoint_str[1000];
+    
     while (1) {
-        zmq_msg_init (&args.msg);
+        zmq_msg_init (&args.msg_event);
+        zmq_msg_init (&args.msg_endpoint);
         rc = (int)rb_thread_blocking_region(rb_czmq_nogvl_monitor_recv, (void *)&args, RUBY_UBF_IO, 0);
         if (rc == -1 && (zmq_errno() == ETERM || zmq_errno() == ENOTSOCK || zmq_errno() == EINTR)) break;
         if (rc == -1 && (sock->flags & ZMQ_SOCKET_DESTROYED)) break;
         assert (rc != -1);
-        memcpy (&event, zmq_msg_data (&args.msg), sizeof (event));
+        memcpy (&event, zmq_msg_data (&args.msg_event), sizeof (event));
+        // zmq_msg_data(&msg2), zmq_msg_size(&msg2)
+        
+        // copy endpoint into local buffer, null terminated.
+        strncpy(endpoint_str, zmq_msg_data(&args.msg_endpoint), zmq_msg_size(&args.msg_endpoint));
+        
         switch (event.event) {
-        case ZMQ_EVENT_CONNECTED: rb_funcall(sock->monitor_handler, intern_on_connected, 2, rb_str_new2(event.data.connected.addr), INT2FIX(event.data.connected.fd));
+        case ZMQ_EVENT_CONNECTED: rb_funcall(sock->monitor_handler, intern_on_connected, 2, rb_str_new2(endpoint_str), INT2FIX(event.value));
                                   break;
-        case ZMQ_EVENT_CONNECT_DELAYED: rb_funcall(sock->monitor_handler, intern_on_connect_delayed, 2, rb_str_new2(event.data.connect_delayed.addr), INT2FIX(event.data.connect_delayed.err));
+        case ZMQ_EVENT_CONNECT_DELAYED: rb_funcall(sock->monitor_handler, intern_on_connect_delayed, 2, rb_str_new2(endpoint_str), INT2FIX(event.value));
                                         break;
-        case ZMQ_EVENT_CONNECT_RETRIED: rb_funcall(sock->monitor_handler, intern_on_connect_retried, 2, rb_str_new2(event.data.connect_retried.addr), INT2FIX(event.data.connect_retried.interval));
+        case ZMQ_EVENT_CONNECT_RETRIED: rb_funcall(sock->monitor_handler, intern_on_connect_retried, 2, rb_str_new2(endpoint_str), INT2FIX(event.value));
                                         break;
-        case ZMQ_EVENT_LISTENING: rb_funcall(sock->monitor_handler, intern_on_listening, 2, rb_str_new2(event.data.listening.addr), INT2FIX(event.data.listening.fd));
+        case ZMQ_EVENT_LISTENING: rb_funcall(sock->monitor_handler, intern_on_listening, 2, rb_str_new2(endpoint_str), INT2FIX(event.value));
                                   break;
-        case ZMQ_EVENT_BIND_FAILED: rb_funcall(sock->monitor_handler, intern_on_bind_failed, 2, rb_str_new2(event.data.bind_failed.addr), INT2FIX(event.data.bind_failed.err));
+        case ZMQ_EVENT_BIND_FAILED: rb_funcall(sock->monitor_handler, intern_on_bind_failed, 2, rb_str_new2(endpoint_str), INT2FIX(event.value));
                                     break;
-        case ZMQ_EVENT_ACCEPTED: rb_funcall(sock->monitor_handler, intern_on_accepted, 2, rb_str_new2(event.data.accepted.addr), INT2FIX(event.data.accepted.fd));
+        case ZMQ_EVENT_ACCEPTED: rb_funcall(sock->monitor_handler, intern_on_accepted, 2, rb_str_new2(endpoint_str), INT2FIX(event.value));
                                  break;
-        case ZMQ_EVENT_ACCEPT_FAILED: rb_funcall(sock->monitor_handler, intern_on_accept_failed, 2, rb_str_new2(event.data.accept_failed.addr), INT2FIX(event.data.accept_failed.err));
+        case ZMQ_EVENT_ACCEPT_FAILED: rb_funcall(sock->monitor_handler, intern_on_accept_failed, 2, rb_str_new2(endpoint_str), INT2FIX(event.value));
                                       break;
-        case ZMQ_EVENT_CLOSE_FAILED: rb_funcall(sock->monitor_handler, intern_on_close_failed, 2, rb_str_new2(event.data.close_failed.addr), INT2FIX(event.data.close_failed.err));
+        case ZMQ_EVENT_CLOSE_FAILED: rb_funcall(sock->monitor_handler, intern_on_close_failed, 2, rb_str_new2(endpoint_str), INT2FIX(event.value));
                                      break;
-        case ZMQ_EVENT_CLOSED: rb_funcall(sock->monitor_handler, intern_on_closed, 2, rb_str_new2(event.data.closed.addr), INT2FIX(event.data.closed.fd));
+        case ZMQ_EVENT_CLOSED: rb_funcall(sock->monitor_handler, intern_on_closed, 2, rb_str_new2(endpoint_str), INT2FIX(event.value));
                                break;
-        case ZMQ_EVENT_DISCONNECTED: rb_funcall(sock->monitor_handler, intern_on_disconnected, 2, rb_str_new2(event.data.disconnected.addr), INT2FIX(event.data.disconnected.fd));
+        case ZMQ_EVENT_DISCONNECTED: rb_funcall(sock->monitor_handler, intern_on_disconnected, 2, rb_str_new2(endpoint_str), INT2FIX(event.value));
                                      break;
         }
 
@@ -1694,6 +1708,9 @@ static VALUE rb_czmq_socket_monitor_thread(void *arg)
         {
             break;
         }
+        
+        zmq_msg_close(&args.msg_event);
+        zmq_msg_close(&args.msg_endpoint);
     }
     /* leave the socket to be closed when the context is destroyed on the main/other thread.
         This additional thread is likely to be terminated by termination, interrupt or the

@@ -295,7 +295,7 @@ static VALUE rb_czmq_beacon_pipe(VALUE obj)
     zmq_sock_wrapper *sock = NULL;
     VALUE socket;
     GetZmqBeacon(obj);
-    socket = rb_czmq_socket_alloc(Qnil, NULL, zbeacon_pipe(beacon->beacon));
+    socket = rb_czmq_socket_alloc(Qnil, NULL, zbeacon_socket(beacon->beacon));
     GetZmqSocket(socket);
     sock->state = ZMQ_SOCKET_BOUND;
     return socket;

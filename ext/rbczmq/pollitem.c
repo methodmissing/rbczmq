@@ -83,7 +83,7 @@ static VALUE rb_czmq_pollitem_s_new(int argc, VALUE *argv, VALUE obj)
        pollitem->item->fd = 0;
        pollitem->item->socket = sock->socket;
        /* Do not block on socket close */
-       zsockopt_set_linger(sock->socket, 1);
+       // zsockopt_set_linger(sock->socket, 1);
     } else if (rb_obj_is_kind_of(pollable, rb_cIO)) {
        pollitem->io = pollable;
        pollitem->socket = Qnil;
