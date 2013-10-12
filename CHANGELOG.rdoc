@@ -1,5 +1,9 @@
 = Changelog
 
+== 1.7.2 (October 12, 2013)
+
+* Upgrade to libzmq 4.0.1 and czmq 2
+
 == 1.7.1 (July 25, 2013)
 
 * FIX: ZMQ::Message#pop did not relase ownership of frame.
