@@ -211,6 +211,19 @@ static void rb_czmq_free_loop_gc(void *ptr)
 }
 
 /*
+ * :nodoc:
+ *  GC mark callback
+ *
+*/
+static void rb_czmq_mark_loop(void *ptr)
+{
+    zmq_loop_wrapper *loop = (zmq_loop_wrapper *)ptr;
+    if (loop) {
+        rb_gc_mark(loop->items);
+    }
+}
+
+/*
  *  call-seq:
  *     ZMQ::Loop.new    =>  ZMQ::Loop
  *
@@ -225,12 +238,13 @@ static VALUE rb_czmq_loop_new(VALUE loop)
 {
     zmq_loop_wrapper *lp = NULL;
     errno = 0;
-    loop = Data_Make_Struct(rb_cZmqLoop, zmq_loop_wrapper, 0, rb_czmq_free_loop_gc, lp);
+    loop = Data_Make_Struct(rb_cZmqLoop, zmq_loop_wrapper, rb_czmq_mark_loop, rb_czmq_free_loop_gc, lp);
     lp->loop = zloop_new();
     ZmqAssertObjOnAlloc(lp->loop, lp);
     lp->flags = 0;
     lp->running = false;
     lp->verbose = false;
+    lp->items = rb_ary_new();
     rb_obj_call_init(loop, 0, NULL);
     return loop;
 }
@@ -394,7 +408,7 @@ static VALUE rb_czmq_loop_set_verbose(VALUE obj, VALUE level)
  * === Examples
  *     loop = ZMQ::Loop.new                        =>   ZMQ::Loop
  *     item = ZMQ::Pollitem.new(sock, ZMQ::POLLIN) =>   ZMQ::Pollitem
- *     loop.register(item)                         =>   true
+ *     loop.register(item)                         =>   ZMQ::Pollitem (coerced)
  *
 */
 
@@ -405,11 +419,12 @@ static VALUE rb_czmq_loop_register(VALUE obj, VALUE pollable)
     ZmqGetLoop(obj);
     pollable = rb_czmq_pollitem_coerce(pollable);
     ZmqGetPollitem(pollable);
+    rb_ary_push(loop->items, pollable);
     rc = zloop_poller(loop->loop, pollitem->item, rb_czmq_loop_pollitem_callback, (void *)pollitem);
     ZmqAssert(rc);
     /* Let pollable be verbose if loop is verbose */
     if (loop->verbose == true) rb_czmq_pollitem_set_verbose(pollable, Qtrue);
-    return Qtrue;
+    return pollable;
 }
 
 /*
@@ -433,6 +448,7 @@ static VALUE rb_czmq_loop_remove(VALUE obj, VALUE pollable)
     pollable = rb_czmq_pollitem_coerce(pollable);
     ZmqGetPollitem(pollable);
     zloop_poller_end(loop->loop, pollitem->item);
+    rb_ary_delete(loop->items, pollable);
     return Qnil;
 }
 
@@ -456,6 +472,7 @@ static VALUE rb_czmq_loop_register_timer(VALUE obj, VALUE tm)
     ZmqGetLoop(obj);
     ZmqGetTimer(tm);
     rc = zloop_timer(loop->loop, timer->delay, timer->times, rb_czmq_loop_timer_callback, (void *)tm);
+    rb_ary_push(loop->items, tm);
     ZmqAssert(rc);
     return Qtrue;
 }
@@ -481,6 +498,7 @@ static VALUE rb_czmq_loop_cancel_timer(VALUE obj, VALUE tm)
     ZmqGetLoop(obj);
     ZmqGetTimer(tm);
     rc = zloop_timer_end(loop->loop, (void *)tm);
+    rb_ary_delete(loop->items, tm);
     ZmqAssert(rc);
     return Qtrue;
 }

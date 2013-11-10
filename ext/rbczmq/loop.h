@@ -8,6 +8,7 @@ typedef struct {
     int flags;
     bool verbose;
     bool running;
+    VALUE items; /* pollitem and timer objects we need to keep from being garbage collected. */
 } zmq_loop_wrapper;
 
 #define ZmqAssertLoop(obj) ZmqAssertType(obj, rb_cZmqLoop, "ZMQ::Loop")
