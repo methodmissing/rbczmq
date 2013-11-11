@@ -1,5 +1,9 @@
 = Changelog
 
+== 1.7.3 (November 11, 2013)
+
+* Add an array of poll items to ZMQ::Loop so that they are not garbage collected. #25
+
 == 1.7.2 (October 12, 2013)
 
 * Upgrade to libzmq 4.0.1 and czmq 2
