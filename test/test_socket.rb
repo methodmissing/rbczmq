@@ -275,6 +275,19 @@ class TestZmqSocket < ZmqTestCase
   ensure
     ctx.destroy
   end
+
+  def test_send_receive_with_null_in_string
+    string = [1,0,1,2,3,4,5].pack('c*')
+    ctx = ZMQ::Context.new
+    rep = ctx.socket(:PAIR)
+    rep.bind("inproc://test.socket-send_receive")
+    req = ctx.socket(:PAIR)
+    req.connect("inproc://test.socket-send_receive")
+    assert req.send(string)
+    assert_equal string, rep.recv
+  ensure
+    ctx.destroy
+  end
   
   def test_verbose
     ctx = ZMQ::Context.new

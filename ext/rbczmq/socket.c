@@ -348,6 +348,25 @@ static VALUE rb_czmq_socket_set_verbose(VALUE obj, VALUE level)
 
 /*
  * :nodoc:
+ *
+ * Based on czmq `s_send_string` to send a C string. We need to be able to support
+ * strings that contain null bytes, so we cannot use zstr_send as it is intended for
+ * null terminated C strings.
+ */
+static int rb_czmq_nogvl_zstr_send_internal(struct nogvl_send_args *args, int flags)
+{
+    errno = 0;
+    zmq_sock_wrapper *socket = args->socket;
+
+    zmq_msg_t message;
+    zmq_msg_init_size(&message, args->length);
+    memcpy(zmq_msg_data(&message), args->msg, args->length);
+    int rc = zmq_sendmsg(socket->socket, &message, flags);
+    return (rc == -1? -1: 0);
+}
+
+/*
+ * :nodoc:
  *  Sends a raw string while the GIL is released.
  *
 */
@@ -355,8 +374,8 @@ static VALUE rb_czmq_nogvl_zstr_send(void *ptr)
 {
     struct nogvl_send_args *args = ptr;
     errno = 0;
-    zmq_sock_wrapper *socket = args->socket;
-    return (VALUE)zstr_send(socket->socket, "%s", args->msg);
+    int rc = rb_czmq_nogvl_zstr_send_internal(args, 0);
+    return (VALUE)rc;
 }
 
 /*
@@ -368,8 +387,8 @@ static VALUE rb_czmq_nogvl_zstr_sendm(void *ptr)
 {
     struct nogvl_send_args *args = ptr;
     errno = 0;
-    zmq_sock_wrapper *socket = args->socket;
-    return (VALUE)zstr_sendm(socket->socket, "%s", args->msg);
+    int rc = rb_czmq_nogvl_zstr_send_internal(args, ZMQ_SNDMORE);
+    return (VALUE)rc;
 }
 
 /*
@@ -394,9 +413,11 @@ static VALUE rb_czmq_socket_send(VALUE obj, VALUE msg)
     GetZmqSocket(obj);
     ZmqAssertSocketNotPending(sock, "can only send on a bound or connected socket!");
     ZmqSockGuardCrossThread(sock);
-    Check_Type(msg, T_STRING);
     args.socket = sock;
-    args.msg = StringValueCStr(msg);
+    StringValue(msg);
+    Check_Type(msg, T_STRING);
+    args.msg = RSTRING_PTR(msg);
+    args.length = RSTRING_LEN(msg);
     rc = (int)rb_thread_blocking_region(rb_czmq_nogvl_zstr_send, (void *)&args, RUBY_UBF_IO, 0);
     ZmqAssert(rc);
     if (sock->verbose)
@@ -427,9 +448,11 @@ static VALUE rb_czmq_socket_sendm(VALUE obj, VALUE msg)
     GetZmqSocket(obj);
     ZmqAssertSocketNotPending(sock, "can only send on a bound or connected socket!");
     ZmqSockGuardCrossThread(sock);
-    Check_Type(msg, T_STRING);
     args.socket = sock;
-    args.msg = StringValueCStr(msg);
+    StringValue(msg);
+    Check_Type(msg, T_STRING);
+    args.msg = RSTRING_PTR(msg);
+    args.length = RSTRING_LEN(msg);
     rc = (int)rb_thread_blocking_region(rb_czmq_nogvl_zstr_sendm, (void *)&args, RUBY_UBF_IO, 0);
     ZmqAssert(rc);
     if (sock->verbose)
@@ -447,7 +470,13 @@ static VALUE rb_czmq_nogvl_recv(void *ptr)
     struct nogvl_recv_args *args = ptr;
     errno = 0;
     zmq_sock_wrapper *socket = args->socket;
-    return (VALUE)zstr_recv(socket->socket);
+
+    // implement similar to zstr_recv, except that the copy to the string is done
+    // after we return with the GIL so that the ruby string object can be created
+    // from the zmq message buffer in a single copy.
+    assert (socket->socket);
+    int rc = zmq_recvmsg(socket->socket, &args->message, 0);
+    return (VALUE)rc;
 }
 
 /*
@@ -474,13 +503,21 @@ static VALUE rb_czmq_socket_recv(VALUE obj)
     ZmqAssertSocketNotPending(sock, "can only receive on a bound or connected socket!");
     ZmqSockGuardCrossThread(sock);
     args.socket = sock;
-    str = (char *)rb_thread_blocking_region(rb_czmq_nogvl_recv, (void *)&args, RUBY_UBF_IO, 0);
-    if (str == NULL) return result;
+    zmq_msg_init(&args.message);
+
+    int rc = (int)rb_thread_blocking_region(rb_czmq_nogvl_recv, (void *)&args, RUBY_UBF_IO, 0);
+    if (rc < 0) {
+        zmq_msg_close(&args.message);
+        return Qnil;
+    }
     ZmqAssertSysError();
     if (sock->verbose)
         zclock_log ("I: %s socket %p: recv \"%s\"", zsocket_type_str(sock->socket), sock->socket, str);
-    result = ZmqEncode(rb_str_new2(str));
-    free(str);
+
+    result = rb_str_new(zmq_msg_data(&args.message), zmq_msg_size(&args.message));
+    zmq_msg_close(&args.message);
+
+    result = ZmqEncode(result);
     return result;
 }
 
@@ -501,19 +538,29 @@ static VALUE rb_czmq_socket_recv(VALUE obj)
 static VALUE rb_czmq_socket_recv_nonblock(VALUE obj)
 {
     char *str = NULL;
+    struct nogvl_recv_args args;
     errno = 0;
     VALUE result = Qnil;
     zmq_sock_wrapper *sock = NULL;
     GetZmqSocket(obj);
     ZmqAssertSocketNotPending(sock, "can only receive on a bound or connected socket!");
     ZmqSockGuardCrossThread(sock);
-    str = zstr_recv_nowait(sock->socket);
-    if (str == NULL) return result;
+
+    zmq_msg_init(&args.message);
+
+    int rc = zmq_recvmsg(sock->socket, &args.message, ZMQ_DONTWAIT);
+    if (rc < 0) {
+        zmq_msg_close(&args.message);
+        return Qnil;
+    }
     ZmqAssertSysError();
     if (sock->verbose)
-        zclock_log ("I: %s socket %p: recv_nonblock \"%s\"", zsocket_type_str(sock->socket), sock->socket, str);
-    result = ZmqEncode(rb_str_new2(str));
-    free(str);
+        zclock_log ("I: %s socket %p: recv \"%s\"", zsocket_type_str(sock->socket), sock->socket, str);
+
+    result = rb_str_new(zmq_msg_data(&args.message), zmq_msg_size(&args.message));
+    zmq_msg_close(&args.message);
+
+    result = ZmqEncode(result);
     return result;
 }
 

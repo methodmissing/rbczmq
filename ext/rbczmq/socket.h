@@ -102,6 +102,7 @@ void rb_czmq_free_sock_gc(void *ptr);
 struct nogvl_send_args {
     zmq_sock_wrapper *socket;
     const char *msg;
+    long length;
     bool read;
 };
 
@@ -120,6 +121,7 @@ struct nogvl_send_message_args {
 
 struct nogvl_recv_args {
     zmq_sock_wrapper *socket;
+    zmq_msg_t message;
 };
 
 struct nogvl_socket_poll_args {
