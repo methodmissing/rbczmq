@@ -6,7 +6,7 @@ PATH
 GEM
   remote: https://rubygems.org/
   specs:
-    json (1.8.0)
+    json (1.8.1)
     rake (10.1.0)
     rake-compiler (0.8.3)
       rake
