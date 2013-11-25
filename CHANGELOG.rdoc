@@ -1,5 +1,9 @@
 = Changelog
 
+== 1.7.4 (November 25, 2013)
+
+* 	Update ZMQ::Socket to support strings with null bytes in them (Matt Connolly)
+
 == 1.7.3 (November 11, 2013)
 
 * Add an array of poll items to ZMQ::Loop so that they are not garbage collected. #25
