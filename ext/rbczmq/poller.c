@@ -154,15 +154,22 @@ VALUE rb_czmq_poller_poll(int argc, VALUE *argv, VALUE obj)
     args.nitems = poller->poll_size;
     args.timeout = (long)timeout;
 
+    rb_ary_clear(poller->readables);
+    rb_ary_clear(poller->writables);
+
     rc = (int)rb_thread_blocking_region(rb_czmq_nogvl_poll, (void *)&args, RUBY_UBF_IO, 0);
+
     /* only call ZmqAssert if return code is less than zero since zmq_poll returns the number of pollers on success */
     if (rc < 0) {
-        ZmqAssert(rc);
+        if (zmq_errno() == EINTR || zmq_errno() == EAGAIN) {
+            // these are recoverable errors, so return flow to ruby so that retry / interrupt handling can be
+            // done in ruby code. Ruby will see a -1 result. If it was an INT (or other) signal, ruby's signal
+            // handler will raise the Interrupt exception.
+        } else {
+            ZmqAssert(rc);
+        }
     }
-    if (rc == 0) {
-        rb_ary_clear(poller->readables);
-        rb_ary_clear(poller->writables);
-    } else {
+    if (rc > 0) {
         rb_czmq_poller_rebuild_selectables(poller);
     }
     return INT2NUM(rc);
