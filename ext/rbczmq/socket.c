@@ -537,7 +537,6 @@ static VALUE rb_czmq_socket_recv(VALUE obj)
 
 static VALUE rb_czmq_socket_recv_nonblock(VALUE obj)
 {
-    char *str = NULL;
     struct nogvl_recv_args args;
     errno = 0;
     VALUE result = Qnil;
@@ -554,11 +553,13 @@ static VALUE rb_czmq_socket_recv_nonblock(VALUE obj)
         return Qnil;
     }
     ZmqAssertSysError();
-    if (sock->verbose)
-        zclock_log ("I: %s socket %p: recv \"%s\"", zsocket_type_str(sock->socket), sock->socket, str);
 
     result = rb_str_new(zmq_msg_data(&args.message), zmq_msg_size(&args.message));
     zmq_msg_close(&args.message);
+
+    if (sock->verbose) {
+        zclock_log ("I: %s socket %p: recv \"%s\"", zsocket_type_str(sock->socket), sock->socket, StringValueCStr(result));
+    }
 
     result = ZmqEncode(result);
     return result;
