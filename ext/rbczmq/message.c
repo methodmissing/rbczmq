@@ -377,7 +377,7 @@ static VALUE rb_czmq_message_pushstr(VALUE obj, VALUE str)
     ZmqGetMessage(obj);
     ZmqAssertMessageOwned(message);
     Check_Type(str, T_STRING);
-    rc = zmsg_pushmem(message->message, StringValueCStr(str), RSTRING_LEN(str));
+    rc = zmsg_pushmem(message->message, RSTRING_PTR(str), RSTRING_LEN(str));
     ZmqAssert(rc);
 
     /* keep zlist of frame ruby objects in sync with message's frame list */
@@ -410,7 +410,7 @@ static VALUE rb_czmq_message_addstr(VALUE obj, VALUE str)
     ZmqGetMessage(obj);
     ZmqAssertMessageOwned(message);
     Check_Type(str, T_STRING);
-    rc = zmsg_addmem(message->message, StringValueCStr(str), RSTRING_LEN(str));
+    rc = zmsg_addmem(message->message, RSTRING_PTR(str), RSTRING_LEN(str));
     ZmqAssert(rc);
 
     /* keep zlist of frame ruby objects in sync with message's frame list */
@@ -603,7 +603,9 @@ static VALUE rb_czmq_message_encode(VALUE obj)
     ZmqGetMessage(obj);
     ZmqReturnNilUnlessOwned(message);
     buff_size = zmsg_encode(message->message, &buff);
-    return rb_str_new((char *)buff, buff_size);
+    VALUE result = rb_str_new((char *)buff, buff_size);
+    free(buff);
+    return result;
 }
 
 /*
@@ -623,7 +625,7 @@ static VALUE rb_czmq_message_s_decode(ZMQ_UNUSED VALUE obj, VALUE buffer)
 {
     zmsg_t * m = NULL;
     Check_Type(buffer, T_STRING);
-    m = zmsg_decode((byte *)StringValueCStr(buffer), RSTRING_LEN(buffer));
+    m = zmsg_decode((byte *)RSTRING_PTR(buffer), RSTRING_LEN(buffer));
     if (m == NULL) return Qnil;
     return rb_czmq_alloc_message(m);
 }
