@@ -67,6 +67,7 @@ static VALUE rb_czmq_nogvl_zctx_new(ZMQ_UNUSED void *ptr)
     zctx_t *ctx = NULL;
     ctx = zctx_new();
     zctx_set_linger(ctx, 1);
+    zsys_handler_reset(); // restore ruby signal handlers.
     return (VALUE)ctx;
 }
 
