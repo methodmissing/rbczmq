@@ -1,5 +1,12 @@
 = Changelog
 
+== 1.7.5 (to be released)
+
+* Update to ZMQ 4.0.3. This fixes several bugs, incluing: https://github.com/zeromq/libzmq/issues/769
+* Fix ZMQ::Poller#poll handling of signals (INT/TERM)
+* Fix several cases where Ruby strings with NUL characters in them would have been truncated as C strings when sent in ZMQ messages.
+* Updates Gemfile to support rubinius 2.
+
 == 1.7.4 (November 25, 2013)
 
 * 	Update ZMQ::Socket to support strings with null bytes in them (Matt Connolly)
