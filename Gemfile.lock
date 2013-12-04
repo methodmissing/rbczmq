@@ -8,6 +8,7 @@ GEM
   specs:
     ffi2-generators (0.1.1)
     json (1.8.1)
+    minitest (4.7.5)
     rake (10.1.0)
     rake-compiler (0.8.3)
       rake
@@ -220,6 +221,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  minitest (~> 4.7)
   rake
   rake-compiler (~> 0.8.0)
   rbczmq!
