@@ -9,4 +9,5 @@ gem 'rdoc'
 platforms :rbx do
   gem 'rubysl', '~> 2.0'
   gem 'minitest', '~> 4.7'
+  gem 'rubysl-test-unit', '~> 2.0'
 end

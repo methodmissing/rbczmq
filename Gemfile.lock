@@ -178,7 +178,7 @@ GEM
     rubysl-ostruct (2.0.4)
     rubysl-pathname (2.0.0)
     rubysl-prettyprint (2.0.2)
-    rubysl-prime (2.0.0)
+    rubysl-prime (2.0.1)
     rubysl-profile (2.0.0)
     rubysl-profiler (2.0.1)
     rubysl-pstore (2.0.0)
@@ -201,6 +201,8 @@ GEM
     rubysl-syslog (2.0.1)
       ffi2-generators (~> 0.1)
     rubysl-tempfile (2.0.1)
+    rubysl-test-unit (2.0.3)
+      minitest (~> 4.7)
     rubysl-thread (2.0.2)
     rubysl-thwait (2.0.0)
     rubysl-time (2.0.3)
@@ -227,3 +229,4 @@ DEPENDENCIES
   rbczmq!
   rdoc
   rubysl (~> 2.0)
+  rubysl-test-unit (~> 2.0)
