@@ -184,7 +184,7 @@ VALUE rb_czmq_nogvl_socket_bind(void *ptr)
     struct nogvl_conn_args *args = ptr;
     errno = 0;
     zmq_sock_wrapper *socket = args->socket;
-    rc = zsocket_bind(socket->socket, args->endpoint);
+    rc = zsocket_bind(socket->socket, "%s", args->endpoint);
     return (VALUE)rc;
 }
 
@@ -199,7 +199,7 @@ VALUE rb_czmq_nogvl_socket_connect(void *ptr)
     struct nogvl_conn_args *args = ptr;
     errno = 0;
     zmq_sock_wrapper *socket = args->socket;
-    rc = zsocket_connect(socket->socket, args->endpoint);
+    rc = zsocket_connect(socket->socket, "%s", args->endpoint);
     return (VALUE)rc;
 }
 
@@ -284,7 +284,7 @@ VALUE rb_czmq_nogvl_socket_disconnect(void *ptr)
     struct nogvl_conn_args *args = ptr;
     errno = 0;
     zmq_sock_wrapper *socket = args->socket;
-    rc = zsocket_disconnect(socket->socket, args->endpoint);
+    rc = zsocket_disconnect(socket->socket, "%s", args->endpoint);
     return (VALUE)rc;
 }
 
