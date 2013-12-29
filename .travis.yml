@@ -14,6 +14,8 @@ notifications:
 branches:
   only:
     - master
+before_install:
+  - ruby -v | grep rubinius > /dev/null && travis_retry gem install rubysl
 matrix:
   allow_failures:
     - rvm: ruby-head
