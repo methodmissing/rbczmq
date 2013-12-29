@@ -229,5 +229,4 @@ DEPENDENCIES
   rbczmq!
   rdoc
   rubysl (~> 2.0)
-  rubysl-logger (~> 2.0)
   rubysl-test-unit (~> 2.0)
