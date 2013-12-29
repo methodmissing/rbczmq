@@ -3,7 +3,7 @@
 require File.join(File.dirname(__FILE__), 'helper')
 
 class TestMonitor
-  attr_reader :listening, :closed
+  attr_reader :listening, :closed, :accepted
 
   def on_listening(addr, fd)
     @listening = true
@@ -11,6 +11,10 @@ class TestMonitor
 
   def on_closed(addr, fd)
     @closed = true
+  end
+
+  def on_accepted(addr, fd)
+    @accepted = true
   end
 end
 
