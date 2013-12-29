@@ -183,13 +183,13 @@ class TestZmqSocket < ZmqTestCase
     assert(req.state & ZMQ::Socket::PENDING)
     req.connect("tcp://127.0.0.1:#{port}")
     assert_equal "PAIR socket", sock.to_s
-    assert_equal "REP socket bound to tcp://127.0.0.1:*", rep.to_s
+    assert_equal "REP socket bound to tcp://127.0.0.1:#{port}", rep.to_s
     assert_equal "REQ socket connected to tcp://127.0.0.1:#{port}", req.to_s
 
 
     port2 = rep.bind("tcp://127.0.0.1:*")
     req.connect("tcp://127.0.0.1:#{port2}")
-    assert_equal "REP socket bound to tcp://127.0.0.1:*, tcp://127.0.0.1:*", rep.to_s
+    assert_equal "REP socket bound to tcp://127.0.0.1:#{port}, tcp://127.0.0.1:#{port2}", rep.to_s
     assert_equal "REQ socket connected to tcp://127.0.0.1:#{port}, tcp://127.0.0.1:#{port2}", req.to_s
   ensure
     ctx.destroy
@@ -201,7 +201,7 @@ class TestZmqSocket < ZmqTestCase
     port = rep.bind("tcp://127.0.0.1:*")
     req = ctx.socket(:REQ)
     req.connect("tcp://127.0.0.1:#{port}")
-    assert_equal "tcp://127.0.0.1:*", rep.endpoint
+    assert_equal "tcp://127.0.0.1:#{port}", rep.endpoint
     assert_equal "tcp://127.0.0.1:#{port}", req.endpoint
   ensure
     ctx.destroy
@@ -213,12 +213,12 @@ class TestZmqSocket < ZmqTestCase
     port = rep.bind("tcp://127.0.0.1:*")
     req = ctx.socket(:REQ)
     req.connect("tcp://127.0.0.1:#{port}")
-    assert_equal ["tcp://127.0.0.1:*"], rep.endpoints
+    assert_equal ["tcp://127.0.0.1:#{port}"], rep.endpoints
     assert_equal ["tcp://127.0.0.1:#{port}"], req.endpoints
 
     port2 = rep.bind("tcp://127.0.0.1:*")
     req.connect("tcp://127.0.0.1:#{port2}")
-    assert_equal ["tcp://127.0.0.1:*", "tcp://127.0.0.1:*"], rep.endpoints
+    assert_equal ["tcp://127.0.0.1:#{port}", "tcp://127.0.0.1:#{port2}"], rep.endpoints
     assert_equal ["tcp://127.0.0.1:#{port}", "tcp://127.0.0.1:#{port2}"], req.endpoints
   ensure
     ctx.destroy
@@ -558,4 +558,33 @@ end
   ensure
     ctx.destroy
   end
+
+  def test_last_endpoint
+    ctx = ZMQ::Context.new
+    sock = ctx.socket(ZMQ::PULL)
+    port = sock.bind('tcp://127.0.0.1:*')
+    assert_equal sock.last_endpoint, "tcp://127.0.0.1:#{port}"
+  ensure
+    ctx.destroy
+  end
+
+  def test_ephemeral_bind
+    ctx = ZMQ::Context.new
+    sock = ctx.socket(ZMQ::PULL)
+    port = sock.bind('tcp://127.0.0.1:*')
+    assert sock.endpoints.include?("tcp://127.0.0.1:#{port}")
+  ensure
+    ctx.destroy
+  end
+
+  def test_ephemral_bind_and_unbind
+    ctx = ZMQ::Context.new
+    sock = ctx.socket(ZMQ::PULL)
+    port = sock.bind('tcp://127.0.0.1:*')
+    sock.unbind("tcp://127.0.0.1:#{port}")
+    assert sock.endpoints.count == 0
+  ensure
+    ctx.destroy
+  end
+
 end

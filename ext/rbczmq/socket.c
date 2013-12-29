@@ -232,10 +232,14 @@ static VALUE rb_czmq_socket_bind(VALUE obj, VALUE endpoint)
     if (rc < 0) {
         ZmqAssert(rc);
     }
+    /* get the endpoint name with any ephemeral ports filled in. */
+    char* endpoint_string = zsocket_last_endpoint(sock->socket);
+    ZmqAssert(endpoint_string != NULL);
     if (sock->verbose)
-        zclock_log ("I: %s socket %p: bound \"%s\"", zsocket_type_str(sock->socket), obj, StringValueCStr(endpoint));
+        zclock_log ("I: %s socket %p: bound \"%s\"", zsocket_type_str(sock->socket), obj, endpoint_string);
     sock->state = ZMQ_SOCKET_BOUND;
-    rb_ary_push(sock->endpoints, rb_str_new4(endpoint));
+    rb_ary_push(sock->endpoints, rb_str_new_cstr(endpoint_string));
+    free(endpoint_string);
     return INT2NUM(rc);
 }
 
@@ -266,10 +270,14 @@ static VALUE rb_czmq_socket_connect(VALUE obj, VALUE endpoint)
     args.endpoint = StringValueCStr(endpoint);
     rc = (int)rb_thread_blocking_region(rb_czmq_nogvl_socket_connect, (void *)&args, RUBY_UBF_IO, 0);
     ZmqAssert(rc);
+    /* get the endpoint name with any ephemeral ports filled in. */
+    char* endpoint_string = zsocket_last_endpoint(sock->socket);
+    ZmqAssert(endpoint_string != NULL);
     if (sock->verbose)
-        zclock_log ("I: %s socket %p: connected \"%s\"", zsocket_type_str(sock->socket), obj, StringValueCStr(endpoint));
+        zclock_log ("I: %s socket %p: connected \"%s\"", zsocket_type_str(sock->socket), obj, endpoint_string);
     sock->state = ZMQ_SOCKET_CONNECTED;
-    rb_ary_push(sock->endpoints, rb_str_new4(endpoint));
+    rb_ary_push(sock->endpoints, rb_str_new_cstr(endpoint_string));
+    free(endpoint_string);
     return Qtrue;
 }
 
@@ -322,6 +330,58 @@ static VALUE rb_czmq_socket_disconnect(VALUE obj, VALUE endpoint)
     rb_ary_delete(sock->endpoints, endpoint);
     return Qtrue;
 }
+
+/*
+ * :nodoc:
+ *  Unbinds from an endpoint while the GIL is released.
+ *
+*/
+VALUE rb_czmq_nogvl_socket_unbind(void *ptr)
+{
+    int rc;
+    struct nogvl_conn_args *args = ptr;
+    errno = 0;
+    zmq_sock_wrapper *socket = args->socket;
+    rc = zsocket_unbind(socket->socket, "%s", args->endpoint);
+    return (VALUE)rc;
+}
+
+
+/*
+ *  call-seq:
+ *     sock.disconnect("tcp://localhost:3456")   =>  boolean
+ *
+ *  Attempts to disconnect from a given endpoint.
+ *
+ * === Examples
+ *     ctx = ZMQ::Context.new
+ *     rep = ctx.socket(:REP)
+ *     port = rep.bind("tcp://localhost:*")    =>  5432
+ *     req = ctx.socket(:REQ)
+ *     req.connect("tcp://localhost:#{port}")   => true
+ *     rep.unbind("tcp://localhost:#{port}")   => true
+ *
+*/
+
+static VALUE rb_czmq_socket_unbind(VALUE obj, VALUE endpoint)
+{
+    struct nogvl_conn_args args;
+    int rc;
+    zmq_sock_wrapper *sock = NULL;
+    GetZmqSocket(obj);
+    ZmqSockGuardCrossThread(sock);
+    Check_Type(endpoint, T_STRING);
+    args.socket = sock;
+    args.endpoint = StringValueCStr(endpoint);
+    rc = (int)rb_thread_blocking_region(rb_czmq_nogvl_socket_unbind, (void *)&args, RUBY_UBF_IO, 0);
+    ZmqAssert(rc);
+    if (sock->verbose)
+        zclock_log ("I: %s socket %p: unbound \"%s\"", zsocket_type_str(sock->socket), obj, StringValueCStr(endpoint));
+    sock->state = ZMQ_SOCKET_DISCONNECTED;
+    rb_ary_delete(sock->endpoints, endpoint);
+    return Qtrue;
+}
+
 
 /*
  *  call-seq:
@@ -1665,6 +1725,28 @@ static VALUE rb_czmq_socket_set_opt_sndtimeo(VALUE obj, VALUE value)
     ZmqSetSockOpt(obj, zsocket_set_sndtimeo, "SNDTIMEO", value);
 }
 
+
+/*
+ *  call-seq:
+ *     port = sock.bind('tcp://0.0.0.0:*')  =>  41415
+ *     sock.last_endpoint  =>  "tcp://0.0.0.0:41415"
+ *
+ *  Gets the last endpoint that this socket connected or bound to.
+ *
+*/
+
+static VALUE rb_czmq_socket_opt_last_endpoint(VALUE obj)
+{
+    zmq_sock_wrapper *sock = NULL;
+    GetZmqSocket(obj);
+    char* endpoint_string = zsocket_last_endpoint(sock->socket);
+    VALUE result = rb_str_new_cstr(endpoint_string);
+    if (endpoint_string != NULL) {
+        free(endpoint_string);
+    }
+    return result;
+}
+
 /*
  * :nodoc:
  *  Receives a monitoring event message while the GIL is released.
@@ -1843,6 +1925,7 @@ void _init_rb_czmq_socket()
     rb_define_method(rb_cZmqSocket, "real_bind", rb_czmq_socket_bind, 1);
     rb_define_method(rb_cZmqSocket, "real_connect", rb_czmq_socket_connect, 1);
     rb_define_method(rb_cZmqSocket, "disconnect", rb_czmq_socket_disconnect, 1);
+    rb_define_method(rb_cZmqSocket, "unbind", rb_czmq_socket_unbind, 1);
     rb_define_method(rb_cZmqSocket, "fd", rb_czmq_socket_fd, 0);
     rb_define_alias(rb_cZmqSocket, "to_i", "fd");
     rb_define_method(rb_cZmqSocket, "verbose=", rb_czmq_socket_set_verbose, 1);
@@ -1899,4 +1982,5 @@ void _init_rb_czmq_socket()
     rb_define_method(rb_cZmqSocket, "sndtimeo", rb_czmq_socket_opt_sndtimeo, 0);
     rb_define_method(rb_cZmqSocket, "sndtimeo=", rb_czmq_socket_set_opt_sndtimeo, 1);
     rb_define_method(rb_cZmqSocket, "monitor", rb_czmq_socket_monitor, -1);
+    rb_define_method(rb_cZmqSocket, "last_endpoint", rb_czmq_socket_opt_last_endpoint, 0);
 }
