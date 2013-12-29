@@ -15,7 +15,7 @@ branches:
   only:
     - master
 before_install:
-  - ruby -v | grep rubinius > /dev/null && travis_retry gem install rubysl
+  - if [[ $(ruby -v) =~ rubinius ]]; then travis_retry gem install rubysl; fi; gem list; true
 matrix:
   allow_failures:
     - rvm: ruby-head
