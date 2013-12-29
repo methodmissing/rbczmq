@@ -326,8 +326,11 @@ static VALUE rb_czmq_socket_disconnect(VALUE obj, VALUE endpoint)
     ZmqAssert(rc);
     if (sock->verbose)
         zclock_log ("I: %s socket %p: disconnected \"%s\"", zsocket_type_str(sock->socket), obj, StringValueCStr(endpoint));
-    sock->state = ZMQ_SOCKET_DISCONNECTED;
     rb_ary_delete(sock->endpoints, endpoint);
+    long endpoint_count = RARRAY_LEN(sock->endpoints);
+    if (endpoint_count == 0) {
+        sock->state = ZMQ_SOCKET_DISCONNECTED;
+    }
     return Qtrue;
 }
 
@@ -377,8 +380,11 @@ static VALUE rb_czmq_socket_unbind(VALUE obj, VALUE endpoint)
     ZmqAssert(rc);
     if (sock->verbose)
         zclock_log ("I: %s socket %p: unbound \"%s\"", zsocket_type_str(sock->socket), obj, StringValueCStr(endpoint));
-    sock->state = ZMQ_SOCKET_DISCONNECTED;
     rb_ary_delete(sock->endpoints, endpoint);
+    long endpoint_count = RARRAY_LEN(sock->endpoints);
+    if (endpoint_count == 0) {
+        sock->state = ZMQ_SOCKET_DISCONNECTED;
+    }
     return Qtrue;
 }
 

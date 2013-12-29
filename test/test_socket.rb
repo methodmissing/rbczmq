@@ -587,4 +587,22 @@ end
     ctx.destroy
   end
 
+  def test_pollable_after_bind_and_unbind
+    ctx = ZMQ::Context.new
+    router = ctx.socket(ZMQ::ROUTER)
+    port1 = router.bind('tcp://127.0.0.1:*')
+    dealer = ctx.socket(ZMQ::DEALER)
+    dealer.connect(router.last_endpoint)
+    port2 = router.bind('tcp://127.0.0.1:*')
+    dealer.send("hello")
+    sleep(0.01)
+    assert_equal router.poll(0), true
+    router.unbind("tcp://127.0.0.1:#{port2}")
+    assert_equal router.poll(0), true
+    message = router.recv_message
+    assert_equal message.last.to_s, "hello"
+  ensure
+    ctx.destroy
+  end
+
 end
