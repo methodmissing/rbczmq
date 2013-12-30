@@ -1,4 +1,5 @@
 language: ruby
+bundler_args: --quiet
 rvm:
   - rbx-2
   - 1.9.3
