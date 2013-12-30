@@ -6,6 +6,10 @@
 * Fix ZMQ::Poller#poll handling of signals (INT/TERM)
 * Fix several cases where Ruby strings with NUL characters in them would have been truncated as C strings when sent in ZMQ messages.
 * Updates Gemfile to support rubinius 2.
+* Add ZMQ::Socket#unbind method. Has same affect as disconnect, but matches semantics of bind, as per other bindings.
+* Update ZMQ::Socket state to only become disconnected after all connected/bound endpoints are removed with disconnect/unbind.
+* Fix ZMQ::Socket connect/bind bug with percent symbols in the address URI.
+* Add ZMQ::Socket#last_endpoint for retrieving the string URI with an ephemeral port number filled in.
 
 == 1.7.4 (November 25, 2013)
 
