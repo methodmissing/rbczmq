@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-require File.join(File.dirname(__FILE__), 'helper')
+require File.expand_path("../helper.rb", __FILE__)
 
 Thread.abort_on_exception = true
 
