@@ -222,9 +222,13 @@ Building from source
     git submodule update
     rake
 
-Running tests
+Running all tests
 
     rake test
+
+Running a single test file:
+
+    ruby -Ilib test/test_context.rb
 
 OS X notes:
 
