@@ -16,6 +16,7 @@ VALUE rb_cZmqReqSocket;
 VALUE rb_cZmqPairSocket;
 VALUE rb_cZmqXPubSocket;
 VALUE rb_cZmqXSubSocket;
+VALUE rb_cZmqStreamSocket;
 
 VALUE rb_cZmqFrame;
 VALUE rb_cZmqMessage;
@@ -249,6 +250,7 @@ void Init_rbczmq_ext()
     rb_define_const(rb_mZmq, "PULL", INT2NUM(ZMQ_PULL));
     rb_define_const(rb_mZmq, "XSUB", INT2NUM(ZMQ_XSUB));
     rb_define_const(rb_mZmq, "XPUB", INT2NUM(ZMQ_XPUB));
+    rb_define_const(rb_mZmq, "STREAM", INT2NUM(ZMQ_STREAM));
 
     rb_define_const(rb_mZmq, "EFSM", INT2NUM(EFSM));
     rb_define_const(rb_mZmq, "ENOCOMPATPROTO", INT2NUM(ENOCOMPATPROTO));

@@ -1898,16 +1898,17 @@ void _init_rb_czmq_socket()
 {
     rb_cZmqSocket = rb_define_class_under(rb_mZmq, "Socket", rb_cObject);
     rb_cZmqPubSocket = rb_define_class_under(rb_cZmqSocket, "Pub", rb_cZmqSocket);
-    rb_cZmqSubSocket = rb_define_class_under(rb_cZmqSocket, "Sub", rb_cZmqSocket);;
-    rb_cZmqPushSocket = rb_define_class_under(rb_cZmqSocket, "Push", rb_cZmqSocket);;
-    rb_cZmqPullSocket = rb_define_class_under(rb_cZmqSocket, "Pull", rb_cZmqSocket);;
-    rb_cZmqRouterSocket = rb_define_class_under(rb_cZmqSocket, "Router", rb_cZmqSocket);;
-    rb_cZmqDealerSocket = rb_define_class_under(rb_cZmqSocket, "Dealer", rb_cZmqSocket);;
-    rb_cZmqRepSocket = rb_define_class_under(rb_cZmqSocket, "Rep", rb_cZmqSocket);;
-    rb_cZmqReqSocket = rb_define_class_under(rb_cZmqSocket, "Req", rb_cZmqSocket);;
-    rb_cZmqPairSocket = rb_define_class_under(rb_cZmqSocket, "Pair", rb_cZmqSocket);;
+    rb_cZmqSubSocket = rb_define_class_under(rb_cZmqSocket, "Sub", rb_cZmqSocket);
+    rb_cZmqPushSocket = rb_define_class_under(rb_cZmqSocket, "Push", rb_cZmqSocket);
+    rb_cZmqPullSocket = rb_define_class_under(rb_cZmqSocket, "Pull", rb_cZmqSocket);
+    rb_cZmqRouterSocket = rb_define_class_under(rb_cZmqSocket, "Router", rb_cZmqSocket);
+    rb_cZmqDealerSocket = rb_define_class_under(rb_cZmqSocket, "Dealer", rb_cZmqSocket);
+    rb_cZmqRepSocket = rb_define_class_under(rb_cZmqSocket, "Rep", rb_cZmqSocket);
+    rb_cZmqReqSocket = rb_define_class_under(rb_cZmqSocket, "Req", rb_cZmqSocket);
+    rb_cZmqPairSocket = rb_define_class_under(rb_cZmqSocket, "Pair", rb_cZmqSocket);
     rb_cZmqXPubSocket = rb_define_class_under(rb_cZmqSocket, "XPub", rb_cZmqSocket);
-    rb_cZmqXSubSocket = rb_define_class_under(rb_cZmqSocket, "XSub", rb_cZmqSocket);;
+    rb_cZmqXSubSocket = rb_define_class_under(rb_cZmqSocket, "XSub", rb_cZmqSocket);
+    rb_cZmqStreamSocket = rb_define_class_under(rb_cZmqSocket, "Stream", rb_cZmqSocket);
 
     intern_on_connected = rb_intern("on_connected");
     intern_on_connect_delayed = rb_intern("on_connect_delayed");

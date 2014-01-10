@@ -66,6 +66,7 @@ extern VALUE rb_cZmqReqSocket;
 extern VALUE rb_cZmqPairSocket;
 extern VALUE rb_cZmqXPubSocket;
 extern VALUE rb_cZmqXSubSocket;
+extern VALUE rb_cZmqStreamSocket;
 
 extern VALUE rb_cZmqFrame;
 extern VALUE rb_cZmqMessage;
