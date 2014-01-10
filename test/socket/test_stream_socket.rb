@@ -20,7 +20,7 @@ class TestStreamSocket < ZmqTestCase
     port = sock.bind("tcp://127.0.0.1:*")
 
     tcp = TCPSocket.new('127.0.0.1', port)
-    tcp.sendmsg("hello")
+    tcp.write("hello")
 
     Timeout.timeout(5) do
       msg = sock.recv_message
@@ -53,7 +53,7 @@ class TestStreamSocket < ZmqTestCase
   #   port = sock.bind("tcp://127.0.0.1:*")
   #
   #   tcp = TCPSocket.new('127.0.0.1', port)
-  #   tcp.sendmsg("hello")
+  #   tcp.write("hello")
   #
   #   Timeout.timeout(5) do
   #     identity = sock.recv
