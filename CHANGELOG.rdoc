@@ -1,6 +1,6 @@
 = Changelog
 
-== 1.7.5 (to be released)
+== 1.7.5 (January 17, 2014)
 
 * Update to ZMQ 4.0.3. This fixes several bugs, incluing: https://github.com/zeromq/libzmq/issues/769
 * Fix ZMQ::Poller#poll handling of signals (INT/TERM)
