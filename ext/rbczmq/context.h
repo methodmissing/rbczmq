@@ -1,6 +1,8 @@
 #ifndef RBCZMQ_CONTEXT_H
 #define RBCZMQ_CONTEXT_H
 
+#include "socket.h"
+
 #define ZMQ_CONTEXT_DESTROYED 0x01
 
 typedef struct {
@@ -8,6 +10,7 @@ typedef struct {
     int flags;
     pid_t pid; /* this is the pid for the process that created the context. Only this process can use the context. */
     VALUE pidValue; /* this is the key used to ensure one context per process */
+    zlist_t* sockets; /* list of socket wrapper objects owned by this context. */
 } zmq_ctx_wrapper;
 
 #define ZmqAssertContext(obj) ZmqAssertType(obj, rb_cZmqContext, "ZMQ::Context")
@@ -31,5 +34,7 @@ struct nogvl_socket_args {
 VALUE rb_czmq_socket_alloc(VALUE context, zctx_t *ctx, void *s);
 
 void _init_rb_czmq_context();
+
+void rb_czmq_context_destroy_socket(zmq_sock_wrapper* socket);
 
 #endif

@@ -5,6 +5,7 @@ require 'socket'
 
 class TestZmqBeacon < ZmqTestCase
   def setup
+    GC.start
     r = Random.new
     begin
       # find a random port number that we are able to bind to, and use this port
@@ -78,6 +79,7 @@ class TestZmqBeacon < ZmqTestCase
   end
 
   def test_pipe
+    GC.start
     beacon = ZMQ::Beacon.new(@port)
     assert_instance_of ZMQ::Socket::Pair, beacon.pipe
     GC.start # check GC cycle with "detached" socket

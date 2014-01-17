@@ -13,36 +13,6 @@ VALUE intern_on_disconnected;
 
 /*
  * :nodoc:
- *  Destroy the socket while the GIL is released - may block depending on socket linger value.
- *
-*/
-static VALUE rb_czmq_nogvl_zsocket_destroy(void *ptr)
-{
-    zmq_sock_wrapper *sock = ptr;
-    errno = 0;
-    sock->flags |= ZMQ_SOCKET_DESTROYED;
-    zsocket_destroy(sock->ctx, sock->socket);
-    return Qnil;
-}
-
-/*
- * :nodoc:
- *  Free all resources for a socket - invoked by the lower level ZMQ::Socket#destroy as well as the GC callback (some
- *  regressions here still though).
- *
-*/
-void rb_czmq_free_sock(zmq_sock_wrapper *sock)
-{
-    if (sock->ctx) {
-        rb_thread_blocking_region(rb_czmq_nogvl_zsocket_destroy, sock, RUBY_UBF_IO, 0);
-        if (zmq_errno() == ENOTSOCK) ZmqRaiseSysError();
-        sock->socket = NULL;
-        sock->flags |= ZMQ_SOCKET_DESTROYED;
-    }
-}
-
-/*
- * :nodoc:
  *  GC mark callback
  *
 */
@@ -50,8 +20,9 @@ void rb_czmq_mark_sock(void *ptr)
 {
     zmq_sock_wrapper *sock = (zmq_sock_wrapper *)ptr;
     if (sock && sock->ctx){
-        if (sock->verbose)
-            zclock_log ("I: %s socket %p, context %p: GC mark", zsocket_type_str(sock->socket), sock, sock->ctx);
+        if (sock->verbose) {
+            zclock_log ("I: %s socket %p, context %p: GC mark", sock->flags & ZMQ_SOCKET_DESTROYED ? "(closed)" : zsocket_type_str(sock->socket), sock, sock->ctx);
+        }
         rb_gc_mark(sock->endpoints);
         rb_gc_mark(sock->thread);
         rb_gc_mark(sock->context);
@@ -69,14 +40,27 @@ void rb_czmq_mark_sock(void *ptr)
 void rb_czmq_free_sock_gc(void *ptr)
 {
     zmq_sock_wrapper *sock = (zmq_sock_wrapper *)ptr;
-    if (sock && sock->ctx){
-        if (sock->verbose)
-            zclock_log ("I: %s socket %p, context %p: GC free", zsocket_type_str(sock->socket), sock, sock->ctx);
+    if (sock) {
+        if (sock->verbose) {
+            zclock_log ("I: %s socket %p, context %p: GC free", sock->flags & ZMQ_SOCKET_DESTROYED ? "(closed)" : zsocket_type_str(sock->socket), sock, sock ? sock->ctx : NULL);
+        }
 /*
         XXX: cyclic dependency
         #4  0x0000000100712524 in zsocket_set_linger (linger=1, socket=<value temporarily unavailable, due to optimizations>) at zsocket.c:288
         if (sock->socket != NULL && !(sock->flags & ZMQ_SOCKET_DESTROYED)) rb_czmq_free_sock(sock);
+
+        SOLVED:
+
+        The above occurs when a socket is not explicitly destroyed and the socket happens to be garbage
+        collected *after* the context has been destroyed. When the context is destroyed, all sockets
+        in the context are closed internally by czmq. However, the rbczmq ZMQ::Socket object still
+        thinks it is alive and will destroy again.
+
+        The new socket destroy method 'rb_czmq_context_destroy_socket' is idempotent and can safely
+        be called after either context or socket has been destroyed.
 */
+
+        rb_czmq_context_destroy_socket(sock);
         xfree(sock);
     }
 }
@@ -100,8 +84,8 @@ static VALUE rb_czmq_socket_close(VALUE obj)
     ZmqSockGuardCrossThread(sock);
     /* This is useless for production / real use cases as we can't query the state again OR assume
     anything about the underlying connection. Merely doing the right thing. */
-    sock->state = ZMQ_SOCKET_PENDING;
-    rb_czmq_free_sock(sock);
+    sock->state = ZMQ_SOCKET_DISCONNECTED;
+    rb_czmq_context_destroy_socket(sock);
     return Qnil;
 }
 
@@ -1814,7 +1798,7 @@ static VALUE rb_czmq_socket_monitor_thread(void *arg)
         // copy endpoint into ruby string.
         VALUE endpoint_str = rb_str_new(zmq_msg_data(&args.msg_endpoint), zmq_msg_size(&args.msg_endpoint));
         VALUE method = Qnil;
-        
+
         switch (event.event) {
         case ZMQ_EVENT_CONNECTED: method = intern_on_connected; break;
         case ZMQ_EVENT_CONNECT_DELAYED: method = intern_on_connect_delayed; break;
@@ -1827,7 +1811,7 @@ static VALUE rb_czmq_socket_monitor_thread(void *arg)
         case ZMQ_EVENT_CLOSED: method = intern_on_closed; break;
         case ZMQ_EVENT_DISCONNECTED: method = intern_on_disconnected; break;
         }
-        
+
         if (method != Qnil) {
             rb_funcall(sock->monitor_handler, method, 2, endpoint_str, INT2FIX(event.value));
         }

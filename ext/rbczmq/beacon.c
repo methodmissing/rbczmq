@@ -8,7 +8,10 @@
 static VALUE rb_czmq_nogvl_beacon_destroy(void *ptr)
 {
     zmq_beacon_wrapper *beacon = ptr;
-    zbeacon_destroy(&beacon->beacon);
+    if (beacon->beacon) {
+        zbeacon_destroy(&beacon->beacon);
+        beacon->beacon = NULL;
+    }
     return Qnil;
 }
 

@@ -1,6 +1,7 @@
 #include "rbczmq_ext.h"
 
 static VALUE intern_zctx_process;
+static zmutex_t* context_mutex = NULL; /* this can only be used outside of Ruby GVL to avoid deadlocks */
 
 static VALUE rb_czmq_ctx_set_iothreads(VALUE context, VALUE io_threads);
 
@@ -18,13 +19,19 @@ static VALUE get_pid()
 */
 static VALUE rb_czmq_nogvl_zctx_destroy(void *ptr)
 {
+    zmutex_lock(context_mutex);
+
     errno = 0;
     zmq_ctx_wrapper *ctx = ptr;
     if (ctx->pid == getpid()) {
-        /* only actually destroy the context if we are the process that created it. */
+        /* Only actually destroy the context if we are the process that created it. */
+        /* This may need to be changed when ZeroMQ's support for forking is improved. */
         zctx_destroy(&ctx->ctx);
     }
     ctx->flags |= ZMQ_CONTEXT_DESTROYED;
+
+    zmutex_unlock(context_mutex);
+
     return Qnil;
 }
 
@@ -37,9 +44,79 @@ static void rb_czmq_free_ctx(zmq_ctx_wrapper *ctx)
 {
     VALUE ctx_map;
     ctx_map = rb_ivar_get(rb_mZmq, intern_zctx_process);
+
+    // destroy sockets. This duplicates czmq's context shutdown which destroys sockets,
+    // but we need to process the list of Ruby ZMQ::Socket objects' data objects to mark
+    // them as closed so that they cannot be double destroyed.
+    zmq_sock_wrapper* socket;
+    while ((socket = zlist_pop(ctx->sockets))) {
+        rb_czmq_context_destroy_socket(socket);
+    }
+
+    // finally, shutdown the context.
     rb_thread_blocking_region(rb_czmq_nogvl_zctx_destroy, ctx, RUBY_UBF_IO, 0);
+
     ctx->ctx = NULL;
     rb_hash_aset(ctx_map, ctx->pidValue, Qnil);
+    zlist_destroy(&ctx->sockets);
+}
+
+/*
+ * :nodoc:
+ *  Destroy the socket while the GIL is released - may block depending on socket linger value.
+ *
+*/
+VALUE rb_czmq_nogvl_zsocket_destroy(void *ptr)
+{
+    zmutex_lock(context_mutex);
+
+    zmq_sock_wrapper *sock = ptr;
+    errno = 0;
+    // zclock_log ("I: %s socket %p, context %p: destroy", zsocket_type_str(sock->socket), sock, sock->ctx);
+    zsocket_destroy(sock->ctx, sock->socket);
+
+    zmutex_unlock(context_mutex);
+    return Qnil;
+}
+
+/*
+ * :nodoc:
+ *
+ * Interal use: Close a socket from the context being destroyed or garbage collected, or
+ * from the socket being closed, or garbage collected.
+ *
+ * The order of these events cannot be determined, so this function has to be idempotent
+ * about this. The close socket call to CZMQ must happen only once or it will abort the
+ * application.
+ */
+void rb_czmq_context_destroy_socket(zmq_sock_wrapper* socket)
+{
+    if (socket == NULL || socket->context == NULL) {
+        return;
+    }
+
+    if (socket && socket->context == Qnil) {
+        // A socket with a context object of Qnil is created by ZMQ::Beacon#new.
+        // zbeacon is responsible for closing this socket in its own context, we will simply mark
+        // it as destroyed and let the ZMQ::Beacon object do the clean up when its internal
+        // context is destroyed.
+    }
+    else if (socket->ctx && socket->ctx_wrapper && !(socket->flags & ZMQ_SOCKET_DESTROYED)) {
+        zmq_ctx_wrapper *ctx = (zmq_ctx_wrapper *)socket->ctx_wrapper;
+        if (ctx) {
+            // remove from the list of socket objects created by this context object.
+            zlist_remove(ctx->sockets, socket);
+
+            if (socket->socket) {
+                rb_thread_blocking_region(rb_czmq_nogvl_zsocket_destroy, socket, RUBY_UBF_IO, 0);
+            }
+        }
+    }
+
+    socket->flags |= ZMQ_SOCKET_DESTROYED;
+    socket->ctx = NULL;
+    socket->socket = NULL;
+    socket->state = ZMQ_SOCKET_DISCONNECTED;
 }
 
 /*
@@ -53,6 +130,19 @@ static void rb_czmq_free_ctx_gc(void *ptr)
     if (ctx) {
         if (ctx->ctx != NULL && !(ctx->flags & ZMQ_CONTEXT_DESTROYED)) rb_czmq_free_ctx(ctx);
         xfree(ctx);
+    }
+}
+
+/*
+ * :nodoc:
+ *  GC mark callback
+ *
+*/
+static void rb_czmq_mark_ctx_gc(void *ptr)
+{
+    zmq_ctx_wrapper *ctx = (zmq_ctx_wrapper *)ptr;
+    if (ctx) {
+        rb_gc_mark(ctx->pidValue);
     }
 }
 
@@ -94,12 +184,13 @@ static VALUE rb_czmq_ctx_s_new(int argc, VALUE *argv, VALUE context)
     rb_scan_args(argc, argv, "01", &io_threads);
     ctx_map = rb_ivar_get(rb_mZmq, intern_zctx_process);
     if (!NIL_P(rb_hash_aref(ctx_map, get_pid()))) rb_raise(rb_eZmqError, "single ZMQ context per process allowed");
-    context = Data_Make_Struct(rb_cZmqContext, zmq_ctx_wrapper, 0, rb_czmq_free_ctx_gc, ctx);
+    context = Data_Make_Struct(rb_cZmqContext, zmq_ctx_wrapper, rb_czmq_mark_ctx_gc, rb_czmq_free_ctx_gc, ctx);
     ctx->ctx = (zctx_t*)rb_thread_blocking_region(rb_czmq_nogvl_zctx_new, NULL, RUBY_UBF_IO, 0);
     ZmqAssertObjOnAlloc(ctx->ctx, ctx);
     ctx->flags = 0;
     ctx->pid = getpid();
     ctx->pidValue = get_pid();
+    ctx->sockets = zlist_new();
     rb_obj_call_init(context, 0, NULL);
     rb_hash_aset(ctx_map, ctx->pidValue, context);
     if (!NIL_P(io_threads)) rb_czmq_ctx_set_iothreads(context, io_threads);
@@ -190,7 +281,10 @@ VALUE rb_czmq_nogvl_socket_new(void *ptr)
 {
     errno = 0;
     struct nogvl_socket_args *args = ptr;
-    return (VALUE)zsocket_new(args->ctx, args->type);
+    zmutex_lock(context_mutex);
+    VALUE result = (VALUE)zsocket_new(args->ctx, args->type);
+    zmutex_unlock(context_mutex);
+    return result;
 }
 
 /*
@@ -230,7 +324,7 @@ static inline VALUE rb_czmq_ctx_socket_klass(int socket_type)
     }
 }
 
-VALUE rb_czmq_socket_alloc(VALUE context, zctx_t *ctx, void *s)
+VALUE rb_czmq_socket_alloc(VALUE context, zctx_t *zctx, void *s)
 {
     VALUE socket;
     zmq_sock_wrapper *sock = NULL;
@@ -238,7 +332,13 @@ VALUE rb_czmq_socket_alloc(VALUE context, zctx_t *ctx, void *s)
     sock->socket = s;
     ZmqAssertObjOnAlloc(sock->socket, sock);
     sock->flags = 0;
-    sock->ctx = ctx;
+    sock->ctx = zctx; // czmq context
+    if (context == Qnil) {
+        sock->ctx_wrapper = NULL;
+    } else {
+        ZmqGetContext(context);
+        sock->ctx_wrapper = ctx; // rbczmq ZMQ::Context wrapped data struct
+    }
     sock->verbose = false;
     sock->state = ZMQ_SOCKET_PENDING;
     sock->endpoints = rb_ary_new();
@@ -279,7 +379,11 @@ static VALUE rb_czmq_ctx_socket(VALUE obj, VALUE type)
 
     args.ctx = ctx->ctx;
     args.type = socket_type;
-    return rb_czmq_socket_alloc(obj, ctx->ctx, (void*)rb_thread_blocking_region(rb_czmq_nogvl_socket_new, (void *)&args, RUBY_UBF_IO, 0));
+    VALUE socket_object = rb_czmq_socket_alloc(obj, ctx->ctx, (void*)rb_thread_blocking_region(rb_czmq_nogvl_socket_new, (void *)&args, RUBY_UBF_IO, 0));
+    zmq_sock_wrapper *sock = NULL;
+    GetZmqSocket(socket_object);
+    zlist_push(ctx->sockets, sock);
+    return socket_object;
 }
 
 void _init_rb_czmq_context()
@@ -294,4 +398,6 @@ void _init_rb_czmq_context()
     rb_define_method(rb_cZmqContext, "iothreads=", rb_czmq_ctx_set_iothreads, 1);
     rb_define_method(rb_cZmqContext, "linger=", rb_czmq_ctx_set_linger, 1);
     rb_define_method(rb_cZmqContext, "socket", rb_czmq_ctx_socket, 1);
+
+    context_mutex = zmutex_new();
 }

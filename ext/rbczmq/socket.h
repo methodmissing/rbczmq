@@ -13,6 +13,7 @@
 typedef struct {
     zctx_t *ctx;
     void *socket;
+    void *ctx_wrapper; // zmq_ctx_wrapper - can't be defined yet, circular header includes.
     int flags;
     bool verbose;
     int state;
@@ -153,5 +154,6 @@ extern VALUE intern_on_close_failed;
 extern VALUE intern_on_disconnected;
 
 void _init_rb_czmq_socket();
+VALUE rb_czmq_nogvl_zsocket_destroy(void *ptr);
 
 #endif
