@@ -1,6 +1,6 @@
 = rbczmq - binding for the high level ZeroMQ C API {<img src="https://secure.travis-ci.org/methodmissing/rbczmq.png" alt="Build Status" />}[http://travis-ci.org/methodmissing/rbczmq]
 
-(c) 2011-2013 Lourens Naudé (methodmissing), James Tucker (raggi), Matt Connolly (mattconnolly) with API guidance from the czmq (http://czmq.zeromq.org/) project.
+(c) 2011-2014 Lourens Naudé (methodmissing), James Tucker (raggi), Matt Connolly (mattconnolly) with API guidance from the czmq (http://czmq.zeromq.org/) project.
 
   http://github.com/methodmissing/rbczmq
 
@@ -206,7 +206,7 @@ Here's a few basic examples. Please refer to documentation (http://methodmissing
 * A POSIX compliant OS, known to work well on Linux, BSD variants, Mac OS X and SmartOS.
 * Ruby MRI 1.9, 2.0 or Rubinius (JRuby capi support forthcoming)
 * A C compiler
-* This is a "fat" gem, including its own source code for both ZeroMQ and CZMQ libraries. No system installation if either library is required.
+* This is a "fat" gem, including its own source code for both ZeroMQ and CZMQ libraries. No system installation of either library is required.
 
 == Installation
 
@@ -251,7 +251,6 @@ This gem uses the "zmq" and "czmq" libraries, both of which are licensed under t
 * Revisit the ZMQ::Loop API
 * RDOC fail on mixed C and Ruby source files that document that same constants
 * GC guards to prevent recycling objects being sent / received.
-* Sockets can bind && connect to multiple endpoints - account for that
 * Watch out for further cases where REQ / REP pairs could raise EFSM
 * Do not clobber local scope from macros (James's commit in master)
 * Incorporate examples into CI as well
