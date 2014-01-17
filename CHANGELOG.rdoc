@@ -11,6 +11,7 @@
 * Fix ZMQ::Socket connect/bind bug with percent symbols in the address URI.
 * Add ZMQ::Socket#last_endpoint for retrieving the string URI with an ephemeral port number filled in.
 * Add STREAM socket type, using ruby class ZMQ::Socket::Stream.
+* Fix ZMQ::Socket implicit close when garbage collected.
 
 == 1.7.4 (November 25, 2013)
 
