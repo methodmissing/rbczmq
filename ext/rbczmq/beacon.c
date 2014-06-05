@@ -57,7 +57,7 @@ static VALUE rb_czmq_beacon_s_new(VALUE beacon, VALUE port)
     Check_Type(port, T_FIXNUM);
     beacon = Data_Make_Struct(rb_cZmqBeacon, zmq_beacon_wrapper, 0, rb_czmq_free_beacon_gc, bcn);
     prt = FIX2INT(port);
-    bcn->beacon = (zbeacon_t*)rb_thread_blocking_region(rb_czmq_nogvl_new_beacon, (void *)&prt, RUBY_UBF_IO, 0);
+    bcn->beacon = (zbeacon_t*)rb_thread_blocking_region(rb_czmq_nogvl_new_beacon, (void *)prt, RUBY_UBF_IO, 0);
     ZmqAssertObjOnAlloc(bcn->beacon, bcn);
     rb_obj_call_init(beacon, 0, NULL);
     return beacon;
