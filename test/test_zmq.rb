@@ -13,6 +13,12 @@ class TestZmq < ZmqTestCase
     assert version.all?{|v| Fixnum === v }
   end
 
+  def test_czmq_version
+    version = ZMQ.czmq_version
+    assert_instance_of Array, version
+    assert version.all?{|v| Fixnum === v }
+  end
+
   def test_now
     assert [Bignum, Fixnum].include?(ZMQ.now.class)
   end
