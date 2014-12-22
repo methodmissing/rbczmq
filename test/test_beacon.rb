@@ -6,23 +6,10 @@ require 'socket'
 class TestZmqBeacon < ZmqTestCase
   def setup
     GC.start
-    r = Random.new
-    begin
-      # find a random port number that we are able to bind to, and use this port
-      # for the beacon tests.
-      udp = UDPSocket.new
-      @port = 10000 + r.rand(50000)
-      udp.bind('0.0.0.0', @port)
-    rescue Errno::EADDRINUSE
-      udp.close
-      retry
-    ensure
-      udp.close
-    end
   end
 
   def test_beacon
-    beacon = ZMQ::Beacon.new(@port)
+    beacon = ZMQ::Beacon.new(0)
     assert_instance_of ZMQ::Beacon, beacon
     assert_nil beacon.destroy
     assert_raises TypeError do
@@ -33,14 +20,14 @@ class TestZmqBeacon < ZmqTestCase
   end
 
   def test_hostname
-    beacon = ZMQ::Beacon.new(@port)
+    beacon = ZMQ::Beacon.new(0)
     assert_instance_of String, beacon.hostname
   ensure
     beacon.destroy
   end
 
   def test_set_interval
-    beacon = ZMQ::Beacon.new(@port)
+    beacon = ZMQ::Beacon.new(0)
     beacon.interval = 100
     assert_raises TypeError do
       beacon.interval = :invalid
@@ -50,14 +37,14 @@ class TestZmqBeacon < ZmqTestCase
   end
 
   def test_noecho
-    beacon = ZMQ::Beacon.new(@port)
+    beacon = ZMQ::Beacon.new(0)
     assert_nil beacon.noecho
   ensure
     beacon.destroy
   end
 
   def test_publish
-    beacon = ZMQ::Beacon.new(@port)
+    beacon = ZMQ::Beacon.new(0)
     assert_raises TypeError do
       beacon.publish :invalid
     end
@@ -68,7 +55,7 @@ class TestZmqBeacon < ZmqTestCase
   end
 
   def test_subscribe
-    beacon = ZMQ::Beacon.new(@port)
+    beacon = ZMQ::Beacon.new(0)
     assert_raises TypeError do
       beacon.subscribe :invalid
     end
@@ -80,7 +67,7 @@ class TestZmqBeacon < ZmqTestCase
 
   def test_pipe
     GC.start
-    beacon = ZMQ::Beacon.new(@port)
+    beacon = ZMQ::Beacon.new(0)
     assert_instance_of ZMQ::Socket::Pair, beacon.pipe
     GC.start # check GC cycle with "detached" socket
   ensure
@@ -89,17 +76,18 @@ class TestZmqBeacon < ZmqTestCase
 
   def test_announce_lookup
     ctx = ZMQ::Context.new
-    address = "tcp://127.0.0.1:90000"
-    rep = ctx.bind(:REP, address)
-    service_beacon = ZMQ::Beacon.new(@port)
-    service_beacon.publish(address)
+    rep = ctx.bind(:REP, "tcp://127.0.0.1:0")
+    # official ZRE port, don't know how to introspect beacon to get bound port
+    beacon_port = 5670
+    service_beacon = ZMQ::Beacon.new(beacon_port)
+    service_beacon.publish(rep.endpoint)
     sleep(0.5)
-    client_beacon = ZMQ::Beacon.new(@port)
+    client_beacon = ZMQ::Beacon.new(beacon_port)
     client_beacon.subscribe("tcp")
     client_beacon.pipe.rcvtimeo = 1000
     sender_address = client_beacon.pipe.recv
     client_address = client_beacon.pipe.recv
-    assert_equal address, client_address
+    assert_equal rep.endpoint, client_address
     req = ctx.connect(:REQ, client_address)
     req.send "ping"
     assert_equal "ping", rep.recv
