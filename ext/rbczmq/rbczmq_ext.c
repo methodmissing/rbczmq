@@ -69,6 +69,22 @@ static VALUE rb_czmq_m_version(ZMQ_UNUSED VALUE obj)
 
 /*
  *  call-seq:
+ *     ZMQ.czmq_version    =>  Array
+ *
+ *  Returns the czmq version linked against.
+ *
+ * === Examples
+ *     ZMQ.czmq_version    =>  [3,0,0]
+ *
+*/
+
+static VALUE rb_czmq_m_czmq_version(ZMQ_UNUSED VALUE obj)
+{
+    return rb_ary_new3(3, INT2NUM(CZMQ_VERSION_MAJOR), INT2NUM(CZMQ_VERSION_MINOR), INT2NUM(CZMQ_VERSION_PATCH));
+}
+
+/*
+ *  call-seq:
  *     ZMQ.now    =>  Fixnum
  *
  *  Returns a current timestamp as a Fixnum
@@ -228,6 +244,7 @@ void Init_rbczmq_ext()
 
     rb_define_module_function(rb_mZmq, "interrupted?", rb_czmq_m_interrupted_p, 0);
     rb_define_module_function(rb_mZmq, "version", rb_czmq_m_version, 0);
+    rb_define_module_function(rb_mZmq, "czmq_version", rb_czmq_m_czmq_version, 0);
     rb_define_module_function(rb_mZmq, "now", rb_czmq_m_now, 0);
     rb_define_module_function(rb_mZmq, "log", rb_czmq_m_log, 1);
     rb_define_module_function(rb_mZmq, "error", rb_czmq_m_error, 0);
