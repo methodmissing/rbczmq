@@ -2,8 +2,6 @@
 
 require File.expand_path("../helper.rb", __FILE__)
 
-Thread.abort_on_exception = true
-
 class TestZmqThreading < ZmqTestCase
   def test_threaded
     ctx = ZMQ::Context.new
@@ -30,5 +28,7 @@ class TestZmqThreading < ZmqTestCase
     threads.map!{|t| t.value }
     thread_vals = [0, 1, 2, 3, 4, 500_000, 500_000, 500_000, 500_000, 500_000, expected, true]
     assert_equal thread_vals, threads
+  ensure
+    ctx.destroy
   end
 end

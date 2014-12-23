@@ -124,9 +124,8 @@ class TestZmqSocket < ZmqTestCase
     assert sock.fd != -1
     assert(sock.state & ZMQ::Socket::BOUND)
     tcp_sock = nil
-    assert_nothing_raised do
-      tcp_sock = TCPSocket.new("127.0.0.1", port)
-    end
+    tcp_sock = TCPSocket.new("127.0.0.1", port)
+    assert tcp_sock
   ensure
     ctx.destroy
     tcp_sock.close if tcp_sock

@@ -11,7 +11,7 @@ class TestZmqContext < ZmqTestCase
     end
     assert_equal ctx, ZMQ.context
   ensure
-    assert_nil ctx.destroy
+    ctx.destroy
   end
 
   def test_destroyed_context
@@ -30,7 +30,7 @@ class TestZmqContext < ZmqTestCase
     end
     assert_equal ctx, ZMQ.context
   ensure
-    assert_nil ctx.destroy
+    ctx.destroy
   end
 
   def test_iothreads

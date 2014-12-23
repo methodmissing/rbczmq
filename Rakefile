@@ -34,7 +34,8 @@ end
 
 desc 'Run rbczmq tests'
 Rake::TestTask.new(:test) do |t|
-  t.test_files = Dir.glob("test/**/test_*.rb")
+  t.libs << 'test'
+  t.pattern = "test/**/test_*.rb"
   t.verbose = true
   t.warning = true
 end

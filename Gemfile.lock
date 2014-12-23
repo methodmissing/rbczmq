@@ -8,7 +8,7 @@ GEM
   specs:
     ffi2-generators (0.1.1)
     json (1.8.1)
-    minitest (4.7.5)
+    minitest (5.5.0)
     rake (10.4.2)
     rake-compiler (0.8.3)
       rake
@@ -200,8 +200,6 @@ GEM
     rubysl-syslog (2.1.0)
       ffi2-generators (~> 0.1)
     rubysl-tempfile (2.0.1)
-    rubysl-test-unit (2.0.3)
-      minitest (~> 4.7)
     rubysl-thread (2.0.2)
     rubysl-thwait (2.0.0)
     rubysl-time (2.0.3)
@@ -222,10 +220,9 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  minitest (~> 4.7)
+  minitest (~> 5.5.0)
   rake
   rake-compiler (~> 0.8.0)
   rbczmq!
   rdoc
   rubysl (~> 2.0)
-  rubysl-test-unit (~> 2.0)
