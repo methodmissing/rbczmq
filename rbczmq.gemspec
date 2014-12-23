@@ -19,6 +19,7 @@ Gem::Specification.new do |s|
   s.test_files = `git ls-files test`.split("\n")
   s.rdoc_options = ["--charset=UTF-8"]
   s.require_paths = ["lib"]
+  s.add_development_dependency('minitest', '~> 5.5.0')
   s.add_development_dependency('rake-compiler', '~> 0.8.0')
 
   # get an array of submodule dirs by executing 'pwd' inside each submodule

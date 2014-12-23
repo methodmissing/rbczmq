@@ -36,7 +36,7 @@ class TestZmqFrame < ZmqTestCase
   def test_dup
     frame =  ZMQ::Frame("message")
     dup_frame = frame.dup
-    assert_not_equal dup_frame.object_id, frame.object_id
+    assert_operator dup_frame.object_id, :!=, frame.object_id
     assert_equal frame.data, dup_frame.data
   end
 
@@ -54,7 +54,7 @@ class TestZmqFrame < ZmqTestCase
   def test_equals
     frame =  ZMQ::Frame("message")
     assert_equal frame, ZMQ::Frame("message")
-    assert_not_equal frame, ZMQ::Frame("msg")
+    assert_operator frame, :!=, ZMQ::Frame("msg")
   end
 
   def test_compare

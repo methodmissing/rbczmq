@@ -11,7 +11,7 @@ class TestZmqMessage < ZmqTestCase
 
   def test_destroyed
     msg = ZMQ::Message("one", "two")
-    assert_not_nil msg.encode
+    assert msg.encode
     assert !msg.gone?
     msg.destroy
     assert msg.gone?
@@ -162,7 +162,7 @@ class TestZmqMessage < ZmqTestCase
     msg =  ZMQ::Message.new
     msg.pushstr "header"
     dup_msg = msg.dup
-    assert_not_equal dup_msg.object_id, msg.object_id
+    assert_operator dup_msg.object_id, :!=, msg.object_id
     assert_equal msg.size, dup_msg.size
     assert_equal "header", msg.popstr
   end
@@ -195,7 +195,7 @@ class TestZmqMessage < ZmqTestCase
     other.pushstr "header"
     other.pushstr "body"
 
-    assert_not_equal msg, other
+    assert_operator msg, :!=, other
     assert !msg.eql?(other)
     assert other.eql?(other)
   end
@@ -244,7 +244,7 @@ class TestZmqMessage < ZmqTestCase
     msg.add ZMQ::Frame.new("world")
     push.send_message(msg)
     received = pull.recv_message
-    assert_not_nil received
+    assert received
     assert_equal 2, received.size
     assert_equal "hello", received.first.data
     assert_equal "world", received.next.data
