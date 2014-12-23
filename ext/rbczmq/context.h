@@ -10,6 +10,8 @@ typedef struct {
     int flags;
     pid_t pid; /* this is the pid for the process that created the context. Only this process can use the context. */
     VALUE pidValue; /* this is the key used to ensure one context per process */
+    const char *file; /* Source file where the context for this process was created */
+    int line; /* Source line where the context for this process was created */
     zlist_t* sockets; /* list of socket wrapper objects owned by this context. */
 } zmq_ctx_wrapper;
 

@@ -178,12 +178,17 @@ static VALUE rb_czmq_nogvl_zctx_new(ZMQ_UNUSED void *ptr)
 
 static VALUE rb_czmq_ctx_s_new(int argc, VALUE *argv, VALUE context)
 {
+    VALUE process_ctx;
     VALUE ctx_map;
     VALUE io_threads;
     zmq_ctx_wrapper *ctx = NULL;
     rb_scan_args(argc, argv, "01", &io_threads);
     ctx_map = rb_ivar_get(rb_mZmq, intern_zctx_process);
-    if (!NIL_P(rb_hash_aref(ctx_map, get_pid()))) rb_raise(rb_eZmqError, "single ZMQ context per process allowed");
+    process_ctx = rb_hash_aref(ctx_map, get_pid());
+    if (!NIL_P(process_ctx)){
+      Data_Get_Struct(process_ctx, zmq_ctx_wrapper, ctx);
+      rb_raise(rb_eZmqError, "single ZMQ context per process allowed (previous context created at %s:%d)", ctx->file, ctx->line);
+    }
     context = Data_Make_Struct(rb_cZmqContext, zmq_ctx_wrapper, rb_czmq_mark_ctx_gc, rb_czmq_free_ctx_gc, ctx);
     ctx->ctx = (zctx_t*)rb_thread_blocking_region(rb_czmq_nogvl_zctx_new, NULL, RUBY_UBF_IO, 0);
     ZmqAssertObjOnAlloc(ctx->ctx, ctx);
@@ -191,6 +196,8 @@ static VALUE rb_czmq_ctx_s_new(int argc, VALUE *argv, VALUE context)
     ctx->pid = getpid();
     ctx->pidValue = get_pid();
     ctx->sockets = zlist_new();
+    ctx->file = rb_sourcefile();
+    ctx->line = rb_sourceline();
     rb_obj_call_init(context, 0, NULL);
     rb_hash_aset(ctx_map, ctx->pidValue, context);
     if (!NIL_P(io_threads)) rb_czmq_ctx_set_iothreads(context, io_threads);
