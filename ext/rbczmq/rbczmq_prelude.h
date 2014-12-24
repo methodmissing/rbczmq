@@ -11,7 +11,7 @@
 #ifdef JRUBY
 #include "jruby.h"
 #else
-#ifdef HAVE_RB_THREAD_BLOCKING_REGION
+#if HAVE_RB_THREAD_BLOCKING_REGION || HAVE_RB_THREAD_CALL_WITHOUT_GVL
 #include "ruby19.h"
 #else
 #include "ruby18.h"
