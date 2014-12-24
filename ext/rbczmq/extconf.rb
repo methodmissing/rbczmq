@@ -124,7 +124,7 @@ end
 
 dir_config('rbczmq')
 
-have_func('rb_thread_call_without_gvl')
+have_func('rb_thread_blocking_region')
 have_func('rb_thread_call_without_gvl')
 
 $INCFLAGS << " -I#{zmq_include_path}" if find_header("zmq.h", zmq_include_path)
