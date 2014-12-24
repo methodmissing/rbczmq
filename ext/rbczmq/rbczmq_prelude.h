@@ -12,7 +12,7 @@
 #include "jruby.h"
 #else
 #if HAVE_RB_THREAD_BLOCKING_REGION || HAVE_RB_THREAD_CALL_WITHOUT_GVL
-#include "ruby19.h"
+#include "ruby2.h"
 #else
 #include "ruby18.h"
 #endif
