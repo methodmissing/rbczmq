@@ -124,6 +124,7 @@ end
 
 dir_config('rbczmq')
 
+have_header('ruby/thread.h')
 have_func('rb_thread_blocking_region')
 have_func('rb_thread_call_without_gvl')
 

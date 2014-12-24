@@ -54,7 +54,7 @@ static void rb_czmq_free_ctx(zmq_ctx_wrapper *ctx)
     }
 
     // finally, shutdown the context.
-    rb_thread_call_without_gvl(rb_czmq_nogvl_zctx_destroy, ctx, RUBY_UBF_IO, 0);
+    rb_thread_call_without_gvl(rb_czmq_nogvl_zctx_destroy, (void *)ctx, RUBY_UBF_IO, 0);
 
     ctx->ctx = NULL;
     rb_hash_aset(ctx_map, ctx->pidValue, Qnil);
@@ -108,7 +108,7 @@ void rb_czmq_context_destroy_socket(zmq_sock_wrapper* socket)
             zlist_remove(ctx->sockets, socket);
 
             if (socket->socket) {
-                rb_thread_call_without_gvl(rb_czmq_nogvl_zsocket_destroy, socket, RUBY_UBF_IO, 0);
+                rb_thread_call_without_gvl(rb_czmq_nogvl_zsocket_destroy, (void *)socket, RUBY_UBF_IO, 0);
             }
         }
     }
@@ -379,6 +379,7 @@ static VALUE rb_czmq_ctx_socket(VALUE obj, VALUE type)
     int socket_type;
     struct nogvl_socket_args args;
     errno = 0;
+    void *socket;
     ZmqGetContext(obj);
     ZmqAssertContextPidMatches(ctx);
     if (TYPE(type) != T_FIXNUM && TYPE(type) != T_SYMBOL) rb_raise(rb_eTypeError, "wrong socket type %s (expected Fixnum or Symbol)", RSTRING_PTR(rb_obj_as_string(type)));
@@ -386,7 +387,8 @@ static VALUE rb_czmq_ctx_socket(VALUE obj, VALUE type)
 
     args.ctx = ctx->ctx;
     args.type = socket_type;
-    VALUE socket_object = rb_czmq_socket_alloc(obj, ctx->ctx, (void*)rb_thread_call_without_gvl(rb_czmq_nogvl_socket_new, (void *)&args, RUBY_UBF_IO, 0));
+    socket = rb_thread_call_without_gvl(rb_czmq_nogvl_socket_new, (void *)&args, RUBY_UBF_IO, 0);
+    VALUE socket_object = rb_czmq_socket_alloc(obj, ctx->ctx, socket);
     zmq_sock_wrapper *sock = NULL;
     GetZmqSocket(socket_object);
     zlist_push(ctx->sockets, sock);
