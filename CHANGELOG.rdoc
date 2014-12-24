@@ -1,5 +1,10 @@
 = Changelog
 
+== 1.7.8 (December 24, 2014)
+
+* clean up beacon tests to bind to port 0 to get an automatically assigned free port (Erkki Eilonen)
+* Support rubies > 2.1
+
 == 1.7.7 (August 29, 2014)
 
 * Add the ability to use system libraries for hosts that already have libzmq and libczmq installed by passing the
