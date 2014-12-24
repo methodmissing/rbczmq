@@ -24,7 +24,7 @@ static void rb_czmq_free_beacon_gc(void *ptr)
 {
     zmq_beacon_wrapper *beacon = (zmq_beacon_wrapper *)ptr;
     if (beacon) {
-        rb_thread_blocking_region(rb_czmq_nogvl_beacon_destroy, beacon, RUBY_UBF_IO, 0);
+        rb_thread_call_without_gvl(rb_czmq_nogvl_beacon_destroy, beacon, RUBY_UBF_IO, 0);
         xfree(beacon);
     }
 }
@@ -57,7 +57,7 @@ static VALUE rb_czmq_beacon_s_new(VALUE beacon, VALUE port)
     Check_Type(port, T_FIXNUM);
     beacon = Data_Make_Struct(rb_cZmqBeacon, zmq_beacon_wrapper, 0, rb_czmq_free_beacon_gc, bcn);
     prt = FIX2INT(port);
-    bcn->beacon = (zbeacon_t*)rb_thread_blocking_region(rb_czmq_nogvl_new_beacon, (void *)prt, RUBY_UBF_IO, 0);
+    bcn->beacon = (zbeacon_t*)rb_thread_call_without_gvl(rb_czmq_nogvl_new_beacon, (void *)prt, RUBY_UBF_IO, 0);
     ZmqAssertObjOnAlloc(bcn->beacon, bcn);
     rb_obj_call_init(beacon, 0, NULL);
     return beacon;
@@ -77,7 +77,7 @@ static VALUE rb_czmq_beacon_s_new(VALUE beacon, VALUE port)
 static VALUE rb_czmq_beacon_destroy(VALUE obj)
 {
     GetZmqBeacon(obj);
-    rb_thread_blocking_region(rb_czmq_nogvl_beacon_destroy, beacon, RUBY_UBF_IO, 0);
+    rb_thread_call_without_gvl(rb_czmq_nogvl_beacon_destroy, beacon, RUBY_UBF_IO, 0);
     return Qnil;
 }
 
@@ -127,7 +127,7 @@ static VALUE rb_czmq_beacon_set_interval(VALUE obj, VALUE interval)
     Check_Type(interval, T_FIXNUM);
     args.beacon = beacon;
     args.interval = FIX2INT(interval);
-    rb_thread_blocking_region(rb_czmq_nogvl_set_interval, (void *)&args, RUBY_UBF_IO, 0);
+    rb_thread_call_without_gvl(rb_czmq_nogvl_set_interval, (void *)&args, RUBY_UBF_IO, 0);
     return Qnil;
 }
 
@@ -156,7 +156,7 @@ static VALUE rb_czmq_nogvl_noecho(void *ptr)
 static VALUE rb_czmq_beacon_noecho(VALUE obj)
 {
     GetZmqBeacon(obj);
-    rb_thread_blocking_region(rb_czmq_nogvl_noecho, (void *)beacon, RUBY_UBF_IO, 0);
+    rb_thread_call_without_gvl(rb_czmq_nogvl_noecho, (void *)beacon, RUBY_UBF_IO, 0);
     return Qnil;
 }
 
@@ -191,7 +191,7 @@ static VALUE rb_czmq_beacon_publish(VALUE obj, VALUE transmit)
     args.beacon = beacon;
     args.transmit = RSTRING_PTR(transmit);
     args.length = (int)RSTRING_LEN(transmit);
-    rb_thread_blocking_region(rb_czmq_nogvl_publish, (void *)&args, RUBY_UBF_IO, 0);
+    rb_thread_call_without_gvl(rb_czmq_nogvl_publish, (void *)&args, RUBY_UBF_IO, 0);
     return Qnil;
 }
 
@@ -220,7 +220,7 @@ static VALUE rb_czmq_nogvl_silence(void *ptr)
 static VALUE rb_czmq_beacon_silence(VALUE obj)
 {
     GetZmqBeacon(obj);
-    rb_thread_blocking_region(rb_czmq_nogvl_silence, (void *)beacon, RUBY_UBF_IO, 0);
+    rb_thread_call_without_gvl(rb_czmq_nogvl_silence, (void *)beacon, RUBY_UBF_IO, 0);
     return Qnil;
 }
 
@@ -260,7 +260,7 @@ static VALUE rb_czmq_beacon_subscribe(VALUE obj, VALUE filter)
         args.filter = RSTRING_PTR(filter);
         args.length = (int)RSTRING_LEN(filter);
     }
-    rb_thread_blocking_region(rb_czmq_nogvl_subscribe, (void *)&args, RUBY_UBF_IO, 0);
+    rb_thread_call_without_gvl(rb_czmq_nogvl_subscribe, (void *)&args, RUBY_UBF_IO, 0);
     return Qnil;
 }
 
@@ -289,7 +289,7 @@ static VALUE rb_czmq_nogvl_unsubscribe(void *ptr)
 static VALUE rb_czmq_beacon_unsubscribe(VALUE obj)
 {
     GetZmqBeacon(obj);
-    rb_thread_blocking_region(rb_czmq_nogvl_unsubscribe, (void *)beacon, RUBY_UBF_IO, 0);
+    rb_thread_call_without_gvl(rb_czmq_nogvl_unsubscribe, (void *)beacon, RUBY_UBF_IO, 0);
     return Qnil;
 }
 

@@ -223,7 +223,7 @@ static VALUE rb_czmq_m_proxy(int argc, VALUE *argv, ZMQ_UNUSED VALUE klass)
         sockets[2] = NULL;
     }
 
-    rc = (int)rb_thread_blocking_region(rb_czmq_m_proxy_nogvl, (void *)sockets, RUBY_UBF_IO, 0);
+    rc = (int)rb_thread_call_without_gvl(rb_czmq_m_proxy_nogvl, (void *)sockets, RUBY_UBF_IO, 0);
 
     // int result = zmq_proxy(frontend_socket, backend_socket, capture_socket);
     return INT2NUM(rc);

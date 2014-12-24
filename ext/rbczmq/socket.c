@@ -211,7 +211,7 @@ static VALUE rb_czmq_socket_bind(VALUE obj, VALUE endpoint)
     Check_Type(endpoint, T_STRING);
     args.socket = sock;
     args.endpoint = StringValueCStr(endpoint);
-    rc = (int)rb_thread_blocking_region(rb_czmq_nogvl_socket_bind, (void *)&args, RUBY_UBF_IO, 0);
+    rc = (int)rb_thread_call_without_gvl(rb_czmq_nogvl_socket_bind, (void *)&args, RUBY_UBF_IO, 0);
     /* ZmqAssert will return false on any non-zero return code. Bind returns the port number */
     if (rc < 0) {
         ZmqAssert(rc);
@@ -252,7 +252,7 @@ static VALUE rb_czmq_socket_connect(VALUE obj, VALUE endpoint)
     Check_Type(endpoint, T_STRING);
     args.socket = sock;
     args.endpoint = StringValueCStr(endpoint);
-    rc = (int)rb_thread_blocking_region(rb_czmq_nogvl_socket_connect, (void *)&args, RUBY_UBF_IO, 0);
+    rc = (int)rb_thread_call_without_gvl(rb_czmq_nogvl_socket_connect, (void *)&args, RUBY_UBF_IO, 0);
     ZmqAssert(rc);
     /* get the endpoint name with any ephemeral ports filled in. */
     char* endpoint_string = zsocket_last_endpoint(sock->socket);
@@ -306,7 +306,7 @@ static VALUE rb_czmq_socket_disconnect(VALUE obj, VALUE endpoint)
     Check_Type(endpoint, T_STRING);
     args.socket = sock;
     args.endpoint = StringValueCStr(endpoint);
-    rc = (int)rb_thread_blocking_region(rb_czmq_nogvl_socket_disconnect, (void *)&args, RUBY_UBF_IO, 0);
+    rc = (int)rb_thread_call_without_gvl(rb_czmq_nogvl_socket_disconnect, (void *)&args, RUBY_UBF_IO, 0);
     ZmqAssert(rc);
     if (sock->verbose)
         zclock_log ("I: %s socket %p: disconnected \"%s\"", zsocket_type_str(sock->socket), obj, StringValueCStr(endpoint));
@@ -360,7 +360,7 @@ static VALUE rb_czmq_socket_unbind(VALUE obj, VALUE endpoint)
     Check_Type(endpoint, T_STRING);
     args.socket = sock;
     args.endpoint = StringValueCStr(endpoint);
-    rc = (int)rb_thread_blocking_region(rb_czmq_nogvl_socket_unbind, (void *)&args, RUBY_UBF_IO, 0);
+    rc = (int)rb_thread_call_without_gvl(rb_czmq_nogvl_socket_unbind, (void *)&args, RUBY_UBF_IO, 0);
     ZmqAssert(rc);
     if (sock->verbose)
         zclock_log ("I: %s socket %p: unbound \"%s\"", zsocket_type_str(sock->socket), obj, StringValueCStr(endpoint));
@@ -468,7 +468,7 @@ static VALUE rb_czmq_socket_send(VALUE obj, VALUE msg)
     Check_Type(msg, T_STRING);
     args.msg = RSTRING_PTR(msg);
     args.length = RSTRING_LEN(msg);
-    rc = (int)rb_thread_blocking_region(rb_czmq_nogvl_zstr_send, (void *)&args, RUBY_UBF_IO, 0);
+    rc = (int)rb_thread_call_without_gvl(rb_czmq_nogvl_zstr_send, (void *)&args, RUBY_UBF_IO, 0);
     ZmqAssert(rc);
     if (sock->verbose)
         zclock_log ("I: %s socket %p: send \"%s\"", zsocket_type_str(sock->socket), obj, StringValueCStr(msg));
@@ -503,7 +503,7 @@ static VALUE rb_czmq_socket_sendm(VALUE obj, VALUE msg)
     Check_Type(msg, T_STRING);
     args.msg = RSTRING_PTR(msg);
     args.length = RSTRING_LEN(msg);
-    rc = (int)rb_thread_blocking_region(rb_czmq_nogvl_zstr_sendm, (void *)&args, RUBY_UBF_IO, 0);
+    rc = (int)rb_thread_call_without_gvl(rb_czmq_nogvl_zstr_sendm, (void *)&args, RUBY_UBF_IO, 0);
     ZmqAssert(rc);
     if (sock->verbose)
         zclock_log ("I: %s socket %p: sendm \"%s\"", zsocket_type_str(sock->socket), sock->socket, StringValueCStr(msg));
@@ -555,7 +555,7 @@ static VALUE rb_czmq_socket_recv(VALUE obj)
     args.socket = sock;
     zmq_msg_init(&args.message);
 
-    int rc = (int)rb_thread_blocking_region(rb_czmq_nogvl_recv, (void *)&args, RUBY_UBF_IO, 0);
+    int rc = (int)rb_thread_call_without_gvl(rb_czmq_nogvl_recv, (void *)&args, RUBY_UBF_IO, 0);
     if (rc < 0) {
         zmq_msg_close(&args.message);
         return Qnil;
@@ -677,7 +677,7 @@ static VALUE rb_czmq_socket_send_frame(int argc, VALUE *argv, VALUE obj)
     args.socket = sock;
     args.frame = frame->frame;
     args.flags = flgs;
-    rc = (int)rb_thread_blocking_region(rb_czmq_nogvl_send_frame, (void *)&args, RUBY_UBF_IO, 0);
+    rc = (int)rb_thread_call_without_gvl(rb_czmq_nogvl_send_frame, (void *)&args, RUBY_UBF_IO, 0);
     ZmqAssert(rc);
     if ((flgs & ZFRAME_REUSE) == 0) {
         /* frame has been destroyed, clear the owns flag */
@@ -730,7 +730,7 @@ static VALUE rb_czmq_socket_send_message(VALUE obj, VALUE message_obj)
     if (sock->verbose) print_message = zmsg_dup(message->message);
     args.socket = sock;
     args.message = message->message;
-    rb_thread_blocking_region(rb_czmq_nogvl_send_message, (void *)&args, RUBY_UBF_IO, 0);
+    rb_thread_call_without_gvl(rb_czmq_nogvl_send_message, (void *)&args, RUBY_UBF_IO, 0);
     message->flags &= ~ZMQ_MESSAGE_OWNED;
     if (sock->verbose) ZmqDumpMessage("send_message", print_message);
     return Qnil;
@@ -774,7 +774,7 @@ static VALUE rb_czmq_socket_recv_frame(VALUE obj)
     ZmqAssertSocketNotPending(sock, "can only receive on a bound or connected socket!");
     ZmqSockGuardCrossThread(sock);
     args.socket = sock;
-    frame = (zframe_t *)rb_thread_blocking_region(rb_czmq_nogvl_recv_frame, (void *)&args, RUBY_UBF_IO, 0);
+    frame = (zframe_t *)rb_thread_call_without_gvl(rb_czmq_nogvl_recv_frame, (void *)&args, RUBY_UBF_IO, 0);
     if (frame == NULL) return Qnil;
     if (sock->verbose) {
         cur_time = rb_czmq_formatted_current_time();
@@ -852,7 +852,7 @@ static VALUE rb_czmq_socket_recv_message(VALUE obj)
     ZmqAssertSocketNotPending(sock, "can only receive on a bound or connected socket!");
     ZmqSockGuardCrossThread(sock);
     args.socket = sock;
-    message = (zmsg_t *)rb_thread_blocking_region(rb_czmq_nogvl_recv_message, (void *)&args, RUBY_UBF_IO, 0);
+    message = (zmsg_t *)rb_thread_call_without_gvl(rb_czmq_nogvl_recv_message, (void *)&args, RUBY_UBF_IO, 0);
     if (message == NULL) return Qnil;
     if (sock->verbose) ZmqDumpMessage("recv_message", message);
     return rb_czmq_alloc_message(message);
@@ -894,7 +894,7 @@ static VALUE rb_czmq_socket_poll(VALUE obj, VALUE timeout)
     ZmqSockGuardCrossThread(sock);
     args.socket = sock;
     args.timeout = FIX2INT(timeout);
-    readable = (bool)rb_thread_blocking_region(rb_czmq_nogvl_poll, (void *)&args, RUBY_UBF_IO, 0);
+    readable = (bool)rb_thread_call_without_gvl(rb_czmq_nogvl_poll, (void *)&args, RUBY_UBF_IO, 0);
     return (readable == true) ? Qtrue : Qfalse;
 }
 
@@ -1788,7 +1788,7 @@ static VALUE rb_czmq_socket_monitor_thread(void *arg)
     while (1) {
         zmq_msg_init (&args.msg_event);
         zmq_msg_init (&args.msg_endpoint);
-        rc = (int)rb_thread_blocking_region(rb_czmq_nogvl_monitor_recv, (void *)&args, RUBY_UBF_IO, 0);
+        rc = (int)rb_thread_call_without_gvl(rb_czmq_nogvl_monitor_recv, (void *)&args, RUBY_UBF_IO, 0);
         if (rc == -1 && (zmq_errno() == ETERM || zmq_errno() == ENOTSOCK || zmq_errno() == EINTR)) break;
         if (rc == -1 && (sock->flags & ZMQ_SOCKET_DESTROYED)) break;
         assert (rc != -1);

@@ -301,7 +301,7 @@ static VALUE rb_czmq_loop_start(VALUE obj)
     rb_thread_schedule();
     zloop_timer(loop->loop, 1, 1, rb_czmq_loop_started_callback, loop);
 
-    rc = (int)rb_thread_blocking_region(rb_czmq_loop_start_nogvl, (void *)loop, rb_czmq_loop_start_ubf, (void*)loop);
+    rc = (int)rb_thread_call_without_gvl(rb_czmq_loop_start_nogvl, (void *)loop, rb_czmq_loop_start_ubf, (void*)loop);
 	
     if (rc > 0) rb_raise(rb_eZmqError, "internal event loop error!");
     return INT2NUM(rc);

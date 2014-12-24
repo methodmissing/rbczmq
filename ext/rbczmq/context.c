@@ -54,7 +54,7 @@ static void rb_czmq_free_ctx(zmq_ctx_wrapper *ctx)
     }
 
     // finally, shutdown the context.
-    rb_thread_blocking_region(rb_czmq_nogvl_zctx_destroy, ctx, RUBY_UBF_IO, 0);
+    rb_thread_call_without_gvl(rb_czmq_nogvl_zctx_destroy, ctx, RUBY_UBF_IO, 0);
 
     ctx->ctx = NULL;
     rb_hash_aset(ctx_map, ctx->pidValue, Qnil);
@@ -108,7 +108,7 @@ void rb_czmq_context_destroy_socket(zmq_sock_wrapper* socket)
             zlist_remove(ctx->sockets, socket);
 
             if (socket->socket) {
-                rb_thread_blocking_region(rb_czmq_nogvl_zsocket_destroy, socket, RUBY_UBF_IO, 0);
+                rb_thread_call_without_gvl(rb_czmq_nogvl_zsocket_destroy, socket, RUBY_UBF_IO, 0);
             }
         }
     }
@@ -190,7 +190,7 @@ static VALUE rb_czmq_ctx_s_new(int argc, VALUE *argv, VALUE context)
       rb_raise(rb_eZmqError, "single ZMQ context per process allowed (previous context created at %s:%d)", ctx->file, ctx->line);
     }
     context = Data_Make_Struct(rb_cZmqContext, zmq_ctx_wrapper, rb_czmq_mark_ctx_gc, rb_czmq_free_ctx_gc, ctx);
-    ctx->ctx = (zctx_t*)rb_thread_blocking_region(rb_czmq_nogvl_zctx_new, NULL, RUBY_UBF_IO, 0);
+    ctx->ctx = (zctx_t*)rb_thread_call_without_gvl(rb_czmq_nogvl_zctx_new, NULL, RUBY_UBF_IO, 0);
     ZmqAssertObjOnAlloc(ctx->ctx, ctx);
     ctx->flags = 0;
     ctx->pid = getpid();
@@ -386,7 +386,7 @@ static VALUE rb_czmq_ctx_socket(VALUE obj, VALUE type)
 
     args.ctx = ctx->ctx;
     args.type = socket_type;
-    VALUE socket_object = rb_czmq_socket_alloc(obj, ctx->ctx, (void*)rb_thread_blocking_region(rb_czmq_nogvl_socket_new, (void *)&args, RUBY_UBF_IO, 0));
+    VALUE socket_object = rb_czmq_socket_alloc(obj, ctx->ctx, (void*)rb_thread_call_without_gvl(rb_czmq_nogvl_socket_new, (void *)&args, RUBY_UBF_IO, 0));
     zmq_sock_wrapper *sock = NULL;
     GetZmqSocket(socket_object);
     zlist_push(ctx->sockets, sock);
