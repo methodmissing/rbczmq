@@ -143,7 +143,8 @@ fail "Error compiling and linking libczmq" unless have_library("czmq")
 
 $defs << "-pedantic"
 
-$CFLAGS << ' -Wall -funroll-loops'
-$CFLAGS << ' -Wextra -O0 -ggdb3' if ENV['DEBUG']
+$CFLAGS  << ' -Wall -funroll-loops'
+$CFLAGS  << ' -Wextra -O0 -ggdb3' if ENV['DEBUG']
+$LDFLAGS << " -Wl,-rpath,ext/rbczmq/dst/lib/"
 
 create_makefile('rbczmq_ext')
