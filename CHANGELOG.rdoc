@@ -1,5 +1,9 @@
 = Changelog
 
+== 1.7.9 (July 03, 2015)
+
+* set dst/lib as linker rpath for rbczmq_ext [Anthony Bargnesi]
+
 == 1.7.8 (December 24, 2014)
 
 * clean up beacon tests to bind to port 0 to get an automatically assigned free port (Erkki Eilonen)
