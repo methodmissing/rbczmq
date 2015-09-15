@@ -1,5 +1,9 @@
 = Changelog
 
+== 1.8.0 (September 16, 2015)
+
+* Bump libzmq to v4.0.7
+
 == 1.7.9 (July 03, 2015)
 
 * set dst/lib as linker rpath for rbczmq_ext [Anthony Bargnesi]
