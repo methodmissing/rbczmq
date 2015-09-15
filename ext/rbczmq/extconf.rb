@@ -25,6 +25,8 @@ libs_path = dst_path + 'lib'
 vendor_path = cwd + '..'
 zmq_path = vendor_path + 'zeromq'
 czmq_path = vendor_path + 'czmq'
+libsodium_path = vendor_path + 'libsodium'
+libsodium_include_path = libsodium_path + 'include'
 zmq_include_path = zmq_path + 'include'
 czmq_include_path = czmq_path + 'include'
 
@@ -96,6 +98,19 @@ unless File.exist?(zmq_path + 'autogen.sh')
   sys "cd ../.. && git submodule update --init", "Checking out git submodules error!"
 end
 
+# build libsodium
+if with_config('system-libs')
+  $stderr.puts "Warning -- using system version of libsodium."
+else
+  lib = libs_path + "libsodium.#{LIBEXT}"
+  Dir.chdir libsodium_path do
+    sys "./autogen.sh", "libsodium autogen failed!" unless File.exist?(libsodium_path + 'configure')
+    sys "./configure --prefix=#{dst_path} --without-documentation --enable-shared",
+        "libsodium configure failed" unless File.exist?(libsodium_path + 'Makefile')
+    sys "make && make install", "libsodium compile error!"
+  end
+end
+
 # build libzmq
 if with_config('system-libs')
   $stderr.puts "Warning -- using system version of libzmq."
@@ -106,7 +121,7 @@ else
     sys "./configure --prefix=#{dst_path} --without-documentation --enable-shared",
         "ZeroMQ configure failed" unless File.exist?(zmq_path + 'Makefile')
     sys "make && make install", "ZeroMQ compile error!"
-  end #unless File.exist?(lib)
+  end
 end
 
 # build libczmq
@@ -116,10 +131,10 @@ else
   lib = libs_path + "libczmq.#{LIBEXT}"
   Dir.chdir czmq_path do
     sys "./autogen.sh", "CZMQ autogen failed!" unless File.exist?(czmq_path + 'configure')
-    sys "./configure LDFLAGS=-L#{libs_path} CFLAGS='#{CZMQ_CFLAGS.join(" ")}' --prefix=#{dst_path} --with-libzmq=#{dst_path} --disable-shared",
+    sys "./configure LDFLAGS=-L#{libs_path} CFLAGS='#{CZMQ_CFLAGS.join(" ")}' --prefix=#{dst_path} --with-libzmq=#{dst_path}  --disable-shared",
         "CZMQ configure error!" unless File.exist?(czmq_path + 'Makefile')
     sys "make all && make install", "CZMQ compile error!"
-  end #unless File.exist?(lib)
+  end
 end
 
 dir_config('rbczmq')
@@ -128,6 +143,7 @@ have_header('ruby/thread.h')
 have_func('rb_thread_blocking_region')
 have_func('rb_thread_call_without_gvl')
 
+$INCFLAGS << " -I#{libsodium_include_path}" if find_header("sodidum.h", libsodium_include_path)
 $INCFLAGS << " -I#{zmq_include_path}" if find_header("zmq.h", zmq_include_path)
 $INCFLAGS << " -I#{czmq_include_path}" if find_header("czmq.h", czmq_include_path)
 

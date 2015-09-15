@@ -4,3 +4,6 @@
 [submodule "ext/czmq"]
 	path = ext/czmq
 	url = https://github.com/zeromq/czmq
+[submodule "ext/libsodium"]
+	path = ext/libsodium
+	url = git://github.com/jedisct1/libsodium.git
