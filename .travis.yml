@@ -17,9 +17,6 @@ notifications:
   recipients:
     - lourens@methodmissing.com
     - matt.connolly@me.com
-branches:
-  only:
-    - master
 before_install:
   - if [[ $(ruby -v) =~ rubinius ]]; then travis_retry gem install rubysl; fi; gem list; true
 matrix:
