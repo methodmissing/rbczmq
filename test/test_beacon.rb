@@ -9,7 +9,7 @@ class TestZmqBeacon < ZmqTestCase
   end
 
   def test_beacon
-    beacon = ZMQ::Beacon.new(0)
+    beacon = ZMQ::Beacon.new(5670)
     assert_instance_of ZMQ::Beacon, beacon
     assert_nil beacon.destroy
     assert_raises TypeError do
@@ -20,14 +20,14 @@ class TestZmqBeacon < ZmqTestCase
   end
 
   def test_hostname
-    beacon = ZMQ::Beacon.new(0)
+    beacon = ZMQ::Beacon.new(5670)
     assert_instance_of String, beacon.hostname
   ensure
     beacon.destroy
   end
 
   def test_set_interval
-    beacon = ZMQ::Beacon.new(0)
+    beacon = ZMQ::Beacon.new(5670)
     beacon.interval = 100
     assert_raises TypeError do
       beacon.interval = :invalid
@@ -37,14 +37,14 @@ class TestZmqBeacon < ZmqTestCase
   end
 
   def test_noecho
-    beacon = ZMQ::Beacon.new(0)
+    beacon = ZMQ::Beacon.new(5670)
     assert_nil beacon.noecho
   ensure
     beacon.destroy
   end
 
   def test_publish
-    beacon = ZMQ::Beacon.new(0)
+    beacon = ZMQ::Beacon.new(5670)
     assert_raises TypeError do
       beacon.publish :invalid
     end
@@ -55,7 +55,7 @@ class TestZmqBeacon < ZmqTestCase
   end
 
   def test_subscribe
-    beacon = ZMQ::Beacon.new(0)
+    beacon = ZMQ::Beacon.new(5670)
     assert_raises TypeError do
       beacon.subscribe :invalid
     end
@@ -67,7 +67,7 @@ class TestZmqBeacon < ZmqTestCase
 
   def test_pipe
     GC.start
-    beacon = ZMQ::Beacon.new(0)
+    beacon = ZMQ::Beacon.new(5670)
     assert_instance_of ZMQ::Socket::Pair, beacon.pipe
     GC.start # check GC cycle with "detached" socket
   ensure

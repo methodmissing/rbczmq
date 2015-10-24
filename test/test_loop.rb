@@ -86,7 +86,7 @@ class TestZmqLoop < ZmqTestCase
     ctx = ZMQ::Context.new
     fired = 0
     ZMQ::Loop.run do
-      timer = ZL.add_timer(0.1, 5) do
+      timer = ZL.add_timer(0.5, 5) do
         fired += 1
         fired < 5
       end

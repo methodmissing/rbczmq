@@ -156,4 +156,11 @@ extern VALUE intern_on_disconnected;
 void _init_rb_czmq_socket();
 VALUE rb_czmq_nogvl_zsocket_destroy(void *ptr);
 
+#if (ZMQ_VERSION_MAJOR == 4 && ZMQ_VERSION_MINOR >= 1)
+typedef struct {
+    uint16_t event;  // id of the event as bitfield
+    int32_t  value; // value is either error code, fd or reconnect interval
+} zmq_event_t;
+#endif
+
 #endif
