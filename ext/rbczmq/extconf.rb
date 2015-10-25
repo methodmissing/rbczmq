@@ -119,7 +119,7 @@ else
   lib = libs_path + "libzmq.#{LIBEXT}"
   Dir.chdir zmq_path do
     sys "./autogen.sh", "ZeroMQ autogen failed!" unless File.exist?(zmq_path + 'configure')
-    sys "./configure CFLAGS='#{CZMQ_CFLAGS.join(" ")}' CXXFLAGS='#{CZMQ_CFLAGS.join(" ")}' --prefix=#{dst_path} --without-documentation --disable-shared --enable-static --with-libsodium=#{dst_path}",
+    sys "./configure CFLAGS='#{CZMQ_CFLAGS.join(" ")}' CXXFLAGS='#{CZMQ_CFLAGS.join(" ")}' PKG_CONFIG_PATH='#{libs_path}/pkgconfig' --prefix=#{dst_path} --without-documentation --disable-shared --enable-static --with-libsodium=#{dst_path}",
         "ZeroMQ configure failed" unless File.exist?(zmq_path + 'Makefile')
     sys "make && make install", "ZeroMQ compile error!"
   end
@@ -132,7 +132,7 @@ else
   lib = libs_path + "libczmq.#{LIBEXT}"
   Dir.chdir czmq_path do
     sys "./autogen.sh", "CZMQ autogen failed!" unless File.exist?(czmq_path + 'configure')
-    sys "./configure LDFLAGS='-L#{libs_path} -lm' CFLAGS='#{CZMQ_CFLAGS.join(" ")}' --prefix=#{dst_path} --disable-shared --enable-static --with-libsodium=#{dst_path}",
+    sys "./configure LDFLAGS='-L#{libs_path} -lm' CFLAGS='#{CZMQ_CFLAGS.join(" ")}' PKG_CONFIG_PATH='#{libs_path}/pkgconfig' --prefix=#{dst_path} --disable-shared --enable-static --with-libsodium=#{dst_path}",
         "CZMQ configure error!" unless File.exist?(czmq_path + 'Makefile')
     sys "make all && make install", "CZMQ compile error!"
   end
