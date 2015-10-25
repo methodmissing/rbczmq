@@ -132,7 +132,7 @@ else
   lib = libs_path + "libczmq.#{LIBEXT}"
   Dir.chdir czmq_path do
     sys "./autogen.sh", "CZMQ autogen failed!" unless File.exist?(czmq_path + 'configure')
-    sys "./configure LDFLAGS='-L#{libs_path} -lm' CFLAGS='#{CZMQ_CFLAGS.join(" ")}' PKG_CONFIG_PATH='#{libs_path}/pkgconfig' --prefix=#{dst_path} --disable-shared --enable-static --without-makecert --with-libsodium=#{dst_path}",
+    sys "./configure LDFLAGS='-L#{libs_path} -lm' CFLAGS='#{CZMQ_CFLAGS.join(" ")}' PKG_CONFIG_PATH='#{libs_path}/pkgconfig' --prefix=#{dst_path} --disable-shared --enable-static --without-makecert --without-test_zgossip --with-libsodium=#{dst_path}",
         "CZMQ configure error!" unless File.exist?(czmq_path + 'Makefile')
     sys "make all && make install", "CZMQ compile error!"
   end
