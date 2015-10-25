@@ -158,6 +158,7 @@ end
 fail "Error compiling and linking libsodium" unless have_library("sodium")
 fail "Error compiling and linking libzmq" unless have_library("zmq")
 fail "Error compiling and linking libczmq" unless have_library("czmq")
+fail "Error linking against libm" unless have_library("m")
 
 $defs << "-pedantic"
 
