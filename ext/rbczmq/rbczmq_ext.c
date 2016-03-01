@@ -113,7 +113,7 @@ static VALUE rb_czmq_m_now(ZMQ_UNUSED VALUE obj)
 static VALUE rb_czmq_m_log(ZMQ_UNUSED VALUE obj, VALUE msg)
 {
     Check_Type(msg, T_STRING);
-    zclock_log(StringValueCStr(msg));
+    zclock_log("%s", StringValueCStr(msg));
     return Qnil;
 }
 
