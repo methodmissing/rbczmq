@@ -20,6 +20,7 @@ notifications:
     - lourens@methodmissing.com
     - matt.connolly@me.com
 before_install:
+  - gem update bundler
   - if [[ $(ruby -v) =~ rubinius ]]; then travis_retry gem install rubysl; fi; gem list; true
 matrix:
   allow_failures:
