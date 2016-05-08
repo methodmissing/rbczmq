@@ -35,9 +35,9 @@ class ZMQ::Loop
 
   # A higher level API for ZMQ socket bind and loop registration.
   #
-  # ZMQ::Loop.run do
-  #   ZL.bind(pub, "inproc://fanout", Producer)
-  # end
+  #   ZMQ::Loop.run do
+  #     ZL.bind(pub, "inproc://fanout", Producer)
+  #   end
   #
   def self.bind(socket, address, handler = ZMQ::DefaultHandler, *args)
     attach(socket, :bind, address, handler, *args)
@@ -45,10 +45,10 @@ class ZMQ::Loop
 
   # A higher level API for ZMQ socket bind and loop registration.
   #
-  # ZMQ::Loop.run do
-  #   ZL.bind(pub, "inproc://fanout", Producer)
-  #   ZL.connect(sub, "inproc://fanout", Consumer)
-  # end
+  #   ZMQ::Loop.run do
+  #     ZL.bind(pub, "inproc://fanout", Producer)
+  #     ZL.connect(sub, "inproc://fanout", Consumer)
+  #   end
   #
   def self.connect(socket, address, handler = ZMQ::DefaultHandler, *args)
     attach(socket, :connect, address, handler, *args)
@@ -56,9 +56,9 @@ class ZMQ::Loop
 
   # Registers a given ZMQ::Socket or IO instance for readable events notification.
   #
-  # ZMQ::Loop.run do
-  #   ZL.register_readable(sub, "inproc://fanout", Consumer)
-  # end
+  #   ZMQ::Loop.run do
+  #     ZL.register_readable(sub, "inproc://fanout", Consumer)
+  #   end
   #
   def self.register_readable(pollable, handler = ZMQ::DefaultHandler, *args)
     pollitem = ZMQ::Pollitem.new(pollable, ZMQ::POLLIN)
@@ -68,9 +68,9 @@ class ZMQ::Loop
 
   # Registers a given ZMQ::Socket or IO instance for writable events notification.
   #
-  # ZMQ::Loop.run do
-  #   ZL.register_writable(pub, "inproc://fanout", Producer)
-  # end
+  #   ZMQ::Loop.run do
+  #     ZL.register_writable(pub, "inproc://fanout", Producer)
+  #   end
   #
   def self.register_writable(pollable, handler = ZMQ::DefaultHandler, *args)
     pollitem = ZMQ::Pollitem.new(pollable, ZMQ::POLLOUT)
@@ -80,9 +80,9 @@ class ZMQ::Loop
 
   # Registers a oneshot timer with the event loop.
   #
-  # ZMQ::Loop.run do
-  #   ZL.add_oneshot_timer(0.2){ :work } # Fires once after 0.2s
-  # end
+  #   ZMQ::Loop.run do
+  #     ZL.add_oneshot_timer(0.2){ :work } # Fires once after 0.2s
+  #   end
   #
   def self.add_oneshot_timer(delay, p = nil, &blk)
     add_timer(delay, 1, p, &blk)
@@ -90,9 +90,9 @@ class ZMQ::Loop
 
   # Registers a periodic timer with the event loop.
   #
-  # ZMQ::Loop.run do
-  #   ZL.add_oneshot_timer(0.2){ :work } # Fires every 0.2s
-  # end
+  #   ZMQ::Loop.run do
+  #     ZL.add_periodic_timer(0.2){ :work } # Fires every 0.2s
+  #   end
   #
   def self.add_periodic_timer(delay, p = nil, &blk)
     add_timer(delay, 0, p, &blk)
@@ -100,9 +100,9 @@ class ZMQ::Loop
 
   # Lower level interface for timer registration
   #
-  # ZMQ::Loop.run do
-  #  timer = ZL.add_timer(0.1, 5){ :work } # Fires 5 times at 0.1s intervals
-  # end
+  #   ZMQ::Loop.run do
+  #     timer = ZL.add_timer(0.1, 5){ :work } # Fires 5 times at 0.1s intervals
+  #   end
   #
   def self.add_timer(delay, times, p = nil, &blk)
     timer = ZMQ::Timer.new(delay, times, p, &blk)
