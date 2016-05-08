@@ -147,7 +147,7 @@ $INCFLAGS << " -I#{libsodium_include_path}" if find_header("sodidum.h", libsodiu
 $INCFLAGS << " -I#{zmq_include_path}" if find_header("zmq.h", zmq_include_path)
 $INCFLAGS << " -I#{czmq_include_path}" if find_header("czmq.h", czmq_include_path)
 
-$LIBPATH << libs_path.to_s
+$DEFLIBPATH.unshift(libs_path.to_s)
 
 # Special case to prevent Rubinius compile from linking system libzmq if present
 if defined?(RUBY_ENGINE) && RUBY_ENGINE =~ /rbx/ && RUBY_PLATFORM =~ /linux/
