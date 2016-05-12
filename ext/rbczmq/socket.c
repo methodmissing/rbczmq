@@ -1738,6 +1738,39 @@ static VALUE rb_czmq_socket_opt_last_endpoint(VALUE obj)
 }
 
 /*
+ *  call-seq:
+ *     sock.stream_notify = false =>  nil
+ *
+ *  Sets the socket stream_notify value.
+ *
+ * === Examples
+ *     ctx = ZMQ::Context.new
+ *     sock = ctx.socket(:STREAM)
+ *     sock.stream_notify = false  =>  nil
+ *
+*/
+
+static VALUE rb_czmq_socket_set_opt_stream_notify(VALUE obj, VALUE value)
+{
+    int rc, optval;
+    zmq_sock_wrapper *sock = NULL;
+
+    GetZmqSocket(obj);
+    ZmqSockGuardCrossThread(sock);
+    CheckBoolean(value);
+    optval = (value == Qtrue) ? 1 : 0;
+
+    rc = zmq_setsockopt(sock->socket, ZMQ_STREAM_NOTIFY, &optval, sizeof(optval));
+    ZmqAssert(rc);
+
+    if (sock->verbose)
+        zclock_log ("I: %s socket %p: set option \"STREAM_NOTIFY\" %d",
+                    zsocket_type_str(sock->socket), (void *)obj, optval);
+
+    return Qnil;
+}
+
+/*
  * :nodoc:
  *  Receives a monitoring event message while the GIL is released.
  *
@@ -1974,4 +2007,5 @@ void _init_rb_czmq_socket()
     rb_define_method(rb_cZmqSocket, "sndtimeo=", rb_czmq_socket_set_opt_sndtimeo, 1);
     rb_define_method(rb_cZmqSocket, "monitor", rb_czmq_socket_monitor, -1);
     rb_define_method(rb_cZmqSocket, "last_endpoint", rb_czmq_socket_opt_last_endpoint, 0);
+    rb_define_method(rb_cZmqStreamSocket, "stream_notify=", rb_czmq_socket_set_opt_stream_notify, 1);
 }

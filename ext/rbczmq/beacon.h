@@ -2,7 +2,10 @@
 #define RBCZMQ_BEACON_H
 
 typedef struct {
-    zbeacon_t *beacon;
+    zactor_t *beacon;
+    char *hostname;
+    int interval;
+    int port;
 } zmq_beacon_wrapper;
 
 #define ZmqAssertBeacon(obj) ZmqAssertType(obj, rb_cZmqBeacon, "ZMQ::Beacon")

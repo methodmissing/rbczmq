@@ -1,6 +1,6 @@
 [submodule "ext/zeromq"]
 	path = ext/zeromq
-	url = https://github.com/zeromq/zeromq4-x
+	url = https://github.com/zeromq/libzmq
 [submodule "ext/czmq"]
 	path = ext/czmq
 	url = https://github.com/zeromq/czmq
