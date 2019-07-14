@@ -14,7 +14,6 @@ Gem::Specification.new do |s|
   s.date = Time.now.utc.strftime('%Y-%m-%d')
   s.platform = Gem::Platform::RUBY
   s.extensions = "ext/rbczmq/extconf.rb"
-  s.has_rdoc = true
   s.files = `git ls-files`.split("\n")
   s.test_files = `git ls-files test`.split("\n")
   s.rdoc_options = ["--charset=UTF-8"]
