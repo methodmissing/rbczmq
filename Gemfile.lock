@@ -7,14 +7,12 @@ GEM
   remote: https://rubygems.org/
   specs:
     ffi2-generators (0.1.1)
-    json (1.8.1)
     minitest (5.5.0)
     rake (10.4.2)
     rake-compiler (0.8.3)
       rake
     rb-readline (0.5.1)
-    rdoc (4.2.0)
-      json (~> 1.4)
+    rdoc (6.3.2)
     rubysl (2.1.0)
       rubysl-abbrev (~> 2.0)
       rubysl-base64 (~> 2.0)
